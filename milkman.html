@@ -450,7 +450,16 @@ async function selectCust(cid){
   document.getElementById('suggs').classList.remove('show');
   var c=CUSTS.find(function(x){return(x.customerId||x.id)===cid;});
   if(!c){
-    try{var d=await db.collection('customers').doc(cid).get();if(d.exists)c=Object.assign({id:d.id},d.data());}catch(e){}
+    try{
+      // Try direct doc lookup first
+      var d=await db.collection('customers').doc(cid).get();
+      if(d.exists){c=Object.assign({id:d.id},d.data());}
+      // Fallback: query by customerId field
+      if(!c){
+        var q=await db.collection('customers').where('customerId','==',cid).where('active','==',true).limit(1).get();
+        if(!q.empty)c=Object.assign({id:q.docs[0].id},q.docs[0].data());
+      }
+    }catch(e){console.error('selectCust lookup error:',e);}
   }
   if(!c){toast('Customer not found','err');return;}
   activeCust=c;
@@ -744,33 +753,38 @@ function decodeFrame(){
   var video=document.getElementById('sv');
   // Guard: video must have real dimensions
   if(!video||!video.srcObject||video.videoWidth===0||video.videoHeight===0||video.readyState<2){
-    dbg('video not ready (readyState='+( video?video.readyState:'N/A')+', w='+( video?video.videoWidth:0)+')');
+    dbg('video not ready (readyState='+(video?video.readyState:'N/A')+', w='+(video?video.videoWidth:0)+')');
     scheduleNextFrame();return;
   }
   var cv=document.getElementById('scanCv');
   var vw=video.videoWidth,vh=video.videoHeight;
-  if(cv.width!==vw)cv.width=vw;
-  if(cv.height!==vh)cv.height=vh;
+  // Downscale to max 640px wide – jsQR decodes reliably at this size
+  // and it's much faster on mid-range Android phones than full 1280x720
+  var scale=Math.min(1,640/vw);
+  var dw=Math.round(vw*scale),dh=Math.round(vh*scale);
+  if(cv.width!==dw)cv.width=dw;
+  if(cv.height!==dh)cv.height=dh;
   var ctx=cv.getContext('2d',{willReadFrequently:true,alpha:false});
-  ctx.drawImage(video,0,0,vw,vh);
+  ctx.drawImage(video,0,0,dw,dh);
   var imgData;
-  try{imgData=ctx.getImageData(0,0,vw,vh);}catch(e){scheduleNextFrame();return;}
-  var code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'attemptBoth'});
+  try{imgData=ctx.getImageData(0,0,dw,dh);}catch(e){scheduleNextFrame();return;}
+  var code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'dontInvert'});
   if(code&&code.data){
     dbg('jsQR raw: '+code.data.slice(0,40));
     processQRData(code.data);
   }else{
-    dbg('no QR (frame '+framesScanned+', '+vw+'x'+vh+')');
+    dbg('no QR (frame '+framesScanned+', '+dw+'x'+dh+')');
   }
   scheduleNextFrame();
 }
 
 function processQRData(raw){
   if(scanCooldown)return;
+  console.log('QR RAW:', raw);
   var cid=safeValidateQR(raw);
-  dbg('validateQR → '+(cid||'null')+' | raw start: '+raw.slice(0,30));
+  console.log('QR CID:', cid);
+  dbg('validateQR → '+(cid||'null')+' | raw: '+raw.slice(0,50));
   if(!cid){
-    // Only report error once per unique bad string
     if(raw!==lastDecodeRaw){
       lastDecodeRaw=raw;
       setScanMsg('❌ Not an AMINA MILK QR code','err');
@@ -789,24 +803,44 @@ function processQRData(raw){
 
 async function fetchAndShowCustomer(cid){
   try{
+    // 1. Check in-memory cache first (fastest)
     var cust=CUSTS.find(function(c){return(c.customerId||c.id)===cid;});
+
     if(!cust){
       setScanMsg('🔄 Fetching from server…','sc');
-      var snap=await db.collection('customers').doc(cid).get();
-      if(snap.exists){
-        cust=Object.assign({id:snap.id},snap.data());
-        CUSTS.push(cust);// add to local cache
+
+      // 2. Try direct doc lookup first (works when doc ID === customerId)
+      var directSnap=await db.collection('customers').doc(cid).get();
+      if(directSnap.exists){
+        cust=Object.assign({id:directSnap.id},directSnap.data());
+        CUSTS.push(cust);
+      }
+
+      // 3. If not found by doc ID, query by the customerId field
+      //    (handles cases where Firestore auto-generated the doc ID)
+      if(!cust){
+        var qSnap=await db.collection('customers')
+          .where('customerId','==',cid)
+          .where('active','==',true)
+          .limit(1)
+          .get();
+        if(!qSnap.empty){
+          cust=Object.assign({id:qSnap.docs[0].id},qSnap.docs[0].data());
+          CUSTS.push(cust);
+        }
       }
     }
+
     if(!cust){
-      setScanMsg('⚠️ Customer not found','err');
+      setScanMsg('⚠️ Customer not found (ID: '+cid+')','err');
+      console.warn('fetchAndShowCustomer: no customer found for cid=',cid);
       setTimeout(function(){if(SCAN_ACTIVE)setScanMsg('📷 Ready – point at QR code','sc');scanCooldown=false;},3000);
       return;
     }
     showScanResult(cust);
-    // Release cooldown after delay
     setTimeout(function(){scanCooldown=false;},3000);
   }catch(e){
+    console.error('fetchAndShowCustomer error:',e);
     setScanMsg('⚠️ Network error – check connection','err');
     setTimeout(function(){if(SCAN_ACTIVE)setScanMsg('📷 Ready – point at QR code','sc');scanCooldown=false;},3000);
   }
