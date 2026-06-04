@@ -1,172 +1,372 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>AMINA MILK – Milkman</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<!-- ZXing for robust live QR scanning -->
 <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
 <script src="firebase.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{--bg:#060d1a;--bg2:#0f1a2e;--bg3:#162236;--bg4:#1c2b42;--acc:#f59e0b;--grn:#10b981;--red:#ef4444;--blu:#3b82f6;--txt:#f1f5f9;--txt2:#94a3b8;--txt3:#64748b;--bdr:rgba(245,158,11,.18);--bdr2:rgba(255,255,255,.07);--sh:0 4px 20px rgba(0,0,0,.5);--rnd:14px}
+:root{
+  --bg:#060a14;--bg2:#0d1523;--bg3:#142035;--bg4:#1a2a42;
+  --acc:#f59e0b;--acc2:#fbbf24;--grn:#10b981;--red:#ef4444;--blu:#3b82f6;--pur:#8b5cf6;
+  --txt:#f1f5f9;--txt2:#94a3b8;--txt3:#4a5a7a;
+  --bdr:rgba(245,158,11,.2);--bdr2:rgba(255,255,255,.07);--bdr3:rgba(255,255,255,.04);
+  --sh:0 4px 24px rgba(0,0,0,.55);--rnd:16px;
+  --morning:#f59e0b;--evening:#8b5cf6
+}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
-#guard{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:12px}
-.spin{width:34px;height:34px;border:3px solid var(--bdr2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;display:block;margin:0 auto}
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 80% 50% at 10% 0%,rgba(245,158,11,.06),transparent),
+    radial-gradient(ellipse 60% 60% at 90% 100%,rgba(16,185,129,.04),transparent);
+  pointer-events:none;z-index:0}
+
+/* GUARD */
+#guard{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:14px;position:relative;z-index:1}
+.spin{width:32px;height:32px;border:3px solid var(--bdr2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;display:block}
 @keyframes spin{to{transform:rotate(360deg)}}
-#app{display:none;padding-bottom:76px}
-.topbar{background:var(--bg2);border-bottom:1px solid var(--bdr2);padding:0 14px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:10px}
-.brand{font-family:'Syne',sans-serif;font-size:1.05rem;color:var(--acc);font-weight:800;display:flex;align-items:center;gap:6px}
-.pill{background:rgba(16,185,129,.15);color:var(--grn);font-size:.6rem;padding:2px 7px;border-radius:20px;font-weight:700;letter-spacing:.5px}
-.clockBar{font-size:.72rem;color:var(--txt2);text-align:right;line-height:1.4;cursor:pointer}
-.clockBar strong{color:var(--txt);font-size:.8rem;display:block}
-.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--bdr2);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
-.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px 6px;cursor:pointer;border:none;background:none;color:var(--txt3);font-size:.6rem;font-family:'DM Sans',sans-serif;font-weight:600;letter-spacing:.3px;transition:color .15s}
-.nb .i{font-size:1.25rem;line-height:1;transition:transform .15s}
-.nb.active{color:var(--acc)}.nb.active .i{transform:scale(1.18)}
-.nb.scan .wrap{width:50px;height:50px;background:linear-gradient(135deg,var(--acc),#f97316);border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-top:-20px;box-shadow:0 4px 18px rgba(245,158,11,.5)}
-.page{display:none;padding:14px;animation:fi .18s ease}
+
+/* APP */
+#app{display:none;padding-bottom:80px;position:relative;z-index:1}
+
+/* TOPBAR */
+.topbar{
+  background:rgba(13,21,35,.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--bdr2);padding:0 16px;height:56px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;gap:10px
+}
+.brand{font-family:'Syne',sans-serif;font-size:1rem;color:var(--acc);font-weight:800;display:flex;align-items:center;gap:8px}
+.brand-pill{background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);color:var(--acc);font-size:.6rem;padding:2px 8px;border-radius:20px;font-weight:700;letter-spacing:.6px}
+
+/* SHIFT SELECTOR (top bar) */
+.shift-toggle{display:flex;gap:4px;background:rgba(255,255,255,.05);border:1px solid var(--bdr2);border-radius:22px;padding:3px;flex-shrink:0}
+.shift-btn{padding:4px 12px;border-radius:18px;border:none;font-size:.68rem;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.3px;color:var(--txt3);background:transparent}
+.shift-btn.morning.active{background:var(--morning);color:#000}
+.shift-btn.evening.active{background:var(--pur);color:#fff}
+.shift-btn:not(.active):hover{color:var(--txt)}
+
+.clockBar{font-size:.7rem;color:var(--txt2);text-align:right;line-height:1.5;cursor:pointer}
+.clockBar strong{color:var(--txt);font-size:.78rem;display:block}
+
+/* BOTTOM NAV */
+.bnav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(13,21,35,.95);backdrop-filter:blur(20px);
+  border-top:1px solid var(--bdr2);
+  display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom,0px)
+}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px 7px;cursor:pointer;border:none;background:none;color:var(--txt3);font-size:.58rem;font-family:'DM Sans',sans-serif;font-weight:600;letter-spacing:.3px;transition:color .15s;position:relative}
+.nb .ico{font-size:1.2rem;line-height:1;transition:transform .2s}
+.nb.active{color:var(--acc)}.nb.active .ico{transform:scale(1.2)}
+.nb.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:28px;height:2px;background:var(--acc);border-radius:0 0 3px 3px}
+.nb.scan-btn .scan-circle{width:48px;height:48px;background:linear-gradient(135deg,var(--acc),#f97316);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-top:-18px;box-shadow:0 4px 20px rgba(245,158,11,.45),0 0 0 3px rgba(245,158,11,.1);transition:transform .2s}
+.nb.scan-btn:active .scan-circle{transform:scale(.93)}
+
+/* PAGE */
+.page{display:none;padding:14px;animation:fadeUp .18s ease}
 .page.active{display:block}
-#pgScan.active{display:flex;flex-direction:column;padding:0;height:calc(100vh - 54px - 76px);overflow:hidden}
-@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-.card{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--rnd);padding:14px;box-shadow:var(--sh);margin-bottom:12px}
-.cardHd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+#pgScan.active{display:flex;flex-direction:column;padding:0;height:calc(100dvh - 56px - 62px);overflow:hidden}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* CARDS */
+.card{
+  background:linear-gradient(160deg,rgba(20,32,53,.9),rgba(13,21,35,.95));
+  border:1px solid var(--bdr2);border-radius:var(--rnd);padding:14px;
+  box-shadow:var(--sh);margin-bottom:12px;position:relative;overflow:hidden
+}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)}
+.cardHd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .cardHd h3{font-size:.9rem;font-weight:700}
+
+/* STAT GRID */
 .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.sc{background:var(--bg2);border:1px solid var(--bdr2);border-radius:12px;padding:12px;position:relative;overflow:hidden}
-.sc::after{content:'';position:absolute;top:-14px;right:-14px;width:56px;height:56px;border-radius:50%;opacity:.1}
+.sc{
+  background:linear-gradient(135deg,rgba(20,32,53,.9),rgba(13,21,35,.95));
+  border:1px solid var(--bdr2);border-radius:14px;padding:13px 12px;
+  position:relative;overflow:hidden;transition:transform .15s
+}
+.sc::after{content:'';position:absolute;bottom:-16px;right:-16px;width:64px;height:64px;border-radius:50%;opacity:.08}
 .sc.g::after{background:var(--acc)}.sc.r::after{background:var(--red)}.sc.b::after{background:var(--blu)}.sc.n::after{background:var(--grn)}
-.sc .v{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;line-height:1}
-.sc .l{font-size:.63rem;color:var(--txt2);margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
-.sc .ei{font-size:1.1rem;margin-bottom:4px}
+.sc.shift-m{border-color:rgba(245,158,11,.15)}.sc.shift-e{border-color:rgba(139,92,246,.15)}
+.sc .sv{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;line-height:1}
+.sc .sl{font-size:.62rem;color:var(--txt2);margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
+.sc .sei{font-size:1rem;margin-bottom:4px}
+
+/* SHIFT BANNER */
+.shift-banner{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:9px 14px;border-radius:12px;margin-bottom:12px;
+  font-size:.82rem;font-weight:600;
+}
+.shift-banner.morning{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:var(--acc)}
+.shift-banner.evening{background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.25);color:#a78bfa}
+
+/* SEARCH */
 .swrap{position:relative;margin-bottom:10px}
-.swrap .si{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--txt3);font-size:.9rem}
-.sinp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:11px 12px 11px 38px;color:var(--txt);font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s}
-.sinp:focus{border-color:var(--acc)}
-.suggs{background:var(--bg2);border:1px solid var(--bdr2);border-radius:10px;overflow:hidden;display:none;margin-top:3px;box-shadow:var(--sh)}
+.swrap .si{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--txt3);pointer-events:none}
+.sinp{
+  width:100%;background:rgba(255,255,255,.04);border:1px solid var(--bdr2);
+  border-radius:12px;padding:12px 14px 12px 40px;color:var(--txt);
+  font-size:.93rem;font-family:'DM Sans',sans-serif;outline:none;transition:all .2s
+}
+.sinp:focus{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.03);box-shadow:0 0 0 3px rgba(245,158,11,.07)}
+.sinp::placeholder{color:var(--txt3)}
+.suggs{background:var(--bg2);border:1px solid var(--bdr2);border-radius:12px;overflow:hidden;display:none;margin-top:4px;box-shadow:0 8px 30px rgba(0,0,0,.5)}
 .suggs.show{display:block}
-.si2{padding:10px 12px;cursor:pointer;font-size:.83rem;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;gap:9px;transition:background .12s}
-.si2:last-child{border:none}.si2:active{background:var(--bg3)}
-.si2 .inf .nm{font-weight:600;font-size:.85rem}.si2 .inf .sb{font-size:.7rem;color:var(--txt2)}
-.slbl{padding:5px 12px;font-size:.65rem;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;background:var(--bg3)}
+.si2{padding:11px 13px;cursor:pointer;font-size:.83rem;border-bottom:1px solid var(--bdr3);display:flex;align-items:center;gap:10px;transition:background .12s}
+.si2:last-child{border:none}.si2:active,.si2:hover{background:rgba(245,158,11,.05)}
+.si2 .inf .nm{font-weight:600;font-size:.85rem}.si2 .inf .sb{font-size:.7rem;color:var(--txt2);margin-top:1px}
+.slbl{padding:5px 13px;font-size:.62rem;color:var(--txt3);text-transform:uppercase;letter-spacing:.6px;background:rgba(255,255,255,.02)}
+
+/* CUSTOMER PANEL */
 #custPanel{display:none}
-.chead{background:linear-gradient(135deg,var(--bg3),var(--bg4));border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px}
-.chead .cnm{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700}
-.chead .cid{font-size:.68rem;color:var(--acc);background:rgba(245,158,11,.12);padding:2px 8px;border-radius:20px;display:inline-block;margin-top:2px}
-.chead .cm{font-size:.78rem;color:var(--txt2);margin-top:2px}
-.sbadge{padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:700;flex-shrink:0}
-.sbadge.done{background:rgba(16,185,129,.15);color:#34d399}.sbadge.pend{background:rgba(245,158,11,.15);color:var(--acc)}
+.chead{
+  background:linear-gradient(135deg,rgba(20,32,53,.95),rgba(26,42,66,.95));
+  border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px;
+  position:relative;overflow:hidden
+}
+.chead::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--acc),transparent)}
+.cnm{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700}
+.cid-badge{font-size:.65rem;color:var(--acc);background:rgba(245,158,11,.12);padding:2px 8px;border-radius:20px;display:inline-block;margin-top:3px}
+.cm{font-size:.76rem;color:var(--txt2);margin-top:3px;display:flex;align-items:center;gap:5px}
+.sbadge{padding:4px 10px;border-radius:20px;font-size:.68rem;font-weight:700;flex-shrink:0}
+.sbadge.done{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.2)}
+.sbadge.pend{background:rgba(245,158,11,.15);color:var(--acc);border:1px solid rgba(245,158,11,.2)}
+
+/* QUANTITY PRESETS */
+.qty-section{margin-bottom:12px}
+.qty-label{font-size:.7rem;color:var(--txt2);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
 .qpresets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-.qbtn{padding:8px 10px;border-radius:9px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--txt2);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .15s;flex:1;min-width:60px;text-align:center}
+.qbtn{
+  padding:9px 11px;border-radius:10px;border:1px solid var(--bdr2);
+  background:rgba(255,255,255,.04);color:var(--txt2);font-size:.78rem;font-weight:600;
+  cursor:pointer;transition:all .15s;flex:1;min-width:56px;text-align:center;
+  font-family:'DM Sans',sans-serif
+}
 .qbtn.active{border-color:var(--acc);background:rgba(245,158,11,.12);color:var(--acc)}
 .qbtn:active{transform:scale(.95)}
-.custinp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:11px 14px;color:var(--txt);font-size:1rem;font-family:'DM Sans',sans-serif;outline:none;display:none;margin-top:6px;transition:border .2s}
+.custinp{
+  width:100%;background:rgba(255,255,255,.04);border:1px solid var(--bdr2);
+  border-radius:10px;padding:11px 14px;color:var(--txt);font-size:1rem;
+  font-family:'DM Sans',sans-serif;outline:none;display:none;margin-top:6px;transition:border .2s
+}
 .custinp:focus{border-color:var(--acc)}
-.selqty{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--acc);text-align:center;padding:10px 0;border-bottom:1px solid var(--bdr2);margin-bottom:10px}
-.sbtn{width:100%;padding:15px;font-size:1rem;border-radius:12px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.3px;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px}
-.sbtn:active{transform:scale(.98)}
-.dupwarn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:#fbbf24;padding:9px 12px;border-radius:9px;font-size:.8rem;text-align:center;margin-bottom:8px}
+.selqty{
+  font-family:'Syne',sans-serif;font-size:2.1rem;font-weight:800;color:var(--acc);
+  text-align:center;padding:10px 0 12px;
+  border-bottom:1px solid var(--bdr2);margin-bottom:12px;
+  letter-spacing:-1px
+}
 
-/* ── LIVE SCANNER ── */
-.scanHd{padding:12px 14px;background:var(--bg2);border-bottom:1px solid var(--bdr2);display:flex;align-items:center;gap:10px;flex-shrink:0}
+/* DUP WARN */
+.dupwarn{
+  background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);
+  color:#fbbf24;padding:10px 13px;border-radius:10px;font-size:.79rem;
+  text-align:center;margin-bottom:10px;display:flex;align-items:center;gap:7px;
+  justify-content:center
+}
+/* EXTRA WARN */
+.extrawarn{
+  background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.25);
+  color:#a78bfa;padding:10px 13px;border-radius:10px;font-size:.79rem;
+  text-align:center;margin-bottom:10px;display:flex;align-items:center;gap:7px;
+  justify-content:center
+}
+
+/* SUBMIT BUTTON */
+.sbtn{
+  width:100%;padding:15px;font-size:.97rem;border-radius:13px;border:none;cursor:pointer;
+  font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.3px;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden
+}
+.sbtn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,.1),transparent);transform:translateX(-100%);transition:transform .4s}
+.sbtn:hover::before{transform:translateX(100%)}
+.sbtn:active{transform:scale(.98)}
+
+/* ACTION BTNS */
+.action-row{display:flex;gap:7px;margin-bottom:10px}
+.btn{padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.83rem;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+.btn:active{transform:scale(.97)}
+.bsm{padding:7px 12px;font-size:.76rem;border-radius:8px}
+.bgh{background:rgba(255,255,255,.05);border:1px solid var(--bdr2);color:var(--txt2)}
+.bgh:hover{border-color:var(--acc);color:var(--acc)}
+.bgrn{background:var(--grn);color:#fff}.bred{background:var(--red);color:#fff}
+.bacc{background:linear-gradient(135deg,var(--acc),#f97316);color:#000}
+.bblu{background:var(--blu);color:#fff}
+
+/* SCANNER */
+.scanHd{
+  padding:13px 16px;
+  background:rgba(13,21,35,.95);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--bdr2);display:flex;align-items:center;gap:12px;flex-shrink:0
+}
 .scanHd h2{font-size:.95rem;font-weight:700;font-family:'Syne',sans-serif}
 .scanHd .st{font-size:.68rem;color:var(--txt2)}
-#scanViewport{position:relative;width:100%;background:#000;flex-shrink:0;overflow:hidden}
+#scanViewport{position:relative;width:100%;background:#000;flex-shrink:0;overflow:hidden;flex:0 0 auto}
 #scanViewport video{width:100%;height:100%;object-fit:cover;display:block}
-#scanViewport canvas{display:none}
+#scanViewport canvas{display:none;position:absolute;inset:0}
+
+/* SCAN OVERLAY */
 .scanOverlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
-.scanFrame{width:220px;height:220px;position:relative}
-.scanFrame::before,.scanFrame::after{content:'';position:absolute;width:40px;height:40px;border-color:var(--acc);border-style:solid}
-.scanFrame::before{top:0;left:0;border-width:3px 0 0 3px;border-radius:4px 0 0 0}
-.scanFrame::after{top:0;right:0;border-width:3px 3px 0 0;border-radius:0 4px 0 0}
-.scanFrame .br,.scanFrame .bl{position:absolute;width:40px;height:40px;border-color:var(--acc);border-style:solid}
-.scanFrame .br{bottom:0;right:0;border-width:0 3px 3px 0;border-radius:0 0 4px 0}
-.scanFrame .bl{bottom:0;left:0;border-width:0 0 3px 3px;border-radius:0 0 0 4px}
-.scanLine{position:absolute;left:10px;right:10px;height:2px;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:scanAnim 2s ease-in-out infinite}
-@keyframes scanAnim{0%{top:10px;opacity:1}50%{top:calc(100% - 10px);opacity:1}51%{opacity:0}100%{top:10px;opacity:0}}
-#scanStatusBar{padding:8px 14px;font-size:.82rem;text-align:center;flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:7px;min-height:38px}
-#scanStatusBar.ok{color:var(--grn);background:rgba(16,185,129,.1)}
-#scanStatusBar.err{color:var(--red);background:rgba(239,68,68,.1)}
-#scanStatusBar.sc{color:var(--acc);background:rgba(245,158,11,.07)}
-#scanStatusBar.inf{color:#94a3b8;background:var(--bg3)}
-#scanBottom{flex:1;overflow-y:auto;padding:10px 14px}
-#scanResult{display:none}
-.srcHead{background:linear-gradient(135deg,var(--bg3),var(--bg4));border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.srcHead .nm{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800}
-.srcHead .cid{font-size:.68rem;color:var(--acc);background:rgba(245,158,11,.12);padding:2px 8px;border-radius:20px;display:inline-block;margin:3px 0}
-.srcHead .m{font-size:.78rem;color:var(--txt2);margin-top:2px}
-.manualBox{background:var(--bg3);border:1px solid var(--bdr2);border-radius:12px;padding:12px;margin-bottom:8px}
-.manualBox label{display:block;font-size:.68rem;color:var(--txt2);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.scanFrame{width:200px;height:200px;position:relative}
+.corner{position:absolute;width:36px;height:36px;border-color:var(--acc);border-style:solid;border-radius:4px}
+.corner.tl{top:0;left:0;border-width:3px 0 0 3px}
+.corner.tr{top:0;right:0;border-width:3px 3px 0 0}
+.corner.bl{bottom:0;left:0;border-width:0 0 3px 3px}
+.corner.br{bottom:0;right:0;border-width:0 3px 3px 0}
+.scanLine{position:absolute;left:8px;right:8px;height:2px;background:linear-gradient(90deg,transparent,var(--acc),rgba(255,200,50,.8),var(--acc),transparent);box-shadow:0 0 8px rgba(245,158,11,.5);animation:scanAnim 2s ease-in-out infinite}
+@keyframes scanAnim{0%{top:8px;opacity:1}48%{top:calc(100% - 8px);opacity:1}50%{opacity:0;top:calc(100% - 8px)}51%{opacity:0;top:8px}52%{opacity:1}}
+.scan-bg-pulse{position:absolute;inset:0;background:rgba(245,158,11,.03);animation:bgPulse 2s ease-in-out infinite}
+@keyframes bgPulse{0%,100%{opacity:0}50%{opacity:1}}
+
+#scanStatusBar{
+  padding:9px 16px;font-size:.82rem;text-align:center;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;gap:8px;min-height:40px;
+  transition:background .2s
+}
+#scanStatusBar.ok{color:var(--grn);background:rgba(16,185,129,.08)}
+#scanStatusBar.err{color:var(--red);background:rgba(239,68,68,.08)}
+#scanStatusBar.sc{color:var(--acc);background:rgba(245,158,11,.05)}
+#scanStatusBar.inf{color:var(--txt2);background:rgba(255,255,255,.03)}
+#scanBottom{flex:1;overflow-y:auto;padding:12px 14px;overscroll-behavior:contain}
+
+/* Manual entry */
+.manualBox{background:rgba(255,255,255,.03);border:1px solid var(--bdr2);border-radius:13px;padding:13px;margin-bottom:10px}
+.manualBox label{display:block;font-size:.68rem;color:var(--txt2);margin-bottom:7px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
 .manualRow{display:flex;gap:8px}
-.manualInp{flex:1;background:var(--bg2);border:1px solid var(--bdr2);border-radius:9px;padding:10px 12px;color:var(--txt);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;text-transform:uppercase}
+.manualInp{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--bdr2);border-radius:9px;padding:11px 12px;color:var(--txt);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;text-transform:uppercase}
 .manualInp:focus{border-color:var(--acc)}
-.manualGoBtn{padding:10px 14px;background:var(--acc);color:#000;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:.15s}
+.manualGoBtn{padding:11px 16px;background:linear-gradient(135deg,var(--acc),#f97316);color:#000;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:.15s;white-space:nowrap}
 .manualGoBtn:active{transform:scale(.97)}
-.camCtrl{display:flex;gap:8px;margin-bottom:8px}
-.camBtn{flex:1;padding:10px;border-radius:9px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--txt2);font-size:.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;display:flex;align-items:center;justify-content:center;gap:5px}
+
+/* Cam controls */
+.camCtrl{display:flex;gap:7px;margin-bottom:10px}
+.camBtn{flex:1;padding:10px;border-radius:10px;border:1px solid var(--bdr2);background:rgba(255,255,255,.04);color:var(--txt2);font-size:.75rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;display:flex;align-items:center;justify-content:center;gap:5px}
 .camBtn:active{transform:scale(.97)}
 .camBtn.active{border-color:var(--acc);background:rgba(245,158,11,.1);color:var(--acc)}
 
-/* History */
-.hi{background:var(--bg2);border:1px solid var(--bdr2);border-radius:10px;padding:11px 13px;margin-bottom:7px}
+/* Scan result */
+#scanResult{display:none}
+.srcHead{
+  background:linear-gradient(135deg,rgba(20,32,53,.95),rgba(26,42,66,.95));
+  border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px;
+  display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
+  position:relative;overflow:hidden
+}
+.srcHead::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--acc),transparent)}
+.srcHead .nm{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:800}
+.srcHead .cid{font-size:.65rem;color:var(--acc);background:rgba(245,158,11,.12);padding:2px 8px;border-radius:20px;display:inline-block;margin:3px 0}
+.srcHead .m{font-size:.76rem;color:var(--txt2);margin-top:2px}
+
+/* HISTORY */
+.hi{background:rgba(255,255,255,.03);border:1px solid var(--bdr3);border-radius:11px;padding:12px 14px;margin-bottom:7px;transition:border-color .15s}
+.hi:hover{border-color:rgba(245,158,11,.15)}
 .hi .r{display:flex;justify-content:space-between;align-items:center}
-.hi .dt{font-weight:600;font-size:.85rem}.hi .qty{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:var(--acc)}
-.hi .sb{font-size:.72rem;color:var(--txt2);margin-top:2px}
-.inp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:11px 14px;color:var(--txt);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s}
+.hi .dt{font-weight:600;font-size:.85rem}
+.hi .qty{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:var(--acc)}
+.hi .sb{font-size:.72rem;color:var(--txt2);margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.shift-tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:.6rem;font-weight:700}
+.shift-tag.morning{background:rgba(245,158,11,.15);color:var(--acc)}
+.shift-tag.evening{background:rgba(139,92,246,.15);color:#a78bfa}
+
+/* INPUTS */
+.inp{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--bdr2);border-radius:10px;padding:11px 14px;color:var(--txt);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s}
 .inp:focus{border-color:var(--acc)}
-.inpG{margin-bottom:12px}.inpG label{display:block;font-size:.75rem;color:var(--txt2);margin-bottom:5px;font-weight:500}
-.btn{padding:10px 16px;border-radius:9px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.85rem;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:5px}
-.btn:active{transform:scale(.97)}
-.bsm{padding:6px 12px;font-size:.75rem;border-radius:7px}
-.bgh{background:transparent;border:1px solid var(--bdr2);color:var(--txt2)}
-.bgrn{background:var(--grn);color:#fff}.bred{background:var(--red);color:#fff}.bacc{background:var(--acc);color:#000}.bblu{background:#3b82f6;color:#fff}
-.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:flex-end;justify-content:center}
+.inpG{margin-bottom:12px}.inpG label{display:block;font-size:.75rem;color:var(--txt2);margin-bottom:5px;font-weight:500;text-transform:uppercase;letter-spacing:.3px}
+
+/* OVERLAY / MODAL */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
 .ov.open{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--bdr2);border-radius:20px 20px 0 0;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.7)}
-.mhd{padding:14px 18px 10px;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;justify-content:space-between}
-.mhd h3{font-size:.95rem;font-weight:700}.mc{background:none;border:none;color:var(--txt2);font-size:1.2rem;cursor:pointer;padding:4px 8px}
-.mbd{padding:14px 18px}.mft{padding:10px 18px;border-top:1px solid var(--bdr2);display:flex;gap:8px}
+.modal{background:linear-gradient(160deg,var(--bg2),var(--bg));border:1px solid var(--bdr2);border-radius:22px 22px 0 0;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 -12px 50px rgba(0,0,0,.7)}
+.mhd{padding:16px 18px 12px;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;justify-content:space-between}
+.mhd h3{font-size:.95rem;font-weight:700;font-family:'Syne',sans-serif}
+.mc{background:none;border:none;color:var(--txt2);font-size:1.2rem;cursor:pointer;padding:4px 8px;border-radius:7px;transition:.15s}
+.mc:hover{background:rgba(255,255,255,.07);color:var(--txt)}
+.mbd{padding:16px 18px}
+.mft{padding:10px 18px;border-top:1px solid var(--bdr2);display:flex;gap:8px}
 .mft .btn{flex:1}
-#toast{position:fixed;top:62px;right:10px;z-index:500;display:flex;flex-direction:column;gap:5px;max-width:290px}
-.ti{background:var(--bg2);border:1px solid var(--bdr2);border-radius:9px;padding:9px 13px;font-size:.8rem;box-shadow:var(--sh);animation:tIn .22s ease;display:flex;align-items:center;gap:7px}
-.ti.ok{border-left:3px solid var(--grn)}.ti.err{border-left:3px solid var(--red)}.ti.inf{border-left:3px solid #3b82f6}
-@keyframes tIn{from{transform:translateX(110%);opacity:0}to{transform:none;opacity:1}}
+
+/* TOAST */
+#toast{position:fixed;top:64px;right:12px;z-index:500;display:flex;flex-direction:column;gap:5px;max-width:300px}
+.ti{
+  background:rgba(13,21,35,.97);border:1px solid var(--bdr2);backdrop-filter:blur(10px);
+  border-radius:10px;padding:10px 14px;font-size:.8rem;box-shadow:var(--sh);
+  animation:tIn .22s ease;display:flex;align-items:center;gap:8px;
+  transform-origin:top right
+}
+.ti.ok{border-left:3px solid var(--grn)}.ti.err{border-left:3px solid var(--red)}.ti.inf{border-left:3px solid var(--blu)}
+@keyframes tIn{from{transform:scale(.8) translateX(40px);opacity:0}to{transform:none;opacity:1}}
+
+/* BADGE */
 .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.68rem;font-weight:600}
 .badge.g{background:rgba(16,185,129,.15);color:#34d399}.badge.r{background:rgba(239,68,68,.15);color:#fca5a5}.badge.y{background:rgba(245,158,11,.15);color:var(--acc)}
+
+/* QPRESET */
 .qpreset{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
-.qp{padding:7px 11px;border-radius:7px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--txt2);font-size:.76rem;font-weight:600;cursor:pointer;transition:.15s}
+.qp{padding:7px 11px;border-radius:8px;border:1px solid var(--bdr2);background:rgba(255,255,255,.04);color:var(--txt2);font-size:.76rem;font-weight:600;cursor:pointer;transition:.15s}
 .qp.active{border-color:var(--acc);background:rgba(245,158,11,.12);color:var(--acc)}
-.settRow{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--bdr2);font-size:.88rem}
+.qp:active{transform:scale(.95)}
+
+/* SETT */
+.settRow{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--bdr3);font-size:.88rem}
 .settRow:last-child{border:none}
-.empty{text-align:center;padding:28px 14px;color:var(--txt3)}.empty .ei{font-size:2rem;margin-bottom:8px}
+.empty{text-align:center;padding:30px 14px;color:var(--txt3)}.empty .ei{font-size:2rem;margin-bottom:8px}
 .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .sh h2{font-size:1.1rem;font-weight:700;font-family:'Syne',sans-serif}
+
+/* DATE FILTER ROW */
+.filter-row{display:flex;gap:8px;align-items:center}
+.filter-row .inp{flex:1}
+.hist-summary{
+  display:flex;gap:16px;justify-content:center;text-align:center;
+  padding:14px;background:rgba(255,255,255,.03);border:1px solid var(--bdr2);
+  border-radius:13px;margin-bottom:10px
+}
+.hist-summary .hv{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;line-height:1}
+.hist-summary .hl{font-size:.65rem;color:var(--txt2);margin-top:3px;text-transform:uppercase}
+
+/* AVATAR */
+.avatar{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--acc),#f97316);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 10px;font-weight:700;color:#000;font-family:'Syne',sans-serif;box-shadow:0 4px 20px rgba(245,158,11,.3)}
 </style>
 </head>
 <body>
-<div id="guard"><div class="spin"></div><p style="color:var(--txt2);font-size:.83rem;margin-top:8px">Checking access…</p></div>
+<div id="guard">
+  <div class="spin"></div>
+  <p style="color:var(--txt2);font-size:.83rem;margin-top:8px">Checking access…</p>
+</div>
+
 <div id="app">
   <div class="topbar">
-    <div class="brand">🥛 <span class="pill">MILKMAN</span></div>
-    <div class="clockBar" onclick="doLogout()">
-      <strong id="liveClock">--:--:--</strong>
-      <span id="liveDate">Loading…</span>
-      <span style="font-size:.6rem;color:var(--txt3)">(tap logout)</span>
+    <div class="brand">🥛 <span class="brand-pill">MILKMAN</span></div>
+    <div class="shift-toggle">
+      <button class="shift-btn morning" id="shiftMorn" onclick="setShift('morning')">☀️ Morning</button>
+      <button class="shift-btn evening" id="shiftEve" onclick="setShift('evening')">🌙 Evening</button>
+    </div>
+    <div class="clockBar" onclick="doLogout()" title="Tap to logout">
+      <strong id="liveClock">--:--</strong>
+      <span id="liveDate"></span>
     </div>
   </div>
 
-  <!-- HOME -->
+  <!-- HOME PAGE -->
   <div class="page active" id="pgHome">
+    <div id="shiftBanner" class="shift-banner morning" style="margin-bottom:12px">
+      <span id="shiftBannerText">☀️ Morning Shift Active</span>
+      <span id="shiftBannerTime" style="font-size:.7rem;opacity:.8"></span>
+    </div>
     <div class="sgrid">
-      <div class="sc g"><div class="ei">✅</div><div class="v" id="hs1">—</div><div class="l">Served Today</div></div>
-      <div class="sc r"><div class="ei">⏳</div><div class="v" id="hs2">—</div><div class="l">Pending</div></div>
-      <div class="sc b"><div class="ei">🥛</div><div class="v" id="hs3">—</div><div class="l">Litres Today</div></div>
-      <div class="sc n"><div class="ei">📦</div><div class="v" id="hs4">—</div><div class="l">Customers</div></div>
+      <div class="sc g"><div class="sei">✅</div><div class="sv" id="hs1">—</div><div class="sl">Served Today</div></div>
+      <div class="sc r"><div class="sei">⏳</div><div class="sv" id="hs2">—</div><div class="sl">Pending</div></div>
+      <div class="sc b"><div class="sei">🥛</div><div class="sv" id="hs3">—</div><div class="sl">Litres Today</div></div>
+      <div class="sc n"><div class="sei">📦</div><div class="sv" id="hs4">—</div><div class="sl">Customers</div></div>
     </div>
     <div class="card">
       <div class="cardHd">
@@ -179,65 +379,87 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
       </div>
       <div class="suggs" id="suggs"></div>
     </div>
+
     <div id="custPanel">
       <div class="chead" id="chead"></div>
       <div class="card" style="margin-bottom:0">
-        <div id="dupwarn" class="dupwarn" style="display:none">⚠️ Already delivered today – submitting will update</div>
-        <div style="font-size:.78rem;color:var(--txt2);margin-bottom:8px;font-weight:600">SELECT QUANTITY</div>
-        <div class="qpresets" id="qpresets">
-          <div class="qbtn" onclick="selectQty(.25,this)">250ml</div>
-          <div class="qbtn" onclick="selectQty(.5,this)">500ml</div>
-          <div class="qbtn" onclick="selectQty(1,this)">1L</div>
-          <div class="qbtn" onclick="selectQty(1.5,this)">1.5L</div>
-          <div class="qbtn" onclick="selectQty(2,this)">2L</div>
-          <div class="qbtn" onclick="selectQty(-1,this)">Custom</div>
+        <div id="dupwarn" class="dupwarn" style="display:none"></div>
+        <div id="extrawarn" class="extrawarn" style="display:none">➕ Force-add new delivery (will create a separate record)</div>
+        <div class="qty-section">
+          <div class="qty-label">Select Quantity</div>
+          <div class="qpresets" id="qpresets">
+            <div class="qbtn" onclick="selectQty(.25,this)">250ml</div>
+            <div class="qbtn" onclick="selectQty(.5,this)">500ml</div>
+            <div class="qbtn" onclick="selectQty(1,this)">1L</div>
+            <div class="qbtn" onclick="selectQty(1.5,this)">1.5L</div>
+            <div class="qbtn" onclick="selectQty(2,this)">2L</div>
+            <div class="qbtn" onclick="selectQty(-1,this)">Custom</div>
+          </div>
+          <input class="custinp" id="custInp" type="number" min="0.1" step="0.25" placeholder="Enter litres…" oninput="setCustomQty(this.value)">
+          <div class="selqty" id="selQty">1.0 L</div>
         </div>
-        <input class="custinp" id="custInp" type="number" min="0.1" step="0.25" placeholder="Enter litres…" oninput="setCustomQty(this.value)">
-        <div class="selqty" id="selQty">1.0 L</div>
-        <div style="display:flex;gap:6px;margin-bottom:10px">
-          <button class="btn bsm bgh" onclick="viewHistory()">📋 History</button>
-          <button class="btn bsm bgh" onclick="viewQR()">📱 QR Card</button>
+        <div class="action-row">
+          <button class="btn bsm bgh" style="flex:1" onclick="viewHistory()">📋 History</button>
+          <button class="btn bsm bgh" style="flex:1" onclick="viewQR()">📱 QR Card</button>
+          <button class="btn bsm bgh" style="flex:1" id="forceAddBtn" onclick="toggleForceAdd()" style="display:none">➕ Extra</button>
         </div>
         <button class="sbtn bgrn" id="subBtn" onclick="doSubmit()">✓ Submit Delivery</button>
       </div>
     </div>
   </div>
 
-  <!-- SCANNER (Live) -->
-  <div class="page" id="pgScan">
-    <div class="scanHd">
-      <span style="font-size:1.3rem">📷</span>
-      <div>
-        <h2>Live QR Scanner</h2>
-        <div class="st" id="scanSubtitle">Point camera at customer QR code</div>
+  <!-- HISTORY PAGE -->
+  <div class="page" id="pgHistory">
+    <div class="sh"><h2>My Deliveries</h2></div>
+    <div class="card">
+      <div class="filter-row">
+        <input class="inp" id="hFrom" type="date">
+        <input class="inp" id="hTo" type="date">
+        <button class="btn bsm bacc" onclick="loadHistory()">Go</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+        <button class="btn bsm bgh" onclick="setHistRange('today')">Today</button>
+        <button class="btn bsm bgh" onclick="setHistRange('week')">This Week</button>
+        <button class="btn bsm bgh" onclick="setHistRange('month')">This Month</button>
       </div>
     </div>
+    <div id="histList"><div class="empty"><div class="ei">📋</div><p>Select dates and tap Go</p></div></div>
+  </div>
 
-    <!-- Live video viewport -->
-    <div id="scanViewport" style="height:280px">
+  <!-- SCAN PAGE -->
+  <div class="page" id="pgScan">
+    <div class="scanHd">
+      <span style="font-size:1.4rem">📷</span>
+      <div>
+        <h2>QR Scanner</h2>
+        <div class="st" id="scanSubtitle">Point camera at customer QR code</div>
+      </div>
+      <div style="margin-left:auto">
+        <div class="shift-toggle" style="transform:scale(.85);transform-origin:right center">
+          <button class="shift-btn morning" id="scanShiftMorn" onclick="setShift('morning')">☀️ AM</button>
+          <button class="shift-btn evening" id="scanShiftEve" onclick="setShift('evening')">🌙 PM</button>
+        </div>
+      </div>
+    </div>
+    <div id="scanViewport" style="height:260px">
+      <div class="scan-bg-pulse"></div>
       <video id="scanVideo" autoplay playsinline muted></video>
       <canvas id="scanCanvas"></canvas>
       <div class="scanOverlay">
         <div class="scanFrame">
-          <div class="br"></div><div class="bl"></div>
+          <div class="corner tl"></div><div class="corner tr"></div>
+          <div class="corner bl"></div><div class="corner br"></div>
           <div class="scanLine"></div>
         </div>
       </div>
     </div>
-
-    <!-- Status bar -->
-    <div id="scanStatusBar" class="sc">📷 Starting camera…</div>
-
-    <!-- Camera controls + manual entry + result -->
+    <div id="scanStatusBar" class="sc">📷 Ready to scan</div>
     <div id="scanBottom">
-      <!-- Camera controls -->
       <div class="camCtrl">
-        <button class="camBtn active" id="btnStartCam" onclick="startLiveScanner()">▶ Start Camera</button>
+        <button class="camBtn" id="btnStartCam" onclick="startLiveScanner()">▶ Start</button>
         <button class="camBtn" id="btnStopCam" onclick="stopLiveScanner()">⏹ Stop</button>
         <button class="camBtn" id="btnFlipCam" onclick="flipCamera()">🔄 Flip</button>
       </div>
-
-      <!-- Manual Entry -->
       <div class="manualBox">
         <label>Or Enter Customer ID / Mobile</label>
         <div class="manualRow">
@@ -247,57 +469,43 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
           <button class="manualGoBtn" onclick="doManualLookup()">Go →</button>
         </div>
       </div>
-
-      <!-- Scan result appears here -->
       <div id="scanResult"></div>
     </div>
   </div>
 
-  <!-- HISTORY -->
-  <div class="page" id="pgHistory">
-    <div class="sh"><h2>My Deliveries</h2></div>
-    <div class="card">
-      <div style="display:flex;gap:8px">
-        <input class="inp" id="hFrom" type="date" style="flex:1">
-        <input class="inp" id="hTo" type="date" style="flex:1">
-        <button class="btn bsm bacc" onclick="loadHistory()">Go</button>
-      </div>
-    </div>
-    <div id="histList"><div class="empty"><div class="ei">📋</div><p>Select dates and tap Go</p></div></div>
-  </div>
-
-  <!-- SETTINGS -->
+  <!-- SETTINGS PAGE -->
   <div class="page" id="pgSettings">
     <div class="sh"><h2>My Account</h2></div>
     <div class="card" style="margin-bottom:12px">
       <div style="text-align:center;padding:8px 0 14px">
-        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--acc),#f97316);display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin:0 auto 10px;font-weight:700;color:#000;font-family:'Syne',sans-serif" id="avatarLetter">?</div>
+        <div class="avatar" id="avatarLetter">?</div>
         <div style="font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700" id="sName">—</div>
         <div style="font-size:.78rem;color:var(--txt2);margin-top:2px" id="sEmail">—</div>
-        <div class="badge y" style="margin-top:6px">MILKMAN</div>
+        <div class="badge y" style="margin-top:7px">MILKMAN</div>
       </div>
-      <div id="settStats" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px;padding-top:12px;border-top:1px solid var(--bdr2)"></div>
+      <div id="settStats" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding-top:14px;border-top:1px solid var(--bdr2)"></div>
     </div>
     <div class="card" style="margin-bottom:12px">
-      <div style="font-size:.85rem;font-weight:700;margin-bottom:12px">Change Password</div>
+      <div style="font-size:.85rem;font-weight:700;margin-bottom:12px;font-family:'Syne',sans-serif">Change Password</div>
       <div class="inpG"><label>New Password</label><input class="inp" id="newPwd" type="password" placeholder="Min 6 characters"></div>
       <div class="inpG"><label>Confirm Password</label><input class="inp" id="confPwd" type="password" placeholder="Repeat password"></div>
       <button class="btn bacc" style="width:100%" onclick="changePwd()">Update Password</button>
     </div>
     <div class="card">
-      <div style="font-size:.85rem;font-weight:700;margin-bottom:12px">App Info</div>
-      <div class="settRow"><div>Version</div><div style="color:var(--txt2)">3.0</div></div>
+      <div style="font-size:.85rem;font-weight:700;margin-bottom:12px;font-family:'Syne',sans-serif">App</div>
+      <div class="settRow"><div>Version</div><div style="color:var(--txt2)">4.0</div></div>
       <div class="settRow"><div>Role</div><div class="badge y">MILKMAN</div></div>
+      <div class="settRow"><div>Current Shift</div><div id="shiftDisplay" style="color:var(--acc);font-weight:600">Morning</div></div>
       <div class="settRow"><div>Cache</div><button class="btn bsm bgh" onclick="clearCache()">Clear</button></div>
       <div style="margin-top:14px"><button class="btn bred" style="width:100%" onclick="doLogout()">🚪 Sign Out</button></div>
     </div>
   </div>
 
   <div class="bnav">
-    <button class="nb active" id="bn0" onclick="nav('Home',0)"><span class="i">🏠</span>Home</button>
-    <button class="nb" id="bn1" onclick="nav('History',1)"><span class="i">📋</span>History</button>
-    <button class="nb scan" id="bnScan" onclick="nav('Scan',99)"><div class="wrap">📷</div></button>
-    <button class="nb" id="bn3" onclick="nav('Settings',3)"><span class="i">👤</span>Profile</button>
+    <button class="nb active" id="bn0" onclick="nav('Home',0)"><span class="ico">🏠</span>Home</button>
+    <button class="nb" id="bn1" onclick="nav('History',1)"><span class="ico">📋</span>History</button>
+    <button class="nb scan-btn" id="bnScan" onclick="nav('Scan',99)"><div class="scan-circle">📷</div></button>
+    <button class="nb" id="bn3" onclick="nav('Settings',3)"><span class="ico">👤</span>Profile</button>
   </div>
 </div>
 
@@ -319,7 +527,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
   <div class="modal">
     <div class="mhd"><h3>Add New Customer</h3><button class="mc" onclick="closeM('addCustModal')">✕</button></div>
     <div class="mbd">
-      <div class="inpG"><label>Full Name *</label><input class="inp" id="acN" placeholder="Customer full name"></div>
+      <div class="inpG"><label>Full Name *</label><input class="inp" id="acN" placeholder="Customer full name" autocomplete="off"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div class="inpG"><label>Mobile *</label><input class="inp" id="acM" type="tel" placeholder="+91…"></div>
         <div class="inpG"><label>Alt Mobile</label><input class="inp" id="acM2" type="tel" placeholder="Optional"></div>
@@ -348,9 +556,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 </div>
 <div class="ov" id="newCustQrModal">
   <div class="modal">
-    <div class="mhd"><h3>Customer Added!</h3><button class="mc" onclick="closeM('newCustQrModal')">✕</button></div>
+    <div class="mhd"><h3>Customer Added! ✅</h3><button class="mc" onclick="closeM('newCustQrModal')">✕</button></div>
     <div class="mbd" style="text-align:center">
-      <div style="font-size:.78rem;color:var(--grn);font-weight:700;margin-bottom:8px">✅ Customer created successfully</div>
       <div id="ncqName" style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:4px"></div>
       <div id="ncqId" style="font-size:.7rem;color:var(--acc);background:rgba(245,158,11,.12);padding:2px 10px;border-radius:20px;display:inline-block;margin-bottom:12px"></div>
       <div id="ncqQr" style="display:flex;justify-content:center;margin-bottom:8px"></div>
@@ -365,86 +572,139 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 <div id="toast"></div>
 
 <script>
-// ── STATE ──
-var CU=null, CUSTS=[], todayIds=new Set(), activeCust=null, selQtyVal=1, activePageName='Home';
-var recentSearches=[], searchTO=null, myData={};
-var acQtyVal=1;
+// ─── STATE ────────────────────────────────────────────────────
+var CU=null, CUSTS=[], activeCust=null, selQtyVal=1, activePageName='Home';
+var recentSearches=[], searchTO=null, myData={}, acQtyVal=1;
+var currentShift='morning'; // 'morning' | 'evening'
+var todayShiftDeliveries={}; // key: customerId -> array of deliveries for current shift today
+var forceAdd=false; // force adding extra delivery for same shift
 
-// ── CLOCK ──
+// ─── CLOCK ────────────────────────────────────────────────────
 function updateClock(){
   var n=new Date();
-  document.getElementById('liveClock').textContent=n.toLocaleTimeString('en-IN');
+  document.getElementById('liveClock').textContent=n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
   document.getElementById('liveDate').textContent=n.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
 }
 setInterval(updateClock,1000); updateClock();
 
-// ── AUTH ──
-auth.onAuthStateChanged(async function(u){
-  if(!u){location.replace('index.html');return;}
-  var role=await getUserRole(u.uid);
-  if(role!=='staff'&&role!=='admin'){await signOut();location.replace('index.html');return;}
-  CU=u;
-  await bootstrapSystem(u.uid,role);
-  var ud=await db.collection('users').doc(CU.uid).get();
-  myData=ud.exists?ud.data():{name:CU.email,email:CU.email};
-  document.getElementById('guard').style.display='none';
-  document.getElementById('app').style.display='block';
-  document.getElementById('avatarLetter').textContent=(myData.name||CU.email||'?')[0].toUpperCase();
-  document.getElementById('sName').textContent=myData.name||CU.email;
-  document.getElementById('sEmail').textContent=CU.email;
-  await loadCustomersCache();
-  await refreshHomeStats();
-  try{recentSearches=await getRecentSearches(CU.uid,8);}catch(e){}
-});
-function doLogout(){stopLiveScanner();signOut().then(function(){location.replace('index.html');});}
-
-// ── NAV ──
-function nav(name,idx){
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
-  document.getElementById('pg'+name).classList.add('active');
-  document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('active');});
-  if(idx===99) document.getElementById('bnScan').classList.add('active');
-  else if(idx>=0) document.getElementById('bn'+idx).classList.add('active');
-  if(activePageName==='Scan'&&name!=='Scan') stopLiveScanner();
-  activePageName=name;
-  if(name==='Scan') setTimeout(startLiveScanner, 300);
-  else if(name==='History') loadHistory();
-  else if(name==='Settings') loadSettingsPage();
+// ─── SHIFT ────────────────────────────────────────────────────
+function setShift(s){
+  currentShift=s;
+  ['shiftMorn','shiftEve','scanShiftMorn','scanShiftEve'].forEach(function(id){
+    var el=document.getElementById(id);if(!el)return;
+    el.classList.remove('active');
+  });
+  if(s==='morning'){
+    ['shiftMorn','scanShiftMorn'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.add('active');});
+    document.getElementById('shiftBanner').className='shift-banner morning';
+    document.getElementById('shiftBannerText').textContent='☀️ Morning Shift Active';
+    if(document.getElementById('shiftDisplay'))document.getElementById('shiftDisplay').textContent='Morning';
+  }else{
+    ['shiftEve','scanShiftEve'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.add('active');});
+    document.getElementById('shiftBanner').className='shift-banner evening';
+    document.getElementById('shiftBannerText').textContent='🌙 Evening Shift Active';
+    if(document.getElementById('shiftDisplay'))document.getElementById('shiftDisplay').textContent='Evening';
+  }
+  refreshHomeStats();
+  if(activeCust)showCustPanel(activeCust);
+  document.getElementById('shiftBannerTime').textContent=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
 }
 
+// ─── AUTH ────────────────────────────────────────────────────
+auth.onAuthStateChanged(async function(u){
+  if(!u){location.replace('index.html');return;}
+  try{
+    var role=await getUserRole(u.uid);
+    if(role!=='staff'&&role!=='admin'){await signOut();location.replace('index.html');return;}
+    CU=u;
+    await bootstrapSystem(u.uid,role);
+    var ud=await db.collection('users').doc(CU.uid).get();
+    myData=ud.exists?ud.data():{name:CU.email,email:CU.email};
+    document.getElementById('guard').style.display='none';
+    document.getElementById('app').style.display='block';
+    var initLetter=(myData.name||CU.email||'?')[0].toUpperCase();
+    document.getElementById('avatarLetter').textContent=initLetter;
+    document.getElementById('sName').textContent=myData.name||CU.email;
+    document.getElementById('sEmail').textContent=CU.email;
+    // Auto-detect shift from time
+    var hr=new Date().getHours();
+    setShift(hr>=12?'evening':'morning');
+    await loadCustomersCache();
+    await refreshHomeStats();
+    try{recentSearches=await getRecentSearches(CU.uid,8);}catch(e){}
+  }catch(e){
+    console.error('Auth error:',e);
+    toast('Login error: '+e.message,'err');
+  }
+});
+
+function doLogout(){stopLiveScanner();signOut().then(function(){location.replace('index.html');});}
+
+// ─── NAV ────────────────────────────────────────────────────
+function nav(name,idx){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  var pg=document.getElementById('pg'+name);if(pg)pg.classList.add('active');
+  document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('active');});
+  if(idx===99)document.getElementById('bnScan').classList.add('active');
+  else if(idx>=0){var nb=document.getElementById('bn'+idx);if(nb)nb.classList.add('active');}
+  if(activePageName==='Scan'&&name!=='Scan')stopLiveScanner();
+  activePageName=name;
+  if(name==='Scan')setTimeout(startLiveScanner,350);
+  else if(name==='History')loadHistory();
+  else if(name==='Settings')loadSettingsPage();
+}
+
+// ─── TOAST ────────────────────────────────────────────────────
 function toast(msg,type){
   type=type||'ok';
   var d=document.createElement('div');d.className='ti '+type;
-  d.textContent=(type==='ok'?'✅ ':type==='err'?'❌ ':'ℹ️ ')+msg;
+  var icon=type==='ok'?'✅':type==='err'?'❌':'ℹ️';
+  d.textContent=icon+' '+msg;
   document.getElementById('toast').appendChild(d);
-  setTimeout(function(){d.remove();},3200);
+  setTimeout(function(){d.style.opacity='0';d.style.transform='translateX(30px)';d.style.transition='all .25s';setTimeout(function(){d.remove();},250);},3000);
 }
 function openM(id){document.getElementById(id).classList.add('open');}
 function closeM(id){document.getElementById(id).classList.remove('open');}
 
-// ── CUSTOMERS ──
+// ─── CUSTOMERS ────────────────────────────────────────────────
 async function loadCustomersCache(){
   var c=CACHE.get('customers',300000);
   if(c&&c.length){CUSTS=c;return;}
-  try{CUSTS=await getCustomers();}catch(e){CUSTS=CACHE.get('customers',3600000)||[];}
+  try{CUSTS=await getCustomers();}
+  catch(e){CUSTS=CACHE.get('customers',3600000)||[];console.warn('Customer cache fallback',e);}
 }
+
 async function refreshHomeStats(){
   try{
-    var dels=await getTodayDeliveries();
-    todayIds=new Set(dels.map(function(d){return d.customerId;}));
-    document.getElementById('hs1').textContent=dels.length;
-    document.getElementById('hs2').textContent=Math.max(0,CUSTS.length-dels.length);
-    document.getElementById('hs3').textContent=dels.reduce(function(s,d){return s+(d.deliveredQty||0);},0)+'L';
+    var today=new Date().toISOString().slice(0,10);
+    // Get ALL today's deliveries (both shifts)
+    var allDels=await getTodayDeliveries();
+    // Get shift-specific
+    var shiftDels=await getTodayDeliveries(currentShift);
+    // Build per-customer delivery map for current shift
+    todayShiftDeliveries={};
+    shiftDels.forEach(function(d){
+      if(!todayShiftDeliveries[d.customerId])todayShiftDeliveries[d.customerId]=[];
+      todayShiftDeliveries[d.customerId].push(d);
+    });
+    var shiftServed=Object.keys(todayShiftDeliveries).length;
+    var totalMilk=allDels.reduce(function(s,d){return s+(d.deliveredQty||0);},0);
+    document.getElementById('hs1').textContent=shiftServed;
+    document.getElementById('hs2').textContent=Math.max(0,CUSTS.length-shiftServed);
+    document.getElementById('hs3').textContent=totalMilk+'L';
     document.getElementById('hs4').textContent=CUSTS.length;
+    // Refresh panel if customer selected
+    if(activeCust)showCustPanel(activeCust);
   }catch(e){console.warn('stats error',e);}
 }
 setInterval(function(){if(activePageName==='Home')refreshHomeStats();},60000);
 
-// ── SEARCH ──
+// ─── SEARCH ────────────────────────────────────────────────────
 function hl(t,q){
-  if(!q||!t)return t||'';
-  return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark style="background:rgba(245,158,11,.25);color:var(--acc);border-radius:2px">$1</mark>');
+  if(!q||!t)return esc(t)||'';
+  return esc(t).replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark style="background:rgba(245,158,11,.25);color:var(--acc);border-radius:2px">$1</mark>');
 }
+
 function handleSearch(q){
   clearTimeout(searchTO);
   var el=document.getElementById('suggs');
@@ -452,20 +712,30 @@ function handleSearch(q){
   searchTO=setTimeout(function(){
     var ql=q.toLowerCase();
     var res=CUSTS.filter(function(c){
-      return(c.name||'').toLowerCase().includes(ql)||(c.mobile||'').includes(q)||(c.customerId||'').toLowerCase().includes(ql)||(c.address||'').toLowerCase().includes(ql);
+      return(c.name||'').toLowerCase().includes(ql)||(c.mobile||'').includes(q)||
+        (c.customerId||'').toLowerCase().includes(ql)||(c.address||'').toLowerCase().includes(ql);
     }).slice(0,8);
     renderSuggs(res,q);
   },200);
 }
+
 function renderSuggs(list,q){
   var el=document.getElementById('suggs');
   if(!list.length){el.classList.remove('show');return;}
   el.innerHTML=list.map(function(c){
-    var done=todayIds.has(c.customerId||c.id);
-    return'<div class="si2" onclick="selectCust(\''+esc(c.customerId||c.id)+'\')"><span style="font-size:1rem">'+(done?'✅':'🥛')+'</span><div class="inf"><div class="nm">'+hl(c.name,q)+'</div><div class="sb">'+(c.mobile||'')+' • '+(c.address||'')+'</div></div>'+(done?'<span class="badge g" style="font-size:.62rem">Done</span>':'')+'</div>';
+    var cid=c.customerId||c.id;
+    var shiftDels=todayShiftDeliveries[cid]||[];
+    var done=shiftDels.length>0;
+    var multi=shiftDels.length>1;
+    return'<div class="si2" onclick="selectCust(\''+esc(cid)+'\')">'+
+      '<span style="font-size:1rem">'+(multi?'⚠️':done?'✅':'🥛')+'</span>'+
+      '<div class="inf"><div class="nm">'+hl(c.name,q)+'</div>'+
+      '<div class="sb">'+(c.mobile||'')+' • '+(c.address||'')+'</div></div>'+
+      (done?'<span class="badge g" style="font-size:.6rem">'+(multi?shiftDels.length+'x':'Done')+'</span>':'')+'</div>';
   }).join('');
   el.classList.add('show');
 }
+
 async function selectCust(cid){
   document.getElementById('suggs').classList.remove('show');
   var c=CUSTS.find(function(x){return(x.customerId||x.id)===cid;});
@@ -473,41 +743,97 @@ async function selectCust(cid){
     try{
       var d=await db.collection('customers').doc(cid).get();
       if(d.exists){c=Object.assign({id:d.id},d.data());}
-      if(!c){
+    }catch(e){}
+    if(!c){
+      try{
         var q=await db.collection('customers').where('customerId','==',cid).where('active','==',true).limit(1).get();
         if(!q.empty)c=Object.assign({id:q.docs[0].id},q.docs[0].data());
-      }
-    }catch(e){console.error('selectCust:',e);}
+      }catch(e){}
+    }
   }
   if(!c){toast('Customer not found','err');return;}
   activeCust=c;
+  forceAdd=false;
   document.getElementById('mainSearch').value=c.name;
   try{saveSearchHistory(CU.uid,c.name,cid);}catch(e){}
   showCustPanel(c);
 }
+
 function showCustPanel(c){
-  var cid=c.customerId||c.id, done=todayIds.has(cid);
+  var cid=c.customerId||c.id;
+  var shiftDels=todayShiftDeliveries[cid]||[];
+  var done=shiftDels.length>0;
+  var multiDone=shiftDels.length>1;
   var dq=parseFloat(c.defaultQty)||1;
   selQtyVal=dq;
+
   document.getElementById('custPanel').style.display='block';
-  document.getElementById('dupwarn').style.display=done?'block':'none';
-  document.querySelectorAll('#qpresets .qbtn').forEach(function(b){b.classList.remove('active');});
+  var dw=document.getElementById('dupwarn');
+  var ew=document.getElementById('extrawarn');
+  var fb=document.getElementById('forceAddBtn');
+
+  if(forceAdd){
+    dw.style.display='none';
+    ew.style.display='flex';
+    fb.style.display='flex';
+    fb.textContent='✕ Cancel Extra';
+  }else if(done){
+    dw.style.display='flex';
+    dw.innerHTML='⚠️ Already delivered this '+currentShift+' ('+shiftDels.length+'x) – tap <b style="margin:0 4px">➕ Extra</b> to add another';
+    ew.style.display='none';
+    fb.style.display='flex';
+    fb.textContent='➕ Extra';
+  }else{
+    dw.style.display='none';
+    ew.style.display='none';
+    fb.style.display='none';
+  }
+
+  // Quantity buttons
   var presets=[.25,.5,1,1.5,2];
   var idx=presets.indexOf(dq);
+  document.querySelectorAll('#qpresets .qbtn').forEach(function(b){b.classList.remove('active');});
   var btns=document.querySelectorAll('#qpresets .qbtn');
-  if(idx>=0) btns[idx].classList.add('active');
+  if(idx>=0)btns[idx].classList.add('active');
   else btns[5].classList.add('active');
   document.getElementById('custInp').style.display=idx>=0?'none':'block';
   document.getElementById('custInp').value=idx>=0?'':dq;
   document.getElementById('selQty').textContent=fmtQ(dq);
+
+  // Submit button state
   var sb=document.getElementById('subBtn');
-  sb.style.background=done?'var(--acc)':'var(--grn)';
-  sb.style.color=done?'#000':'#fff';
-  sb.innerHTML=done?'↺ Update Delivery':'✓ Submit Delivery';
-  document.getElementById('chead').innerHTML='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div><div class="cnm">'+esc(c.name)+'</div><div class="cid">'+cid+'</div><div class="cm">📱 '+(c.mobile||'—')+'</div><div class="cm">📍 '+(c.address||'—')+'</div></div><span class="sbadge '+(done?'done':'pend')+'">'+(done?'✓ Done':'⏳ Pending')+'</span></div>';
+  if(forceAdd){
+    sb.style.background='var(--pur)';sb.style.color='#fff';
+    sb.innerHTML='➕ Add Extra Delivery';
+  }else if(done){
+    sb.style.background='linear-gradient(135deg,var(--acc),#f97316)';sb.style.color='#000';
+    sb.innerHTML='↺ Update Latest Delivery';
+  }else{
+    sb.style.background='var(--grn)';sb.style.color='#fff';
+    sb.innerHTML='✓ Submit Delivery';
+  }
+
+  // Customer info panel
+  document.getElementById('chead').innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">'+
+    '<div>'+
+      '<div class="cnm">'+esc(c.name)+'</div>'+
+      '<div class="cid-badge">'+cid+'</div>'+
+      '<div class="cm">📱 '+(c.mobile||'—')+'</div>'+
+      '<div class="cm">📍 '+(c.address||'—')+'</div>'+
+      (c.notes&&c.notes!=='n'?'<div class="cm" style="color:var(--acc);font-size:.75rem">📝 '+esc(c.notes)+'</div>':'')+
+      '<div class="cm" style="margin-top:4px"><span class="shift-tag '+(currentShift)+'">'+
+        (currentShift==='morning'?'☀️ Morning':'🌙 Evening')+
+      '</span></div>'+
+    '</div>'+
+    '<span class="sbadge '+(done&&!forceAdd?'done':'pend')+'">'+(forceAdd?'➕ Extra':done?'✓ Done':'⏳ Pending')+'</span>'+
+    '</div>';
+
   document.getElementById('custPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-function fmtQ(v){return v<1?(v*1000).toFixed(0)+'ml':v+'L';}
+
+function fmtQ(v){return v<1?(v*1000).toFixed(0)+'ml':parseFloat(v).toFixed(v%1?1:0)+'L';}
+
 function selectQty(v,btn){
   document.querySelectorAll('#qpresets .qbtn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
@@ -518,7 +844,12 @@ function selectQty(v,btn){
 }
 function setCustomQty(v){selQtyVal=parseFloat(v)||0;document.getElementById('selQty').textContent=selQtyVal>0?fmtQ(selQtyVal):'— L';}
 
-// ── ADD CUSTOMER ──
+function toggleForceAdd(){
+  forceAdd=!forceAdd;
+  if(activeCust)showCustPanel(activeCust);
+}
+
+// ─── ADD CUSTOMER ────────────────────────────────────────────
 function openAddCust(){
   ['acN','acM','acM2','acA','acNotes'].forEach(function(id){document.getElementById(id).value='';});
   acQtyVal=1;
@@ -530,6 +861,7 @@ function openAddCust(){
   var btn=document.getElementById('acSaveBtn');btn.innerHTML='Save Customer';btn.disabled=false;
   openM('addCustModal');
 }
+
 function setAcQP(v,btn){
   document.querySelectorAll('#acQPreset .qp').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
@@ -544,13 +876,14 @@ document.getElementById('acQCustom').addEventListener('input',function(){
   document.getElementById('acQShow').style.display='block';
   document.getElementById('acQShow').textContent=acQtyVal>0?'Default: '+acQtyVal+'L / day':'';
 });
+
 async function saveNewCustomer(){
   var name=document.getElementById('acN').value.trim();
   var mobile=document.getElementById('acM').value.trim();
   var address=document.getElementById('acA').value.trim();
   if(!name||!mobile||!address){toast('Fill Name, Mobile and Address','err');return;}
   var dq=document.getElementById('acQCustom').style.display!=='none'?(parseFloat(document.getElementById('acQCustom').value)||1):acQtyVal;
-  var data={name:name,mobile:mobile,mobile2:document.getElementById('acM2').value.trim(),address:address,defaultQty:dq,notes:document.getElementById('acNotes').value.trim()};
+  var data={name,mobile,mobile2:document.getElementById('acM2').value.trim(),address,defaultQty:dq,notes:document.getElementById('acNotes').value.trim(),milkType:'Full Cream'};
   var btn=document.getElementById('acSaveBtn');btn.innerHTML='⏳ Saving…';btn.disabled=true;
   try{
     var res=await addCustomer(data,CU.uid);
@@ -562,34 +895,61 @@ async function saveNewCustomer(){
     renderQR(res.qrData,qrEl,180);
     document.getElementById('ncqDlBtn').onclick=function(){downloadIDCard(res.doc);};
     openM('newCustQrModal');
-    refreshHomeStats();toast('Customer added ✓');
-  }catch(e){toast('Error: '+e.message,'err');btn.innerHTML='Save Customer';btn.disabled=false;}
+    refreshHomeStats();
+    toast('Customer added ✓');
+  }catch(e){
+    toast('Error: '+e.message,'err');
+    btn.innerHTML='Save Customer';btn.disabled=false;
+  }
 }
 
-// ── SUBMIT HOME ──
+// ─── SUBMIT DELIVERY ────────────────────────────────────────
 async function doSubmit(){
   if(!activeCust){toast('Select a customer first','err');return;}
   if(selQtyVal<=0){toast('Select a quantity','err');return;}
   var cid=activeCust.customerId||activeCust.id;
   var btn=document.getElementById('subBtn');btn.innerHTML='⏳ Submitting…';btn.disabled=true;
-  var sd=await db.collection('users').doc(CU.uid).get();
-  var sName=sd.exists?sd.data().name:CU.email;
-  var today=new Date().toISOString().slice(0,10);
-  var existing=await getTodayDeliveryForCustomer(cid);
+
   try{
-    if(existing){
-      await updateDelivery(existing.id,{deliveredQty:selQtyVal,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
-      toast('Delivery updated ✓');
-    } else {
-      var d={customerId:cid,customerName:activeCust.name,customerAddress:activeCust.address||'',staffId:CU.uid,staffName:sName,deliveredQty:selQtyVal,normalQty:parseFloat(activeCust.defaultQty)||1,extraQty:0,mode:'manual',status:'delivered'};
+    var sd=await db.collection('users').doc(CU.uid).get();
+    var sName=sd.exists?sd.data().name:CU.email;
+    var shiftDels=todayShiftDeliveries[cid]||[];
+    var done=shiftDels.length>0;
+
+    if(forceAdd){
+      // Always create a new delivery record (extra)
+      var d={
+        customerId:cid,customerName:activeCust.name,customerAddress:activeCust.address||'',
+        staffId:CU.uid,staffName:sName,deliveredQty:selQtyVal,
+        normalQty:parseFloat(activeCust.defaultQty)||1,extraQty:selQtyVal,
+        mode:'manual',status:'delivered',shift:currentShift,
+        isExtra:true
+      };
       await submitDelivery(d);
-      todayIds.add(cid);
+      toast('➕ Extra '+fmtQ(selQtyVal)+' delivered to '+activeCust.name+' ✓');
+      forceAdd=false;
+    }else if(done&&shiftDels.length>0){
+      // Update the most recent one for this shift
+      var latest=shiftDels[shiftDels.length-1];
+      await updateDelivery(latest.id,{deliveredQty:selQtyVal,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+      toast('Updated: '+fmtQ(selQtyVal)+' for '+activeCust.name+' ✓');
+    }else{
+      // Fresh delivery
+      var d2={
+        customerId:cid,customerName:activeCust.name,customerAddress:activeCust.address||'',
+        staffId:CU.uid,staffName:sName,deliveredQty:selQtyVal,
+        normalQty:parseFloat(activeCust.defaultQty)||1,extraQty:0,
+        mode:'manual',status:'delivered',shift:currentShift,isExtra:false
+      };
+      await submitDelivery(d2);
       toast(fmtQ(selQtyVal)+' delivered to '+activeCust.name+' ✓');
     }
-    btn.innerHTML='✅ Delivered!';btn.style.background='var(--grn)';btn.style.color='#fff';
-    refreshHomeStats();
-    setTimeout(function(){btn.innerHTML='✓ Re-Submit';btn.disabled=false;},2000);
+
+    btn.innerHTML='✅ Done!';btn.style.background='var(--grn)';btn.style.color='#fff';
+    await refreshHomeStats();
+    setTimeout(function(){btn.disabled=false;if(activeCust)showCustPanel(activeCust);},2500);
   }catch(e){
+    console.error('doSubmit error:',e);
     toast('Error: '+e.message,'err');
     btn.innerHTML='✓ Submit Delivery';btn.disabled=false;
   }
@@ -599,16 +959,19 @@ function viewHistory(){
   if(!activeCust)return;
   var cid=activeCust.customerId||activeCust.id;
   document.getElementById('histTitle').textContent=activeCust.name+' – History';
-  document.getElementById('histBody').innerHTML='<div class="spin"></div>';
+  document.getElementById('histBody').innerHTML='<div class="spin" style="margin:20px auto"></div>';
   openM('histModal');
-  // Query only by customerId to avoid needing a composite index
-  db.collection('deliveries').where('customerId','==',cid).orderBy('date','desc').limit(30).get()
+  db.collection('deliveries').where('customerId','==',cid).get()
     .then(function(snap){
       var el=document.getElementById('histBody');
       if(snap.empty){el.innerHTML='<div class="empty"><div class="ei">📦</div><p>No deliveries yet</p></div>';return;}
-      el.innerHTML=snap.docs.map(function(doc){
-        var d=doc.data();
-        return'<div class="hi"><div class="r"><span class="dt">'+d.date+'</span><span class="qty">'+(d.deliveredQty||0)+'L</span></div><div class="sb">'+(d.time||'')+' • '+(d.staffName||'Staff')+'</div></div>';
+      var docs=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+      docs.sort(function(a,b){return b.date.localeCompare(a.date)||((b.time||'').localeCompare(a.time||''));});
+      el.innerHTML=docs.map(function(d){
+        return'<div class="hi">'+
+          '<div class="r"><span class="dt">'+d.date+(d.shift?' <span class="shift-tag '+d.shift+'">'+(d.shift==='morning'?'☀️ AM':'🌙 PM')+'</span>':'')+'</span><span class="qty">'+(d.deliveredQty||0)+'L'+(d.isExtra?' <span style="color:#a78bfa;font-size:.65rem">+extra</span>':'')+'</span></div>'+
+          '<div class="sb">'+(d.time||'')+(d.staffName?' • '+d.staffName:'')+'</div>'+
+        '</div>';
       }).join('');
     }).catch(function(e){
       document.getElementById('histBody').innerHTML='<div class="empty"><div class="ei">⚠️</div><p>Error: '+e.message+'</p></div>';
@@ -620,12 +983,16 @@ function viewQR(){
   document.getElementById('qrTitle').textContent=activeCust.name;
   var el=document.getElementById('qrDisp');el.innerHTML='';
   if(activeCust.qrData){
-    var d=document.createElement('div');el.appendChild(d);
+    var d=document.createElement('div');
+    d.style.cssText='background:#fff;padding:10px;border-radius:12px;display:inline-block';
+    el.appendChild(d);
     renderQR(activeCust.qrData,d,180);
     var inf=document.createElement('div');
-    inf.style.cssText='font-size:.78rem;color:var(--txt2);margin-top:6px';
-    inf.textContent='ID: '+(activeCust.customerId||'');
+    inf.style.cssText='font-size:.78rem;color:var(--txt2);margin-top:8px;text-align:center';
+    inf.innerHTML='<strong>'+esc(activeCust.name)+'</strong><br>'+esc(activeCust.customerId||'')+'<br><span style="font-size:.7rem">📱 '+(activeCust.mobile||'—')+'</span>';
     el.appendChild(inf);
+  }else{
+    el.innerHTML='<div class="empty"><div class="ei">❌</div><p>No QR data for this customer</p></div>';
   }
   var ft=document.getElementById('qrFt');ft.innerHTML='';
   var cb=document.createElement('button');cb.className='btn bgh';cb.textContent='Close';cb.onclick=function(){closeM('qrModal');};
@@ -635,50 +1002,141 @@ function viewQR(){
   ft.appendChild(cb);ft.appendChild(db2);
   openM('qrModal');
 }
+
+// Close suggestions when clicking outside
 document.addEventListener('click',function(e){
-  if(!document.getElementById('mainSearch').contains(e.target)&&!document.getElementById('suggs').contains(e.target))
-    document.getElementById('suggs').classList.remove('show');
+  var ms=document.getElementById('mainSearch');var su=document.getElementById('suggs');
+  if(ms&&su&&!ms.contains(e.target)&&!su.contains(e.target))su.classList.remove('show');
 });
+
 document.getElementById('mainSearch').addEventListener('focus',function(){
   if(this.value.length>1)return;
   if(!recentSearches.length)return;
   var el=document.getElementById('suggs');
-  el.innerHTML='<div class="slbl">Recent</div>'+recentSearches.slice(0,5).map(function(s){return'<div class="si2" onclick="selectCust(\''+esc(s.customerId||'')+'\')"><span>🕐</span><div class="inf"><div class="nm">'+(s.query||s.customerId||'')+'</div></div></div>';}).join('');
+  el.innerHTML='<div class="slbl">Recent</div>'+recentSearches.slice(0,5).map(function(s){
+    return'<div class="si2" onclick="selectCust(\''+esc(s.customerId||'')+'\')"><span>🕐</span><div class="inf"><div class="nm">'+(s.query||s.customerId||'')+'</div></div></div>';
+  }).join('');
   el.classList.add('show');
 });
 
-// ══════════════════════════════════════════════════════
-//  LIVE QR SCANNER using ZXing
-// ══════════════════════════════════════════════════════
-var _scanStream=null;
-var _scanAnimId=null;
-var _scanActive=false;
-var _scanCooldown=false;
-var _facingMode='environment'; // rear camera default
-var _jsQrWorker=null;
+// ─── HISTORY PAGE ────────────────────────────────────────────
+function setHistRange(r){
+  var today=new Date().toISOString().slice(0,10);
+  var from=today,to=today;
+  if(r==='week'){var d=new Date();d.setDate(d.getDate()-6);from=d.toISOString().slice(0,10);}
+  else if(r==='month'){var d2=new Date();d2.setDate(1);from=d2.toISOString().slice(0,10);}
+  document.getElementById('hFrom').value=from;
+  document.getElementById('hTo').value=to;
+  loadHistory();
+}
+
+async function loadHistory(){
+  var el=document.getElementById('histList');
+  el.innerHTML='<div style="text-align:center;padding:30px"><div class="spin" style="margin:0 auto"></div></div>';
+  var today=new Date().toISOString().slice(0,10);
+  var hf=document.getElementById('hFrom').value||today;
+  var ht=document.getElementById('hTo').value||today;
+  // Ensure valid range: if both empty, show today only
+  if(!hf)hf=today;
+  if(!ht)ht=today;
+  if(hf>ht){toast('From date must be before To date','err');el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>Invalid date range</p></div>';return;}
+  try{
+    var snap=await db.collection('deliveries')
+      .where('staffId','==',CU.uid)
+      .where('date','>=',hf)
+      .where('date','<=',ht)
+      .get();
+    var dels=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+    dels.sort(function(a,b){return b.date.localeCompare(a.date)||((b.time||'').localeCompare(a.time||''));});
+    if(!dels.length){
+      el.innerHTML='<div class="empty"><div class="ei">📦</div><p>No deliveries between '+hf+' and '+ht+'</p></div>';
+      return;
+    }
+    var tot=dels.reduce(function(s,d){return s+(d.deliveredQty||0);},0);
+    var morn=dels.filter(function(d){return d.shift==='morning';}).length;
+    var eve=dels.filter(function(d){return d.shift==='evening';}).length;
+    el.innerHTML=
+      '<div class="hist-summary">'+
+        '<div><div class="hv">'+dels.length+'</div><div class="hl">Deliveries</div></div>'+
+        '<div><div class="hv" style="color:var(--acc)">'+tot.toFixed(1)+'L</div><div class="hl">Total Milk</div></div>'+
+        '<div><div class="hv" style="color:var(--morning)">'+morn+'</div><div class="hl">Morning</div></div>'+
+        '<div><div class="hv" style="color:var(--pur)">'+eve+'</div><div class="hl">Evening</div></div>'+
+      '</div>'+
+      dels.map(function(d){
+        return'<div class="hi">'+
+          '<div class="r">'+
+            '<span class="dt">'+d.date+(d.shift?' <span class="shift-tag '+d.shift+'">'+(d.shift==='morning'?'☀️ AM':'🌙 PM')+'</span>':'')+'</span>'+
+            '<span class="qty">'+(d.deliveredQty||0)+'L</span>'+
+          '</div>'+
+          '<div class="sb">'+(d.customerName||d.customerId||'')+(d.time?' • '+d.time:'')+(d.isExtra?' <span style="color:#a78bfa">+extra</span>':'')+'</div>'+
+        '</div>';
+      }).join('');
+  }catch(e){
+    console.error('History error:',e);
+    if(e.code==='failed-precondition'||e.message.includes('index')){
+      // Fallback without composite index
+      try{
+        var snap2=await db.collection('deliveries').where('staffId','==',CU.uid).get();
+        var dels2=snap2.docs.map(function(d){return Object.assign({id:d.id},d.data());})
+          .filter(function(d){return d.date>=hf&&d.date<=ht;});
+        dels2.sort(function(a,b){return b.date.localeCompare(a.date);});
+        if(!dels2.length){el.innerHTML='<div class="empty"><div class="ei">📦</div><p>No deliveries in this range</p></div>';return;}
+        var tot2=dels2.reduce(function(s,d){return s+(d.deliveredQty||0);},0);
+        el.innerHTML='<div class="hist-summary"><div><div class="hv">'+dels2.length+'</div><div class="hl">Deliveries</div></div><div><div class="hv" style="color:var(--acc)">'+tot2.toFixed(1)+'L</div><div class="hl">Total Milk</div></div></div>'+
+          dels2.map(function(d){return'<div class="hi"><div class="r"><span class="dt">'+d.date+'</span><span class="qty">'+(d.deliveredQty||0)+'L</span></div><div class="sb">'+(d.customerName||d.customerId||'')+'</div></div>';}).join('');
+      }catch(e2){el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>Error: '+e2.message+'</p></div>';}
+    }else{
+      el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>Error: '+e.message+'</p></div>';
+    }
+  }
+}
+
+// ─── SETTINGS PAGE ────────────────────────────────────────────
+async function loadSettingsPage(){
+  try{
+    var snap=await db.collection('deliveries').where('staffId','==',CU.uid).get();
+    var dels=snap.docs.map(function(d){return d.data();});
+    var tot=dels.reduce(function(s,d){return s+(d.deliveredQty||0);},0);
+    var today=new Date().toISOString().slice(0,10);
+    var todayCount=dels.filter(function(d){return d.date===today;}).length;
+    document.getElementById('settStats').innerHTML=
+      '<div style="text-align:center"><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:800">'+dels.length+'</div><div style="font-size:.65rem;color:var(--txt2);margin-top:2px">All Del.</div></div>'+
+      '<div style="text-align:center"><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:800;color:var(--acc)">'+tot.toFixed(1)+'L</div><div style="font-size:.65rem;color:var(--txt2);margin-top:2px">Milk Served</div></div>'+
+      '<div style="text-align:center"><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:800;color:var(--grn)">'+todayCount+'</div><div style="font-size:.65rem;color:var(--txt2);margin-top:2px">Today</div></div>';
+  }catch(e){console.warn('Settings stats:',e);}
+}
+
+async function changePwd(){
+  var p=document.getElementById('newPwd').value,c=document.getElementById('confPwd').value;
+  if(!p||p.length<6){toast('Min 6 characters','err');return;}
+  if(p!==c){toast('Passwords do not match','err');return;}
+  try{
+    await CU.updatePassword(p);
+    toast('Password updated ✓');
+    document.getElementById('newPwd').value='';
+    document.getElementById('confPwd').value='';
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+function clearCache(){['customers','settings'].forEach(function(k){CACHE.del(k);});toast('Cache cleared','inf');}
+
+// ─── LIVE QR SCANNER ─────────────────────────────────────────
+var _scanStream=null, _scanAnimId=null, _scanActive=false;
+var _facingMode='environment', _lastScannedRaw='', _lastScanTime=0;
 
 function setScanStatus(msg,type){
-  var e=document.getElementById('scanStatusBar');
-  if(!e)return;
-  e.textContent=msg;
-  e.className=type||'sc';
+  var e=document.getElementById('scanStatusBar');if(!e)return;
+  e.textContent=msg;e.className=type||'sc';
 }
 
 async function startLiveScanner(){
-  if(_scanActive) return;
+  if(_scanActive)return;
   setScanStatus('📷 Starting camera…','sc');
+  document.getElementById('btnStartCam').classList.add('active');
   try{
-    // Stop any existing stream
-    if(_scanStream){_scanStream.getTracks().forEach(t=>t.stop());_scanStream=null;}
-
-    var constraints={
-      video:{
-        facingMode:_facingMode,
-        width:{ideal:1280},
-        height:{ideal:720}
-      }
-    };
-    _scanStream=await navigator.mediaDevices.getUserMedia(constraints);
+    if(_scanStream){_scanStream.getTracks().forEach(function(t){t.stop();});_scanStream=null;}
+    _scanStream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:_facingMode,width:{ideal:1280},height:{ideal:720}}
+    });
     var vid=document.getElementById('scanVideo');
     vid.srcObject=_scanStream;
     await vid.play();
@@ -686,32 +1144,30 @@ async function startLiveScanner(){
     setScanStatus('📷 Scanning… point at QR code','sc');
     document.getElementById('btnStartCam').classList.add('active');
     document.getElementById('btnStopCam').classList.remove('active');
-    // Start decode loop
     _decodeTick();
   }catch(e){
-    console.error('Camera error:',e);
     var msg='⚠️ Camera error: '+e.message;
-    if(e.name==='NotAllowedError') msg='❌ Camera permission denied – please allow camera access';
-    else if(e.name==='NotFoundError') msg='❌ No camera found on this device';
+    if(e.name==='NotAllowedError')msg='❌ Camera permission denied – allow in browser settings';
+    else if(e.name==='NotFoundError')msg='❌ No camera found on this device';
     setScanStatus(msg,'err');
     _scanActive=false;
+    document.getElementById('btnStartCam').classList.remove('active');
   }
 }
 
 function stopLiveScanner(){
   _scanActive=false;
   if(_scanAnimId){cancelAnimationFrame(_scanAnimId);_scanAnimId=null;}
-  if(_scanStream){_scanStream.getTracks().forEach(t=>t.stop());_scanStream=null;}
-  var vid=document.getElementById('scanVideo');
-  if(vid){vid.srcObject=null;}
+  if(_scanStream){_scanStream.getTracks().forEach(function(t){t.stop();});_scanStream=null;}
+  var vid=document.getElementById('scanVideo');if(vid)vid.srcObject=null;
   document.getElementById('btnStartCam').classList.remove('active');
-  setScanStatus('📷 Camera stopped','inf');
+  setScanStatus('📷 Camera stopped – tap Start','inf');
 }
 
 async function flipCamera(){
-  _facingMode=(_facingMode==='environment')?'user':'environment';
+  _facingMode=(_facingMode==='environment'?'user':'environment');
   stopLiveScanner();
-  await new Promise(r=>setTimeout(r,300));
+  await new Promise(function(r){setTimeout(r,300);});
   startLiveScanner();
 }
 
@@ -720,132 +1176,65 @@ function _decodeTick(){
   var vid=document.getElementById('scanVideo');
   var cv=document.getElementById('scanCanvas');
   if(!vid||!cv||vid.readyState<2){
-    _scanAnimId=requestAnimationFrame(_decodeTick);
-    return;
+    _scanAnimId=requestAnimationFrame(_decodeTick);return;
   }
-  cv.width=vid.videoWidth;
-  cv.height=vid.videoHeight;
+  cv.width=vid.videoWidth;cv.height=vid.videoHeight;
   var ctx=cv.getContext('2d',{willReadFrequently:true});
   ctx.drawImage(vid,0,0,cv.width,cv.height);
-
-  // Try ZXing first (more robust)
-  _tryZXing(cv, ctx, vid);
+  _tryDecode(cv,ctx);
 }
 
-function _tryZXing(cv, ctx, vid){
-  try{
-    if(window.ZXing){
-      var hints=new Map();
-      var formats=[window.ZXing.BarcodeFormat.QR_CODE];
-      hints.set(window.ZXing.DecodeHintType.POSSIBLE_FORMATS,formats);
-      hints.set(window.ZXing.DecodeHintType.TRY_HARDER,true);
-      var reader=new window.ZXing.BrowserQRCodeReader();
-
-      // Use imageData
-      var imageData=ctx.getImageData(0,0,cv.width,cv.height);
+function _tryDecode(cv,ctx){
+  // Try ZXing
+  if(window.ZXing){
+    try{
       var luminance=new window.ZXing.HTMLCanvasElementLuminanceSource(cv);
       var binary=new window.ZXing.HybridBinarizer(luminance);
-      var binaryBitmap=new window.ZXing.BinaryBitmap(binary);
-      try{
-        var result=new window.ZXing.QRCodeReader().decode(binaryBitmap);
-        if(result&&result.text){
-          _onQRDetected(result.text);
-          return;
-        }
-      }catch(ex){}
-    }
-  }catch(ex){}
-
-  // Fallback: try jsQR if available
-  _tryJsQR(cv, ctx, vid);
-}
-
-function _tryJsQR(cv, ctx, vid){
-  try{
-    if(window.jsQR){
-      var imageData=ctx.getImageData(0,0,cv.width,cv.height);
-      var code=window.jsQR(imageData.data,imageData.width,imageData.height,{inversionAttempts:'attemptBoth'});
-      if(code&&code.data){
-        _onQRDetected(code.data);
-        return;
-      }
-    }
-  }catch(ex){}
-
+      var bmp=new window.ZXing.BinaryBitmap(binary);
+      var result=new window.ZXing.QRCodeReader().decode(bmp);
+      if(result&&result.text){_onQRDetected(result.text);return;}
+    }catch(ex){}
+  }
   // Schedule next frame
-  if(_scanActive){
-    _scanAnimId=requestAnimationFrame(_decodeTick);
-  }
+  if(_scanActive)_scanAnimId=requestAnimationFrame(_decodeTick);
 }
 
-// ── QR DATA VALIDATOR (robust) ──
-function validateQRData(raw){
-  if(!raw||typeof raw!=='string')return null;
-  var PREFIX='AMINAMILK://';
-  var TOKEN='AMINA_MILK_SECURE_v1_2025';
-
-  // Normalize: trim whitespace
-  raw=raw.trim();
-
-  if(!raw.startsWith(PREFIX))return null;
-
-  var b64=raw.slice(PREFIX.length);
-  // Fix URL-safe base64 and padding
-  b64=b64.replace(/-/g,'+').replace(/_/g,'/');
-  while(b64.length%4!==0)b64+='=';
-
-  try{
-    var binary=atob(b64);
-    var jsonStr;
-    // Try UTF-8 decode
-    try{
-      var bytes=new Uint8Array(binary.length);
-      for(var i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
-      jsonStr=new TextDecoder('utf-8').decode(bytes);
-    }catch(e){
-      jsonStr=decodeURIComponent(escape(binary));
-    }
-    var parsed=JSON.parse(jsonStr);
-    if(parsed&&parsed.t===TOKEN&&parsed.id){
-      return parsed.id;
-    }
-    return null;
-  }catch(e){
-    console.warn('QR parse error:',e.message,'raw:',raw.slice(0,80));
-    return null;
-  }
-}
-
-var _lastScannedCid='';
-var _lastScanTime=0;
-
-function _onQRDetected(rawData){
+function _onQRDetected(raw){
   var now=Date.now();
-  // Cooldown: ignore same QR for 3 seconds
-  if(now-_lastScanTime<3000&&rawData===_lastScannedCid){
-    if(_scanActive) _scanAnimId=requestAnimationFrame(_decodeTick);
-    return;
+  if(now-_lastScanTime<3000&&raw===_lastScannedRaw){
+    if(_scanActive)_scanAnimId=requestAnimationFrame(_decodeTick);return;
   }
-
-  var cid=validateQRData(rawData);
+  var cid=validateQR(raw);
   if(!cid){
-    // Not our QR, keep scanning
-    if(_scanActive) _scanAnimId=requestAnimationFrame(_decodeTick);
-    return;
+    if(_scanActive)_scanAnimId=requestAnimationFrame(_decodeTick);return;
   }
-
-  _lastScannedCid=rawData;
-  _lastScanTime=now;
-
+  _lastScannedRaw=raw;_lastScanTime=now;
   if(navigator.vibrate)navigator.vibrate([80,40,80]);
   setScanStatus('✅ QR scanned! Loading customer…','ok');
-
-  // Pause scanning briefly
   _scanActive=false;
-  fetchAndShowScanResult(cid);
+  fetchAndShowScanResult(cid,false);
 }
 
-// ── MANUAL LOOKUP ──
+function validateQR(raw){
+  if(!raw||typeof raw!=='string')return null;
+  raw=raw.trim();
+  var PREFIX='AMINAMILK://';
+  if(!raw.startsWith(PREFIX))return null;
+  var b64=raw.slice(PREFIX.length).replace(/-/g,'+').replace(/_/g,'/');
+  while(b64.length%4)b64+='=';
+  try{
+    var bin=atob(b64);
+    var jsonStr;
+    try{
+      var bytes=new Uint8Array(bin.length);
+      for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+      jsonStr=new TextDecoder('utf-8').decode(bytes);
+    }catch(e){jsonStr=decodeURIComponent(escape(bin));}
+    var p=JSON.parse(jsonStr);
+    return(p&&p.t==='AMINA_MILK_SECURE_v1_2025'&&p.id)?p.id:null;
+  }catch(e){return null;}
+}
+
 async function doManualLookup(){
   var raw=(document.getElementById('manualIdInp').value||'').trim().toUpperCase();
   if(!raw){toast('Enter a customer ID or mobile number','err');return;}
@@ -853,107 +1242,96 @@ async function doManualLookup(){
   await fetchAndShowScanResult(raw,true);
 }
 
-// ── UNIFIED FETCH + SHOW ──
 async function fetchAndShowScanResult(cid,isManual){
   try{
-    // 1. In-memory cache
     var cust=CUSTS.find(function(c){return(c.customerId||c.id)===cid||c.mobile===cid;});
-
     if(!cust){
-      // 2. Direct doc ID lookup
-      try{
-        var d=await db.collection('customers').doc(cid).get();
-        if(d.exists)cust=Object.assign({id:d.id},d.data());
-      }catch(e){}
+      try{var d=await db.collection('customers').doc(cid).get();if(d.exists)cust=Object.assign({id:d.id},d.data());}catch(e){}
     }
-
     if(!cust){
-      // 3. Query by customerId field
-      try{
-        var q=await db.collection('customers').where('customerId','==',cid).where('active','==',true).limit(1).get();
-        if(!q.empty)cust=Object.assign({id:q.docs[0].id},q.docs[0].data());
-      }catch(e){}
+      try{var q=await db.collection('customers').where('customerId','==',cid).where('active','==',true).limit(1).get();if(!q.empty)cust=Object.assign({id:q.docs[0].id},q.docs[0].data());}catch(e){}
     }
-
     if(!cust&&isManual){
-      // 4. Search by mobile
-      try{
-        var qm=await db.collection('customers').where('mobile','==',cid).where('active','==',true).limit(1).get();
-        if(!qm.empty)cust=Object.assign({id:qm.docs[0].id},qm.docs[0].data());
-      }catch(e){}
+      try{var qm=await db.collection('customers').where('mobile','==',cid).where('active','==',true).limit(1).get();if(!qm.empty)cust=Object.assign({id:qm.docs[0].id},qm.docs[0].data());}catch(e){}
     }
-
     if(!cust){
       setScanStatus('⚠️ Customer not found: '+cid,'err');
-      // Resume scanning
-      setTimeout(function(){
-        setScanStatus('📷 Scanning… point at QR code','sc');
-        _scanActive=true;
-        _decodeTick();
-      },3000);
+      setTimeout(function(){setScanStatus('📷 Scanning… point at QR code','sc');_scanActive=true;_decodeTick();},3000);
       return;
     }
-
-    // Add to local cache if missing
-    if(!CUSTS.find(function(c){return(c.customerId||c.id)===(cust.customerId||cust.id);})){
-      CUSTS.push(cust);
-    }
-
+    if(!CUSTS.find(function(c){return(c.customerId||c.id)===(cust.customerId||cust.id);}))CUSTS.push(cust);
     showScanResult(cust);
-    setScanStatus('✅ '+cust.name+' – choose quantity and submit','ok');
-
+    setScanStatus('✅ '+cust.name+' found – select quantity','ok');
   }catch(e){
     console.error('fetchAndShowScanResult:',e);
     setScanStatus('⚠️ Network error – check connection','err');
-    setTimeout(function(){
-      setScanStatus('📷 Scanning… point at QR code','sc');
-      _scanActive=true;
-      _decodeTick();
-    },3000);
+    setTimeout(function(){setScanStatus('📷 Scanning…','sc');_scanActive=true;_decodeTick();},3000);
   }
 }
 
-// ── SCAN RESULT CARD ──
-var _scanQty=1;
+var _scanQty=1, _scanForceAdd=false;
 function showScanResult(cust){
   var cid=cust.customerId||cust.id;
-  var done=todayIds.has(cid);
+  var shiftDels=todayShiftDeliveries[cid]||[];
+  var done=shiftDels.length>0;
   var dq=parseFloat(cust.defaultQty)||1;
-  _scanQty=dq;
+  _scanQty=dq;_scanForceAdd=false;
   window._sc=cust;
-
   var presets=[.25,.5,1,1.5,2];
   var pi=presets.indexOf(dq);
   var presetsHtml=presets.map(function(v,i){
     return'<div class="qbtn'+(i===pi?' active':'')+'" onclick="setSQ('+v+',this)">'+fmtQ(v)+'</div>';
-  }).join('');
-  presetsHtml+='<div class="qbtn" onclick="setSQ(-1,this)">Custom</div>';
+  }).join('')+'<div class="qbtn" onclick="setSQ(-1,this)">Custom</div>';
 
   var res=document.getElementById('scanResult');
   res.style.display='block';
   res.innerHTML=
-    '<div class="srcHead"><div>'+
-      '<div class="nm">'+esc(cust.name)+'</div>'+
-      '<div class="cid">'+cid+'</div>'+
-      '<div class="m">📱 '+(cust.mobile||'—')+'</div>'+
-      '<div class="m">📍 '+(cust.address||'—')+'</div>'+
+    '<div class="srcHead">'+
+      '<div>'+
+        '<div class="nm">'+esc(cust.name)+'</div>'+
+        '<div class="cid">'+cid+'</div>'+
+        '<div class="m">📱 '+(cust.mobile||'—')+'</div>'+
+        '<div class="m">📍 '+(cust.address||'—')+'</div>'+
+        (cust.notes&&cust.notes!=='n'?'<div class="m" style="color:var(--acc)">📝 '+esc(cust.notes)+'</div>':'')+
+        '<div class="m" style="margin-top:4px"><span class="shift-tag '+currentShift+'">'+(currentShift==='morning'?'☀️ Morning':'🌙 Evening')+'</span></div>'+
+      '</div>'+
+      '<span class="sbadge '+(done?'done':'pend')+'">'+(done?'✓ Done':'⏳ Pending')+'</span>'+
     '</div>'+
-    '<span class="sbadge '+(done?'done':'pend')+'">'+(done?'✓ Done':'⏳ Pending')+'</span></div>'+
-
+    (done?'<div class="dupwarn" id="scanDupWarn">⚠️ Already delivered this '+currentShift+' ('+shiftDels.length+'x). Submit to update, or tap Extra for a new record.</div>':'')+
+    '<div id="scanExtraWarn" class="extrawarn" style="display:none">➕ Force-add new delivery (separate record)</div>'+
     '<div class="card" style="margin-bottom:10px">'+
-      (done?'<div class="dupwarn">⚠️ Already delivered today – submit to update</div>':'')+
-      '<div style="font-size:.75rem;color:var(--txt2);margin-bottom:8px;font-weight:600">SELECT QUANTITY</div>'+
+      '<div class="qty-label">Select Quantity</div>'+
       '<div class="qpresets" id="sqPresets">'+presetsHtml+'</div>'+
-      '<input class="custinp" id="sqCustom" type="number" min="0.1" step="0.25" placeholder="Enter litres…" '+
-        'oninput="_scanQty=parseFloat(this.value)||0;document.getElementById(\'sqDisp\').textContent=_scanQty>0?fmtQ(_scanQty):\'— L\'">'+
+      '<input class="custinp" id="sqCustom" type="number" min="0.1" step="0.25" placeholder="Enter litres…"'+
+        ' oninput="_scanQty=parseFloat(this.value)||0;document.getElementById(\'sqDisp\').textContent=_scanQty>0?fmtQ(_scanQty):\'— L\'">'+
       '<div class="selqty" id="sqDisp">'+fmtQ(dq)+'</div>'+
+      (done?'<div style="display:flex;gap:7px;margin-bottom:8px">'+
+        '<button class="btn bsm bgh" style="flex:1" id="sqExtraBtn" onclick="toggleScanForceAdd()">➕ Extra Delivery</button>'+
+      '</div>':'')+
       '<button class="sbtn '+(done?'bacc':'bgrn')+'" id="sqBtn" onclick="submitScanDel(\''+esc(cid)+'\',\''+esc(cust.name)+'\')">'+
-        '✓ Submit Delivery</button>'+
+        (done?'↺ Update Delivery':'✓ Submit Delivery')+'</button>'+
     '</div>'+
-
     '<button class="btn bgh" style="width:100%;margin-bottom:10px" onclick="resumeScanning()">📷 Scan Another</button>';
-
   res.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function toggleScanForceAdd(){
+  _scanForceAdd=!_scanForceAdd;
+  var ew=document.getElementById('scanExtraWarn');
+  var dw=document.getElementById('scanDupWarn');
+  var eb=document.getElementById('sqExtraBtn');
+  var sb=document.getElementById('sqBtn');
+  if(_scanForceAdd){
+    if(ew)ew.style.display='flex';
+    if(dw)dw.style.display='none';
+    if(eb)eb.textContent='✕ Cancel Extra';
+    if(sb){sb.style.background='var(--pur)';sb.style.color='#fff';sb.innerHTML='➕ Add Extra';}
+  }else{
+    if(ew)ew.style.display='none';
+    if(dw)dw.style.display='flex';
+    if(eb)eb.textContent='➕ Extra Delivery';
+    if(sb){sb.style.background='linear-gradient(135deg,var(--acc),#f97316)';sb.style.color='#000';sb.innerHTML='↺ Update Delivery';}
+  }
 }
 
 function setSQ(v,btn){
@@ -961,8 +1339,7 @@ function setSQ(v,btn){
   btn.classList.add('active');
   var ci=document.getElementById('sqCustom');
   if(v===-1){ci.style.display='block';ci.focus();return;}
-  ci.style.display='none';
-  _scanQty=v;
+  ci.style.display='none';_scanQty=v;
   document.getElementById('sqDisp').textContent=fmtQ(v);
 }
 
@@ -970,11 +1347,9 @@ function resumeScanning(){
   document.getElementById('scanResult').style.display='none';
   document.getElementById('scanResult').innerHTML='';
   document.getElementById('manualIdInp').value='';
-  _lastScannedCid='';
-  _lastScanTime=0;
+  _lastScannedRaw='';_lastScanTime=0;_scanForceAdd=false;
   setScanStatus('📷 Scanning… point at QR code','sc');
-  _scanActive=true;
-  _decodeTick();
+  _scanActive=true;_decodeTick();
 }
 
 async function submitScanDel(cid,custName){
@@ -982,22 +1357,27 @@ async function submitScanDel(cid,custName){
   if(!_scanQty||_scanQty<=0){toast('Select a quantity first','err');return;}
   btn.innerHTML='⏳ Submitting…';btn.disabled=true;
   var c=window._sc||{};
-  var sd=await db.collection('users').doc(CU.uid).get();
-  var sName=sd.exists?sd.data().name:CU.email;
-
   try{
-    var existing=await getTodayDeliveryForCustomer(cid);
-    if(existing){
-      await updateDelivery(existing.id,{deliveredQty:_scanQty,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
-      toast('Updated: '+fmtQ(_scanQty)+' → '+custName+' ✓');
-    } else {
-      var d={customerId:cid,customerName:custName,customerAddress:c.address||'',staffId:CU.uid,staffName:sName,deliveredQty:_scanQty,normalQty:parseFloat(c.defaultQty)||1,extraQty:0,mode:'scan',status:'delivered'};
+    var sd=await db.collection('users').doc(CU.uid).get();
+    var sName=sd.exists?sd.data().name:CU.email;
+    var shiftDels=todayShiftDeliveries[cid]||[];
+    var done=shiftDels.length>0;
+    if(_scanForceAdd){
+      // New extra record
+      var d={customerId:cid,customerName:custName,customerAddress:c.address||'',staffId:CU.uid,staffName:sName,deliveredQty:_scanQty,normalQty:parseFloat(c.defaultQty)||1,extraQty:_scanQty,mode:'scan',status:'delivered',shift:currentShift,isExtra:true};
       await submitDelivery(d);
-      todayIds.add(cid);
+      toast('➕ Extra '+fmtQ(_scanQty)+' → '+custName+' ✓');
+    }else if(done){
+      var latest=shiftDels[shiftDels.length-1];
+      await updateDelivery(latest.id,{deliveredQty:_scanQty,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+      toast('Updated: '+fmtQ(_scanQty)+' → '+custName+' ✓');
+    }else{
+      var d2={customerId:cid,customerName:custName,customerAddress:c.address||'',staffId:CU.uid,staffName:sName,deliveredQty:_scanQty,normalQty:parseFloat(c.defaultQty)||1,extraQty:0,mode:'scan',status:'delivered',shift:currentShift,isExtra:false};
+      await submitDelivery(d2);
       toast(fmtQ(_scanQty)+' → '+custName+' ✓');
     }
     btn.innerHTML='✅ Done!';btn.style.background='var(--grn)';btn.style.color='#fff';
-    refreshHomeStats();
+    await refreshHomeStats();
     setScanStatus('✅ Delivered! Tap "Scan Another" for next customer','ok');
     setTimeout(function(){btn.innerHTML='✓ Submit';btn.disabled=false;},2500);
   }catch(e){
@@ -1007,94 +1387,7 @@ async function submitScanDel(cid,custName){
   }
 }
 
-// ── HISTORY PAGE ──
-async function loadHistory(){
-  var el=document.getElementById('histList');
-  el.innerHTML='<div class="spin"></div>';
-
-  try{
-    var today=new Date().toISOString().slice(0,10);
-    var hf=document.getElementById('hFrom').value||today;
-    var ht=document.getElementById('hTo').value||today;
-
-    // Simple query: just by staffId + date range
-    // Using two separate queries to avoid needing composite index
-    var snap=await db.collection('deliveries')
-      .where('staffId','==',CU.uid)
-      .where('date','>=',hf)
-      .where('date','<=',ht)
-      .get();
-
-    if(snap.empty){
-      el.innerHTML='<div class="empty"><div class="ei">📦</div><p>No deliveries in this range</p></div>';
-      return;
-    }
-
-    var dels=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
-    dels.sort(function(a,b){return b.date.localeCompare(a.date)||((b.time||'').localeCompare(a.time||''));});
-
-    var tot=dels.reduce(function(s,d){return s+(d.deliveredQty||0);},0);
-    el.innerHTML=
-      '<div class="card" style="display:flex;gap:16px;justify-content:center;text-align:center;margin-bottom:10px">'+
-        '<div><div style="font-family:\'Syne\',sans-serif;font-size:1.5rem;font-weight:800">'+dels.length+'</div><div style="font-size:.68rem;color:var(--txt2)">Deliveries</div></div>'+
-        '<div><div style="font-family:\'Syne\',sans-serif;font-size:1.5rem;font-weight:800;color:var(--acc)">'+tot+'L</div><div style="font-size:.68rem;color:var(--txt2)">Total Milk</div></div>'+
-      '</div>'+
-      dels.map(function(d){
-        return'<div class="hi">'+
-          '<div class="r"><span class="dt">'+d.date+(d.time?' '+d.time:'')+'</span><span class="qty">'+(d.deliveredQty||0)+'L</span></div>'+
-          '<div class="sb">'+(d.customerName||d.customerId)+'</div>'+
-        '</div>';
-      }).join('');
-  }catch(e){
-    console.error('History error:',e);
-    // If composite index error, try simpler query
-    if(e.code==='failed-precondition'||e.message.includes('index')){
-      el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>Index not ready. Showing all your deliveries.</p></div>';
-      // Fallback: just get all deliveries by staffId
-      try{
-        var snap2=await db.collection('deliveries').where('staffId','==',CU.uid).get();
-        var dels2=snap2.docs.map(function(d){return Object.assign({id:d.id},d.data());});
-        dels2.sort(function(a,b){return b.date.localeCompare(a.date);});
-        if(!dels2.length){el.innerHTML='<div class="empty"><div class="ei">📦</div><p>No deliveries yet</p></div>';return;}
-        el.innerHTML=dels2.map(function(d){
-          return'<div class="hi">'+
-            '<div class="r"><span class="dt">'+d.date+'</span><span class="qty">'+(d.deliveredQty||0)+'L</span></div>'+
-            '<div class="sb">'+(d.customerName||d.customerId)+'</div>'+
-          '</div>';
-        }).join('');
-      }catch(e2){el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>'+e2.message+'</p></div>';}
-    } else {
-      el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>Error: '+e.message+'</p></div>';
-    }
-  }
-}
-
-// ── SETTINGS ──
-async function loadSettingsPage(){
-  try{
-    // Simple query without composite index
-    var snap=await db.collection('deliveries').where('staffId','==',CU.uid).get();
-    var dels=snap.docs.map(function(d){return d.data();});
-    var tot=dels.reduce(function(s,d){return s+(d.deliveredQty||0);},0);
-    var today=new Date().toISOString().slice(0,10);
-    var todayCount=dels.filter(function(d){return d.date===today;}).length;
-    document.getElementById('settStats').innerHTML=
-      '<div style="text-align:center"><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:800">'+dels.length+'</div><div style="font-size:.65rem;color:var(--txt2)">Total Del.</div></div>'+
-      '<div style="text-align:center"><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:800;color:var(--acc)">'+tot+'L</div><div style="font-size:.65rem;color:var(--txt2)">Milk Served</div></div>'+
-      '<div style="text-align:center"><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:800;color:var(--grn)">'+todayCount+'</div><div style="font-size:.65rem;color:var(--txt2)">Today</div></div>';
-  }catch(e){console.warn('Settings stats:',e);}
-}
-
-async function changePwd(){
-  var p=document.getElementById('newPwd').value,c=document.getElementById('confPwd').value;
-  if(!p||p.length<6){toast('Min 6 characters','err');return;}
-  if(p!==c){toast('Passwords do not match','err');return;}
-  try{await CU.updatePassword(p);toast('Password updated ✓');document.getElementById('newPwd').value='';document.getElementById('confPwd').value='';}
-  catch(e){toast('Error: '+e.message,'err');}
-}
-function clearCache(){['customers','settings'].forEach(function(k){CACHE.del(k);});toast('Cache cleared','inf');}
-
-// ── UTILS ──
+// ─── UTILS ────────────────────────────────────────────────────
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;').replace(/"/g,'&quot;');}
 </script>
 </body>
