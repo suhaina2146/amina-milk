@@ -28,6 +28,7 @@ h1{font-family:'Syne',sans-serif;color:var(--acc);font-size:1.6rem;text-align:ce
 .ok{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#34d399;padding:14px 16px;border-radius:10px;font-size:.85rem;margin-bottom:12px;display:none;line-height:1.6}
 .spin{width:18px;height:18px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:sp .6s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
+.progress{margin:10px 0;font-size:.78rem;color:var(--txt2);min-height:18px;text-align:center}
 .divider{height:1px;background:var(--bdr2);margin:18px 0}
 .step{display:flex;gap:10px;align-items:flex-start;font-size:.8rem;color:var(--txt2);margin-bottom:8px;line-height:1.5}
 .step .num{background:rgba(245,158,11,.15);color:var(--acc);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;flex-shrink:0;margin-top:1px}
@@ -52,6 +53,7 @@ h1{font-family:'Syne',sans-serif;color:var(--acc);font-size:1.6rem;text-align:ce
   <div class="inpG"><label>Password</label><input class="inp" id="aPwd" type="password" placeholder="Min 6 characters"></div>
   <div class="inpG"><label>Confirm Password</label><input class="inp" id="aPwd2" type="password" placeholder="Repeat password"></div>
 
+  <div class="progress" id="progress"></div>
   <button class="btn" id="btn" onclick="createAdmin()">🚀 Create Admin Account</button>
 
   <div class="divider"></div>
@@ -62,68 +64,114 @@ h1{font-family:'Syne',sans-serif;color:var(--acc);font-size:1.6rem;text-align:ce
 </div>
 
 <script>
+function setProgress(msg){document.getElementById('progress').textContent=msg;}
+function showErr(m){var e=document.getElementById('err');e.textContent=m;e.style.display='block';}
+
+// Helper: write Firestore doc with retries
+async function writeAdminDoc(uid, email, name, retries){
+  retries = retries || 5;
+  var docData = {
+    name: name,
+    email: email,
+    role: 'admin',
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    active: true
+  };
+  for(var i = 0; i < retries; i++){
+    try{
+      await db.collection('users').doc(uid).set(docData, {merge: true});
+      // Verify it was actually written
+      var check = await db.collection('users').doc(uid).get();
+      if(check.exists && check.data().role === 'admin'){
+        return true;
+      }
+    }catch(e){
+      setProgress('Retrying... (' + (i+1) + '/' + retries + ')');
+    }
+    await new Promise(r => setTimeout(r, 800));
+  }
+  return false;
+}
+
 async function createAdmin(){
-  var name=document.getElementById('aName').value.trim();
-  var email=document.getElementById('aEmail').value.trim();
-  var pwd=document.getElementById('aPwd').value;
-  var pwd2=document.getElementById('aPwd2').value;
-  var btn=document.getElementById('btn');
-  var errEl=document.getElementById('err');
-  var okEl=document.getElementById('okMsg');
-  errEl.style.display='none';okEl.style.display='none';
+  var name    = document.getElementById('aName').value.trim();
+  var email   = document.getElementById('aEmail').value.trim();
+  var pwd     = document.getElementById('aPwd').value;
+  var pwd2    = document.getElementById('aPwd2').value;
+  var btn     = document.getElementById('btn');
+  var errEl   = document.getElementById('err');
+  var okEl    = document.getElementById('okMsg');
+  errEl.style.display='none'; okEl.style.display='none';
 
-  if(!name){showErr('Enter your name.');return;}
-  if(!email){showErr('Enter an email address.');return;}
-  if(!pwd||pwd.length<6){showErr('Password must be at least 6 characters.');return;}
-  if(pwd!==pwd2){showErr('Passwords do not match.');return;}
+  if(!name)  {showErr('Enter your name.');return;}
+  if(!email) {showErr('Enter an email address.');return;}
+  if(!pwd || pwd.length < 6){showErr('Password must be at least 6 characters.');return;}
+  if(pwd !== pwd2){showErr('Passwords do not match.');return;}
 
-  btn.innerHTML='<div class="spin"></div> Creating…';btn.disabled=true;
+  btn.innerHTML='<div class="spin"></div> Creating…'; btn.disabled=true;
 
   try{
-    // Check if any admin already exists
-    var existCheck=await db.collection('users').where('role','==','admin').limit(1).get();
+    // 1. Check no admin already exists
+    setProgress('Checking existing accounts…');
+    var existCheck = await db.collection('users').where('role','==','admin').limit(1).get();
     if(!existCheck.empty){
       showErr('An admin account already exists. Use the login page instead.');
-      btn.innerHTML='🚀 Create Admin Account';btn.disabled=false;return;
+      btn.innerHTML='🚀 Create Admin Account'; btn.disabled=false;
+      setProgress(''); return;
     }
 
-    // Create Firebase Auth user
-    var cred=await auth.createUserWithEmailAndPassword(email,pwd);
-    var uid=cred.user.uid;
+    // 2. Create Firebase Auth user
+    setProgress('Creating login credentials…');
+    var cred = await auth.createUserWithEmailAndPassword(email, pwd);
+    var uid  = cred.user.uid;
 
-    // Write admin doc to Firestore
-    await db.collection('users').doc(uid).set({
-      name:name,
-      email:email,
-      role:'admin',
-      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
-      active:true
-    });
+    // 3. Write Firestore document with retries
+    setProgress('Saving admin profile to database…');
+    var written = await writeAdminDoc(uid, email, name);
+    if(!written){
+      // Auth user exists but Firestore failed — still show success with manual instructions
+      okEl.innerHTML = '⚠️ Auth account created (UID: <code>' + uid + '</code>) but database write failed. '
+        + 'Please go to Firestore Console → users → Add document with ID = <code>' + uid + '</code> '
+        + 'and fields: name, email, role="admin", active=true';
+      okEl.style.display='block';
+      btn.innerHTML='🚀 Retry';btn.disabled=false;
+      setProgress('');return;
+    }
 
-    // Bootstrap system settings
-    await bootstrapSystem(uid,'admin');
+    // 4. Bootstrap system collections
+    setProgress('Initialising system settings…');
+    await bootstrapSystem(uid, 'admin');
 
-    okEl.innerHTML='✅ <strong>Admin account created!</strong><br>Email: '+email+'<br><br>⚠️ Please delete <code>setup.html</code> from your server now, then <a href="index.html" style="color:#34d399">sign in here</a>.';
+    // 5. Done
+    setProgress('');
+    okEl.innerHTML = '✅ <strong>Admin account created successfully!</strong><br>'
+      + 'Email: ' + email + '<br><br>'
+      + '⚠️ Please <strong>delete setup.html</strong> from your server now, then '
+      + '<a href="index.html" style="color:#34d399;font-weight:600">click here to sign in →</a>';
     okEl.style.display='block';
-    btn.innerHTML='✓ Done – go to login';
+    btn.innerHTML='→ Go to Login';
     btn.onclick=function(){window.location.href='index.html';};
     btn.disabled=false;
 
   }catch(e){
-    var msg=e.code==='auth/email-already-in-use'
-      ?'This email is already registered. Try logging in at index.html.'
-      :e.code==='auth/invalid-email'
-      ?'Invalid email address.'
-      :e.code==='auth/weak-password'
-      ?'Password is too weak.'
-      :e.message||'Setup failed.';
+    setProgress('');
+    var msg = e.code==='auth/email-already-in-use'
+      ? 'This email is already registered. Try logging in at index.html, or use a different email.'
+      : e.code==='auth/invalid-email'
+      ? 'Invalid email address format.'
+      : e.code==='auth/weak-password'
+      ? 'Password is too weak. Use at least 6 characters.'
+      : e.code==='auth/network-request-failed'
+      ? 'Network error. Check your internet connection and try again.'
+      : e.message || 'Setup failed. Check console for details.';
     showErr(msg);
-    btn.innerHTML='🚀 Create Admin Account';btn.disabled=false;
+    btn.innerHTML='🚀 Create Admin Account'; btn.disabled=false;
   }
 }
 
-function showErr(m){var e=document.getElementById('err');e.textContent=m;e.style.display='block';}
-document.getElementById('aPwd2').addEventListener('keydown',function(e){if(e.key==='Enter')createAdmin();});
+document.getElementById('aPwd2').addEventListener('keydown', function(e){
+  if(e.key==='Enter') createAdmin();
+});
 </script>
 </body>
 </html>
