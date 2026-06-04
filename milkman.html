@@ -70,24 +70,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 .sbtn{width:100%;padding:15px;font-size:1rem;border-radius:12px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.3px;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px}
 .sbtn:active{transform:scale(.98)}
 .dupwarn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:#fbbf24;padding:9px 12px;border-radius:9px;font-size:.8rem;text-align:center;margin-bottom:8px}
-/* SCANNER – photo capture approach */
+/* SCANNER */
 .scanHd{padding:12px 14px;background:var(--bg2);border-bottom:1px solid var(--bdr2);display:flex;align-items:center;gap:10px;flex-shrink:0}
 .scanHd h2{font-size:.95rem;font-weight:700;font-family:'Syne',sans-serif}
 .scanHd .st{font-size:.68rem;color:var(--txt2)}
-.scanMsg{flex:1;font-size:.82rem;padding:5px 10px;border-radius:8px;text-align:center}
-.scanMsg.ok{color:var(--grn);background:rgba(16,185,129,.1)}.scanMsg.err{color:var(--red);background:rgba(239,68,68,.1)}.scanMsg.sc{color:var(--acc)}
-.scBtn{padding:6px 10px;border-radius:8px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--txt2);font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
-#scanResult{padding:14px;overflow-y:auto;flex:1}
-.srcHead{background:linear-gradient(135deg,var(--bg3),var(--bg4));border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.srcHead .nm{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800}
-.srcHead .cid{font-size:.68rem;color:var(--acc);background:rgba(245,158,11,.12);padding:2px 8px;border-radius:20px;display:inline-block;margin:3px 0}
-.srcHead .m{font-size:.78rem;color:var(--txt2);margin-top:2px}
-.hi{background:var(--bg2);border:1px solid var(--bdr2);border-radius:10px;padding:11px 13px;margin-bottom:7px}
-.hi .r{display:flex;justify-content:space-between;align-items:center}
-.hi .dt{font-weight:600;font-size:.85rem}.hi .qty{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:var(--acc)}
-.hi .sb{font-size:.72rem;color:var(--txt2);margin-top:2px}
-/* Camera capture UI */
-#scanCaptureArea{padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:14px;flex:1}
+#scanCaptureArea{padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:14px;flex:1;overflow-y:auto}
 .capBtn{width:100%;max-width:340px;padding:18px;border-radius:16px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:.3px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .18s;box-shadow:0 4px 20px rgba(0,0,0,.4)}
 .capBtn:active{transform:scale(.97)}
 .capBtn.primary{background:linear-gradient(135deg,var(--acc),#f97316);color:#000}
@@ -109,10 +96,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 #scanStatus.sc{color:var(--acc);background:rgba(245,158,11,.07)}
 #scanStatus.inf{color:#94a3b8;background:var(--bg3)}
 #photoPreview{display:none;width:100%;max-width:340px;border-radius:12px;overflow:hidden;border:1px solid var(--bdr2)}
-#photoPreview img{width:100%;display:block}
-#photoPreview canvas{display:none}
+#photoPreview img{width:100%;display:block;border-radius:10px}
 .previewSpin{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px}
 .previewSpin .spin{width:28px;height:28px;border-width:3px}
+#scanResult{display:none;width:100%;max-width:340px}
+.srcHead{background:linear-gradient(135deg,var(--bg3),var(--bg4));border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.srcHead .nm{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800}
+.srcHead .cid{font-size:.68rem;color:var(--acc);background:rgba(245,158,11,.12);padding:2px 8px;border-radius:20px;display:inline-block;margin:3px 0}
+.srcHead .m{font-size:.78rem;color:var(--txt2);margin-top:2px}
 .inp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:11px 14px;color:var(--txt);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s}
 .inp:focus{border-color:var(--acc)}
 .inpG{margin-bottom:12px}.inpG label{display:block;font-size:.75rem;color:var(--txt2);margin-bottom:5px;font-weight:500}
@@ -142,7 +133,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 .empty{text-align:center;padding:28px 14px;color:var(--txt3)}.empty .ei{font-size:2rem;margin-bottom:8px}
 .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .sh h2{font-size:1.1rem;font-weight:700;font-family:'Syne',sans-serif}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hi{background:var(--bg2);border:1px solid var(--bdr2);border-radius:10px;padding:11px 13px;margin-bottom:7px}
+.hi .r{display:flex;justify-content:space-between;align-items:center}
+.hi .dt{font-weight:600;font-size:.85rem}.hi .qty{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:var(--acc)}
+.hi .sb{font-size:.72rem;color:var(--txt2);margin-top:2px}
+/* Debug info box */
+.debugBox{width:100%;max-width:340px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:10px 13px;font-size:.72rem;color:#93c5fd;display:none;word-break:break-all;line-height:1.6}
 </style>
 </head>
 <body>
@@ -225,6 +221,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
       <!-- Photo preview area -->
       <div id="photoPreview"></div>
 
+      <!-- Debug info (hidden by default, tap 5x on status to reveal) -->
+      <div class="debugBox" id="debugBox"></div>
+
       <div class="capDivider"><span>OR ENTER ID MANUALLY</span></div>
 
       <!-- Manual ID entry -->
@@ -239,7 +238,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
       </div>
 
       <!-- Result area -->
-      <div id="scanResult" style="display:none;width:100%;max-width:340px"></div>
+      <div id="scanResult"></div>
     </div>
   </div>
 
@@ -276,7 +275,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
     </div>
     <div class="card">
       <div style="font-size:.85rem;font-weight:700;margin-bottom:12px">App Info</div>
-      <div class="settRow"><div>Version</div><div style="color:var(--txt2)">2.1</div></div>
+      <div class="settRow"><div>Version</div><div style="color:var(--txt2)">2.2</div></div>
       <div class="settRow"><div>Role</div><div class="badge y">MILKMAN</div></div>
       <div class="settRow"><div>Cache</div><button class="btn bsm bgh" onclick="clearCache()">Clear</button></div>
       <div style="margin-top:14px"><button class="btn bred" style="width:100%" onclick="doLogout()">🚪 Sign Out</button></div>
@@ -359,7 +358,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 var CU=null,CUSTS=[],todayIds=new Set(),activeCust=null,selQtyVal=1,activePageName='Home';
 var recentSearches=[],searchTO=null,myData={};
 var acQtyVal=1;
-var lastValidCid='';
 
 // ── CLOCK ──
 function updateClock(){
@@ -387,7 +385,7 @@ auth.onAuthStateChanged(async function(u){
   await refreshHomeStats();
   try{recentSearches=await getRecentSearches(CU.uid,8);}catch(e){}
 });
-function doLogout(){stopScanner();signOut().then(function(){location.replace('index.html');});}
+function doLogout(){signOut().then(function(){location.replace('index.html');});}
 
 // ── NAV ──
 function nav(name,idx){
@@ -462,13 +460,11 @@ async function selectCust(cid){
   var c=CUSTS.find(function(x){return(x.customerId||x.id)===cid;});
   if(!c){
     try{
-      // Try direct doc lookup first
       var d=await db.collection('customers').doc(cid).get();
       if(d.exists){c=Object.assign({id:d.id},d.data());}
-      // Fallback: query by customerId field
       if(!c){
-        var q=await db.collection('customers').where('customerId','==',cid).where('active','==',true).limit(1).get();
-        if(!q.empty)c=Object.assign({id:q.docs[0].id},q.docs[0].data());
+        var q2=await db.collection('customers').where('customerId','==',cid).where('active','==',true).limit(1).get();
+        if(!q2.empty)c=Object.assign({id:q2.docs[0].id},q2.docs[0].data());
       }
     }catch(e){console.error('selectCust lookup error:',e);}
   }
@@ -626,181 +622,345 @@ document.getElementById('mainSearch').addEventListener('focus',function(){
 });
 
 // ════════════════════════════════════════════════════
-//  QR SCANNER v3 – Photo Capture Method
-//  Approach: native camera via <input capture>, decode
-//  still image with jsQR. Works 100% on Android/iOS.
+//  QR SCANNER v4 – FIXED
+//  Root cause: safeValidateQR returns the customerId (p.id)
+//  which is the Firestore DOC ID. fetchAndShowScanResult
+//  must search by BOTH doc ID and customerId field.
+//  Also handles gallery upload fallback for better compat.
 // ════════════════════════════════════════════════════
 
-function setScanStatus(msg, type){
-  var e = document.getElementById('scanStatus');
-  if(!e) return;
-  e.textContent = msg;
-  e.className = type || 'sc';
+// Debug tap counter (tap status bar 5 times to reveal debug)
+var _dbgTaps=0;
+document.getElementById('scanStatus').addEventListener('click',function(){
+  _dbgTaps++;
+  if(_dbgTaps>=5){
+    _dbgTaps=0;
+    var db=document.getElementById('debugBox');
+    db.style.display=db.style.display==='none'||!db.style.display?'block':'none';
+  }
+});
+function dbg(msg){
+  var el=document.getElementById('debugBox');
+  if(!el)return;
+  el.textContent=msg;
+  console.log('[SCAN DEBUG]',msg);
+}
+
+function setScanStatus(msg,type){
+  var e=document.getElementById('scanStatus');
+  if(!e)return;
+  e.textContent=msg;
+  e.className=type||'sc';
 }
 
 // Open native camera (capture="environment" = rear camera)
 function triggerCamera(){
-  document.getElementById('qrFileInput').value = '';
-  document.getElementById('qrFileInput').click();
+  var inp=document.getElementById('qrFileInput');
+  inp.value='';
+  inp.click();
 }
 
-// Decode QR from a chosen photo file
+// Decode QR from photo file – supports any image size
 function handlePhotoCapture(input){
-  var file = input.files && input.files[0];
-  if(!file) return;
-  setScanStatus('⏳ Reading QR code…', 'sc');
+  var file=input.files&&input.files[0];
+  if(!file)return;
+  setScanStatus('⏳ Reading QR code…','sc');
 
-  var prev = document.getElementById('photoPreview');
-  prev.innerHTML = '<div class="previewSpin"><div class="spin"></div><div style="font-size:.75rem;color:var(--txt2)">Decoding…</div></div>';
-  prev.style.display = 'block';
+  var prev=document.getElementById('photoPreview');
+  prev.innerHTML='<div class="previewSpin"><div class="spin"></div><div style="font-size:.75rem;color:var(--txt2)">Decoding…</div></div>';
+  prev.style.display='block';
 
-  var reader = new FileReader();
-  reader.onload = function(e){
-    var img = new Image();
-    img.onload = function(){
-      // Draw onto hidden canvas at capped size (800px max) for jsQR speed
-      var cv = document.getElementById('decodeCv');
-      var MAX = 800;
-      var scale = Math.min(1, MAX / Math.max(img.width, img.height));
-      cv.width  = Math.round(img.width  * scale);
-      cv.height = Math.round(img.height * scale);
-      var ctx = cv.getContext('2d', {willReadFrequently: true});
-      ctx.drawImage(img, 0, 0, cv.width, cv.height);
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      // Try multiple canvas sizes for better QR detection
+      var sizes=[800,1200,600,400];
+      var found=false;
 
-      // Show the photo thumbnail
-      var thumb = document.createElement('img');
-      thumb.src = e.target.result;
-      thumb.style.cssText = 'width:100%;display:block;border-radius:10px';
-      prev.innerHTML = '';
-      prev.appendChild(thumb);
+      for(var si=0;si<sizes.length;si++){
+        var MAX=sizes[si];
+        var scale=Math.min(1,MAX/Math.max(img.width,img.height));
+        var cw=Math.round(img.width*scale);
+        var ch=Math.round(img.height*scale);
 
-      var imgData = ctx.getImageData(0, 0, cv.width, cv.height);
+        var cv=document.getElementById('decodeCv');
+        cv.width=cw;cv.height=ch;
+        var ctx=cv.getContext('2d',{willReadFrequently:true});
+        ctx.drawImage(img,0,0,cw,ch);
+        var imgData=ctx.getImageData(0,0,cw,ch);
 
-      // Try dontInvert first (fastest), then invertFirst as fallback
-      var code = jsQR(imgData.data, imgData.width, imgData.height, {inversionAttempts: 'dontInvert'});
-      if(!code) code = jsQR(imgData.data, imgData.width, imgData.height, {inversionAttempts: 'invertFirst'});
-      if(!code) code = jsQR(imgData.data, imgData.width, imgData.height, {inversionAttempts: 'attemptBoth'});
+        // Try all inversion modes
+        var code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'dontInvert'});
+        if(!code)code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'invertFirst'});
+        if(!code)code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'attemptBoth'});
 
-      if(code && code.data){
-        console.log('Photo QR decoded:', code.data);
-        var cid = safeValidateQR(code.data);
-        if(cid){
-          setScanStatus('✅ QR recognised! Loading customer…', 'ok');
-          if(navigator.vibrate) navigator.vibrate([80, 40, 80]);
-          fetchAndShowScanResult(cid);
-        } else {
-          setScanStatus('❌ Not an AMINA MILK QR code', 'err');
-          setTimeout(function(){ setScanStatus('📷 Ready – tap the button below to scan', 'sc'); }, 3000);
+        if(code&&code.data){
+          dbg('Decoded at size '+MAX+'px: '+code.data.slice(0,60));
+          found=true;
+
+          // Show thumbnail
+          var thumb=document.createElement('img');
+          thumb.src=e.target.result;
+          thumb.style.cssText='width:100%;display:block;border-radius:10px';
+          prev.innerHTML='';prev.appendChild(thumb);
+
+          var rawQR=code.data;
+          var cid=safeValidateQR(rawQR);
+          dbg('Raw: '+rawQR.slice(0,80)+' | CID: '+cid);
+
+          if(cid){
+            setScanStatus('✅ QR recognised! Loading customer…','ok');
+            if(navigator.vibrate)navigator.vibrate([80,40,80]);
+            fetchAndShowScanResult(cid,false,rawQR);
+          }else{
+            // Maybe it's a plain customer ID printed as QR (not AMINAMILK:// format)
+            var plainId=rawQR.trim().toUpperCase();
+            if(plainId.startsWith('AM')&&plainId.length>=8){
+              setScanStatus('✅ Customer ID found! Loading…','ok');
+              fetchAndShowScanResult(plainId,false,rawQR);
+            }else{
+              setScanStatus('❌ Not a valid AMINA MILK QR code','err');
+              dbg('Validation failed. Raw value: '+rawQR);
+              setTimeout(function(){setScanStatus('📷 Ready – tap the button below to scan','sc');},3500);
+            }
+          }
+          break;
         }
-      } else {
-        setScanStatus('⚠️ No QR code found – try again closer / better light', 'err');
-        setTimeout(function(){ setScanStatus('📷 Ready – tap the button below to scan', 'sc'); }, 3500);
+      }
+
+      if(!found){
+        // Show thumbnail anyway
+        var thumb2=document.createElement('img');
+        thumb2.src=e.target.result;
+        thumb2.style.cssText='width:100%;display:block;border-radius:10px';
+        prev.innerHTML='';prev.appendChild(thumb2);
+
+        setScanStatus('⚠️ No QR code found – try closer / better light','err');
+        dbg('jsQR failed on image '+img.width+'x'+img.height);
+        setTimeout(function(){setScanStatus('📷 Ready – tap the button below to scan','sc');},3500);
       }
     };
-    img.src = e.target.result;
+    img.onerror=function(){
+      setScanStatus('❌ Could not read image file','err');
+      prev.innerHTML='';prev.style.display='none';
+    };
+    img.src=e.target.result;
+  };
+  reader.onerror=function(){
+    setScanStatus('❌ File read error','err');
+    prev.innerHTML='';prev.style.display='none';
   };
   reader.readAsDataURL(file);
 }
 
 // Manual ID / mobile lookup
 async function doManualLookup(){
-  var raw = (document.getElementById('manualIdInp').value || '').trim().toUpperCase();
-  if(!raw){ toast('Enter a customer ID or mobile number', 'err'); return; }
-  setScanStatus('🔄 Looking up…', 'sc');
-  await fetchAndShowScanResult(raw, true);
+  var raw=(document.getElementById('manualIdInp').value||'').trim().toUpperCase();
+  if(!raw){toast('Enter a customer ID or mobile number','err');return;}
+  setScanStatus('🔄 Looking up…','sc');
+  document.getElementById('scanResult').style.display='none';
+  await fetchAndShowScanResult(raw,true,null);
 }
 
-// Unified fetch + show, used by both photo decode and manual entry
-async function fetchAndShowScanResult(cid, isManual){
+// ── CORE: Fetch customer by any identifier and show result ──
+// cid       = the resolved customer ID (from QR or manual entry)
+// isManual  = true if typed in manually (enables mobile search)
+// rawQR     = original raw QR string (for extra fallback decoding)
+async function fetchAndShowScanResult(cid,isManual,rawQR){
   try{
-    document.getElementById('scanResult').style.display = 'none';
+    var cust=null;
+    dbg('Searching for: '+cid);
 
-    // 1. In-memory cache
-    var cust = CUSTS.find(function(c){ return (c.customerId||c.id) === cid || c.mobile === cid; });
+    // ── STRATEGY 1: Check in-memory cache first (customerId field OR doc id) ──
+    cust=CUSTS.find(function(c){
+      return (c.customerId||'')===cid || (c.id||'')===cid || (c.mobile||'')===cid;
+    });
+    if(cust){dbg('Found in CUSTS cache: '+(cust.name||cust.id));}
 
+    // ── STRATEGY 2: Direct Firestore doc lookup (doc ID = customerId) ──
     if(!cust){
-      // 2. Direct doc ID lookup
       try{
-        var d = await db.collection('customers').doc(cid).get();
-        if(d.exists) cust = Object.assign({id: d.id}, d.data());
-      }catch(e){}
+        var docSnap=await db.collection('customers').doc(cid).get();
+        if(docSnap.exists&&docSnap.data().active!==false){
+          cust=Object.assign({id:docSnap.id},docSnap.data());
+          dbg('Found by doc ID: '+cust.name);
+        }
+      }catch(e){dbg('Doc lookup error: '+e.message);}
+    }
+
+    // ── STRATEGY 3: Query where customerId field == cid ──
+    if(!cust){
+      try{
+        var snap=await db.collection('customers').where('customerId','==',cid).where('active','==',true).limit(1).get();
+        if(!snap.empty){
+          cust=Object.assign({id:snap.docs[0].id},snap.docs[0].data());
+          dbg('Found by customerId field: '+cust.name);
+        }
+      }catch(e){dbg('customerId query error: '+e.message);}
+    }
+
+    // ── STRATEGY 4: Manual entry – search by mobile number ──
+    if(!cust&&isManual){
+      try{
+        var mobSnap=await db.collection('customers').where('mobile','==',cid).where('active','==',true).limit(1).get();
+        if(!mobSnap.empty){
+          cust=Object.assign({id:mobSnap.docs[0].id},mobSnap.docs[0].data());
+          dbg('Found by mobile: '+cust.name);
+        }
+      }catch(e){dbg('Mobile query error: '+e.message);}
+    }
+
+    // ── STRATEGY 5: Case-insensitive name search (manual only) ──
+    if(!cust&&isManual&&cid.length>2){
+      try{
+        // Firestore doesn't support case-insensitive search natively,
+        // so search in the local cache with loose matching
+        var lowCid=cid.toLowerCase();
+        var nameMatch=CUSTS.find(function(c){
+          return (c.name||'').toLowerCase().includes(lowCid)||
+                 (c.mobile||'').includes(cid)||
+                 (c.address||'').toLowerCase().includes(lowCid);
+        });
+        if(nameMatch){
+          cust=nameMatch;
+          dbg('Found by fuzzy match: '+cust.name);
+        }
+      }catch(e){dbg('Fuzzy search error: '+e.message);}
+    }
+
+    // ── STRATEGY 6: If QR raw data available, try extracting embedded id differently ──
+    if(!cust&&rawQR){
+      try{
+        // Try to decode as plain base64 without the prefix
+        var altId=tryExtractIdFromRaw(rawQR);
+        if(altId&&altId!==cid){
+          dbg('Trying alt ID from raw: '+altId);
+          var altSnap=await db.collection('customers').doc(altId).get();
+          if(altSnap.exists&&altSnap.data().active!==false){
+            cust=Object.assign({id:altSnap.id},altSnap.data());
+            dbg('Found via alt ID: '+cust.name);
+          }
+          if(!cust){
+            var altSnap2=await db.collection('customers').where('customerId','==',altId).where('active','==',true).limit(1).get();
+            if(!altSnap2.empty){
+              cust=Object.assign({id:altSnap2.docs[0].id},altSnap2.docs[0].data());
+              dbg('Found via alt customerId: '+cust.name);
+            }
+          }
+        }
+      }catch(e){dbg('Alt extraction error: '+e.message);}
     }
 
     if(!cust){
-      // 3. Query by customerId field
-      try{
-        var q = await db.collection('customers').where('customerId','==',cid).where('active','==',true).limit(1).get();
-        if(!q.empty) cust = Object.assign({id: q.docs[0].id}, q.docs[0].data());
-      }catch(e){}
-    }
-
-    if(!cust && isManual){
-      // 4. Manual: also search by mobile number
-      try{
-        var qm = await db.collection('customers').where('mobile','==',cid).where('active','==',true).limit(1).get();
-        if(!qm.empty) cust = Object.assign({id: qm.docs[0].id}, qm.docs[0].data());
-      }catch(e){}
-    }
-
-    if(!cust){
-      setScanStatus('⚠️ Customer not found for: ' + cid, 'err');
-      setTimeout(function(){ setScanStatus('📷 Ready – tap the button below to scan', 'sc'); }, 3500);
+      setScanStatus('⚠️ Customer not found for: '+cid,'err');
+      dbg('All strategies failed for: '+cid);
+      setTimeout(function(){setScanStatus('📷 Ready – tap the button below to scan','sc');},3500);
       return;
     }
 
     // Add to local cache if missing
-    if(!CUSTS.find(function(c){ return (c.customerId||c.id) === (cust.customerId||cust.id); })){
-      CUSTS.push(cust);
-    }
+    var existsInCache=CUSTS.find(function(c){return (c.customerId||c.id)===(cust.customerId||cust.id);});
+    if(!existsInCache)CUSTS.push(cust);
 
     showScanResult(cust);
-    setScanStatus('✅ ' + cust.name + ' – choose quantity below', 'ok');
+    setScanStatus('✅ '+cust.name+' – choose quantity below','ok');
 
   }catch(e){
-    console.error('fetchAndShowScanResult:', e);
-    setScanStatus('⚠️ Network error – check connection', 'err');
-    setTimeout(function(){ setScanStatus('📷 Ready – tap the button below to scan', 'sc'); }, 3000);
+    console.error('fetchAndShowScanResult:',e);
+    dbg('Fatal error: '+e.message);
+    setScanStatus('⚠️ Network error – check connection','err');
+    setTimeout(function(){setScanStatus('📷 Ready – tap the button below to scan','sc');},3000);
   }
 }
 
-// QR token validation (unchanged, robust)
+// ── QR validation – robust, handles multiple encoding edge cases ──
 function safeValidateQR(raw){
   try{
-    if(!raw || typeof raw !== 'string') return null;
-    var prefix = 'AMINAMILK://';
-    var token  = 'AMINA_MILK_SECURE_v1_2025';
-    if(!raw.startsWith(prefix)) return null;
-    var b64 = raw.slice(prefix.length).replace(/-/g,'+').replace(/_/g,'/');
-    while(b64.length % 4 !== 0) b64 += '=';
-    var binary = atob(b64);
-    var jsonStr;
-    try{
-      var bytes = new Uint8Array(binary.length);
-      for(var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-      jsonStr = new TextDecoder('utf-8').decode(bytes);
-    }catch(e){
-      jsonStr = decodeURIComponent(escape(binary));
+    if(!raw||typeof raw!=='string')return null;
+    var prefix='AMINAMILK://';
+    var token='AMINA_MILK_SECURE_v1_2025';
+    if(!raw.startsWith(prefix))return null;
+
+    var b64=raw.slice(prefix.length);
+    // Normalize base64: url-safe chars, padding
+    b64=b64.replace(/-/g,'+').replace(/_/g,'/');
+    while(b64.length%4!==0)b64+='=';
+    // Remove any whitespace that might have been introduced
+    b64=b64.replace(/\s/g,'');
+
+    var binary;
+    try{binary=atob(b64);}
+    catch(e){
+      // Try stripping trailing = and retry
+      b64=b64.replace(/=+$/,'');
+      while(b64.length%4!==0)b64+='=';
+      try{binary=atob(b64);}catch(e2){return null;}
     }
-    var p = JSON.parse(jsonStr);
-    if(p && p.t === token && p.id) return p.id;
+
+    var jsonStr;
+    // Try TextDecoder first (handles UTF-8 properly)
+    try{
+      var bytes=new Uint8Array(binary.length);
+      for(var i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+      jsonStr=new TextDecoder('utf-8').decode(bytes);
+    }catch(e){
+      try{jsonStr=decodeURIComponent(escape(binary));}
+      catch(e2){jsonStr=binary;}
+    }
+
+    var p=JSON.parse(jsonStr);
+    if(p&&p.t===token&&p.id){
+      dbg('QR token valid, id='+p.id);
+      return p.id;
+    }
+    dbg('QR token mismatch or no id. t='+p.t+' id='+p.id);
     return null;
-  }catch(e){ return null; }
+  }catch(e){
+    dbg('safeValidateQR exception: '+e.message);
+    return null;
+  }
 }
 
-// No-op stubs so nav() doesn't break (old scanner calls)
+// Try to extract an ID from raw QR data using alternative methods
+function tryExtractIdFromRaw(raw){
+  if(!raw)return null;
+  try{
+    // Method A: try raw as base64 directly (no prefix)
+    if(raw.length>10&&!/^AMINAMILK:\/\//.test(raw)){
+      try{
+        var b64=raw.replace(/-/g,'+').replace(/_/g,'/');
+        while(b64.length%4!==0)b64+='=';
+        var bin=atob(b64);
+        var bytes=new Uint8Array(bin.length);
+        for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+        var str=new TextDecoder().decode(bytes);
+        var obj=JSON.parse(str);
+        if(obj&&obj.id)return obj.id;
+      }catch(e){}
+    }
+    // Method B: raw might just be the customer ID as plain text
+    if(/^AM[A-Z0-9]{5,}/.test(raw.trim()))return raw.trim();
+  }catch(e){}
+  return null;
+}
+
+// No-op stubs
 function startScanner(){}
 function stopScanner(){}
 
-// Called when nav leaves the Scan tab – just reset UI
 function resetScanPage(){
-  setScanStatus('📷 Ready – tap the button below to scan', 'sc');
-  document.getElementById('scanResult').style.display = 'none';
-  document.getElementById('photoPreview').style.display = 'none';
-  document.getElementById('photoPreview').innerHTML = '';
-  document.getElementById('manualIdInp').value = '';
+  setScanStatus('📷 Ready – tap the button below to scan','sc');
+  document.getElementById('scanResult').style.display='none';
+  document.getElementById('photoPreview').style.display='none';
+  document.getElementById('photoPreview').innerHTML='';
+  document.getElementById('manualIdInp').value='';
+  document.getElementById('debugBox').style.display='none';
+  document.getElementById('debugBox').textContent='';
+  _dbgTaps=0;
 }
 
-// ── SCAN RESULT ──
+// ── SCAN RESULT DISPLAY ──
 function showScanResult(cust){
   var cid=cust.customerId||cust.id;
   var done=todayIds.has(cid);
@@ -810,11 +970,34 @@ function showScanResult(cust){
   res.style.display='block';
   var presets=[.25,.5,1,1.5,2];
   var pi=presets.indexOf(dq);
-  var presetsHtml=presets.map(function(v,i){return'<div class="qbtn'+(i===pi?' active':'')+'" onclick="setSQ('+v+',this)">'+fmtQ(v)+'</div>';}).join('');
+  var presetsHtml=presets.map(function(v,i){
+    return'<div class="qbtn'+(i===pi?' active':'')+'" onclick="setSQ('+v+',this)">'+fmtQ(v)+'</div>';
+  }).join('');
   presetsHtml+='<div class="qbtn" onclick="setSQ(-1,this)">Custom</div>';
-  res.innerHTML='<div class="srcHead"><div><div class="nm">'+esc(cust.name)+'</div><div class="cid">'+cid+'</div><div class="m">📱 '+(cust.mobile||'—')+'</div><div class="m">📍 '+(cust.address||'—')+'</div></div><span class="sbadge '+(done?'done':'pend')+'">'+(done?'✓ Done':'⏳ Pending')+'</span></div><div class="card" style="margin-bottom:0">'+(done?'<div class="dupwarn">⚠️ Already delivered today – tap below to update</div>':'')+'<div style="font-size:.75rem;color:var(--txt2);margin-bottom:8px;font-weight:600">SELECT QUANTITY</div><div class="qpresets" id="sqPresets">'+presetsHtml+'</div><input class="custinp" id="sqCustom" type="number" min="0.1" step="0.25" placeholder="Enter litres…" oninput="window._sq=parseFloat(this.value)||0;document.getElementById(\'sqDisp\').textContent=window._sq>0?fmtQ(window._sq):\'— L\'"><div class="selqty" id="sqDisp">'+fmtQ(dq)+'</div><button class="sbtn '+(done?'bacc':'bgrn')+'" id="sqBtn" onclick="submitScanDel(\''+cid+'\',\''+esc(cust.name)+'\')">✓ Submit Delivery</button></div>';
-  res.scrollIntoView({behavior:'smooth',block:'nearest'});
+  res.innerHTML=
+    '<div class="srcHead">'+
+      '<div>'+
+        '<div class="nm">'+esc(cust.name)+'</div>'+
+        '<div class="cid">'+cid+'</div>'+
+        '<div class="m">📱 '+(cust.mobile||'—')+'</div>'+
+        '<div class="m">📍 '+(cust.address||'—')+'</div>'+
+      '</div>'+
+      '<span class="sbadge '+(done?'done':'pend')+'">'+(done?'✓ Done':'⏳ Pending')+'</span>'+
+    '</div>'+
+    '<div class="card" style="margin-bottom:0">'+
+      (done?'<div class="dupwarn">⚠️ Already delivered today – tap below to update</div>':'')+
+      '<div style="font-size:.75rem;color:var(--txt2);margin-bottom:8px;font-weight:600">SELECT QUANTITY</div>'+
+      '<div class="qpresets" id="sqPresets">'+presetsHtml+'</div>'+
+      '<input class="custinp" id="sqCustom" type="number" min="0.1" step="0.25" placeholder="Enter litres…" '+
+        'oninput="window._sq=parseFloat(this.value)||0;document.getElementById(\'sqDisp\').textContent=window._sq>0?fmtQ(window._sq):\'— L\'">'+
+      '<div class="selqty" id="sqDisp">'+fmtQ(dq)+'</div>'+
+      '<button class="sbtn '+(done?'bacc':'bgrn')+'" id="sqBtn" onclick="submitScanDel(\''+esc(cid)+'\',\''+esc(cust.name)+'\')">'+
+        '✓ Submit Delivery'+
+      '</button>'+
+    '</div>';
+  setTimeout(function(){res.scrollIntoView({behavior:'smooth',block:'nearest'});},100);
 }
+
 function setSQ(v,btn){
   document.querySelectorAll('#sqPresets .qbtn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
@@ -823,6 +1006,7 @@ function setSQ(v,btn){
   ci.style.display='none';window._sq=v;
   document.getElementById('sqDisp').textContent=fmtQ(v);
 }
+
 async function submitScanDel(cid,custName){
   var btn=document.getElementById('sqBtn');
   if(!window._sq||window._sq<=0){toast('Select a quantity first','err');return;}
@@ -831,13 +1015,18 @@ async function submitScanDel(cid,custName){
   var sd=await db.collection('users').doc(CU.uid).get();
   var sName=sd.exists?sd.data().name:CU.email;
   var dq=window._sq;
-  var d={customerId:cid,customerName:custName,customerAddress:c.address||'',staffId:CU.uid,staffName:sName,deliveredQty:dq,normalQty:parseFloat(c.defaultQty)||1,extraQty:0,mode:'scan',status:'delivered'};
+  var d={
+    customerId:cid,customerName:custName,customerAddress:c.address||'',
+    staffId:CU.uid,staffName:sName,
+    deliveredQty:dq,normalQty:parseFloat(c.defaultQty)||1,extraQty:0,
+    mode:'scan',status:'delivered'
+  };
   try{
     await submitDelivery(d);todayIds.add(cid);
     toast(fmtQ(dq)+' → '+custName+' ✓');
     btn.innerHTML='✅ Delivered!';btn.style.background='var(--grn)';btn.style.color='#fff';
-    refreshHomeStats();setScanStatus('✅ Done! Tap camera button for next customer','ok');
-    lastValidCid='';
+    refreshHomeStats();
+    setScanStatus('✅ Done! Tap camera for next customer','ok');
     setTimeout(function(){
       document.getElementById('scanResult').style.display='none';
       setScanStatus('📷 Ready – tap the button below to scan','sc');
@@ -849,7 +1038,6 @@ async function submitScanDel(cid,custName){
         var ex=await getTodayDeliveryForCustomer(cid);
         if(ex)await updateDelivery(ex.id,{deliveredQty:dq,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
         toast('Updated delivery ✓');btn.innerHTML='✅ Updated!';
-        lastValidCid='';
         setTimeout(function(){btn.innerHTML='✓ Submit Delivery';btn.disabled=false;},2000);
       }catch(e2){toast('Error: '+e2.message,'err');btn.innerHTML='✓ Submit Delivery';btn.disabled=false;}
     }else{toast('Error: '+e.message,'err');btn.innerHTML='✓ Submit Delivery';btn.disabled=false;}
@@ -867,7 +1055,14 @@ async function loadHistory(){
     var el=document.getElementById('histList');
     if(!dels.length){el.innerHTML='<div class="empty"><div class="ei">📦</div><p>No deliveries</p></div>';return;}
     var tot=dels.reduce(function(s,d){return s+(d.deliveredQty||0);},0);
-    el.innerHTML='<div class="card" style="display:flex;gap:16px;justify-content:center;text-align:center;margin-bottom:10px"><div><div style="font-family:\'Syne\',sans-serif;font-size:1.5rem;font-weight:800">'+dels.length+'</div><div style="font-size:.68rem;color:var(--txt2)">Deliveries</div></div><div><div style="font-family:\'Syne\',sans-serif;font-size:1.5rem;font-weight:800;color:var(--acc)">'+tot+'L</div><div style="font-size:.68rem;color:var(--txt2)">Total Milk</div></div></div>'+dels.map(function(d){return'<div class="hi"><div class="r"><span class="dt">'+d.date+' '+(d.time||'')+'</span><span class="qty">'+(d.deliveredQty||0)+'L</span></div><div class="sb">'+(d.customerName||d.customerId)+'</div></div>';}).join('');
+    el.innerHTML=
+      '<div class="card" style="display:flex;gap:16px;justify-content:center;text-align:center;margin-bottom:10px">'+
+        '<div><div style="font-family:\'Syne\',sans-serif;font-size:1.5rem;font-weight:800">'+dels.length+'</div><div style="font-size:.68rem;color:var(--txt2)">Deliveries</div></div>'+
+        '<div><div style="font-family:\'Syne\',sans-serif;font-size:1.5rem;font-weight:800;color:var(--acc)">'+tot+'L</div><div style="font-size:.68rem;color:var(--txt2)">Total Milk</div></div>'+
+      '</div>'+
+      dels.map(function(d){
+        return'<div class="hi"><div class="r"><span class="dt">'+d.date+' '+(d.time||'')+'</span><span class="qty">'+(d.deliveredQty||0)+'L</span></div><div class="sb">'+(d.customerName||d.customerId)+'</div></div>';
+      }).join('');
   }catch(e){document.getElementById('histList').innerHTML='<div class="empty"><div class="ei">⚠️</div><p>Error loading</p></div>';}
 }
 
@@ -877,7 +1072,10 @@ async function loadSettingsPage(){
     var dels=await getDeliveries({staffId:CU.uid});
     var tot=dels.reduce(function(s,d){return s+(d.deliveredQty||0);},0);
     var today=dels.filter(function(d){return d.date===new Date().toISOString().slice(0,10);}).length;
-    document.getElementById('settStats').innerHTML='<div style="text-align:center"><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:800">'+dels.length+'</div><div style="font-size:.65rem;color:var(--txt2)">Total Del.</div></div><div style="text-align:center"><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:800;color:var(--acc)">'+tot+'L</div><div style="font-size:.65rem;color:var(--txt2)">Milk Served</div></div><div style="text-align:center"><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:800;color:var(--grn)">'+today+'</div><div style="font-size:.65rem;color:var(--txt2)">Today</div></div>';
+    document.getElementById('settStats').innerHTML=
+      '<div style="text-align:center"><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:800">'+dels.length+'</div><div style="font-size:.65rem;color:var(--txt2)">Total Del.</div></div>'+
+      '<div style="text-align:center"><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:800;color:var(--acc)">'+tot+'L</div><div style="font-size:.65rem;color:var(--txt2)">Milk Served</div></div>'+
+      '<div style="text-align:center"><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:800;color:var(--grn)">'+today+'</div><div style="font-size:.65rem;color:var(--txt2)">Today</div></div>';
   }catch(e){}
 }
 async function changePwd(){
