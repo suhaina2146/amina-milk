@@ -12,26 +12,30 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{--bg:#060d1a;--bg2:#0f1a2e;--bg3:#162236;--acc:#f59e0b;--grn:#10b981;--red:#ef4444;--txt:#f1f5f9;--txt2:#94a3b8;--bdr:rgba(245,158,11,.18);--bdr2:rgba(255,255,255,.07)}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 20% 10%,rgba(245,158,11,.1),transparent 55%),radial-gradient(ellipse at 85% 85%,rgba(16,185,129,.07),transparent 55%),var(--bg)}
-.box{background:var(--bg2);border:1px solid var(--bdr);border-radius:22px;padding:36px 28px;width:100%;max-width:420px;box-shadow:0 24px 80px rgba(0,0,0,.7)}
-.warn{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:12px;padding:12px 16px;margin-bottom:22px;font-size:.82rem;color:#fca5a5;display:flex;gap:10px;align-items:flex-start;line-height:1.5}
-.warn .ico{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+.box{background:var(--bg2);border:1px solid var(--bdr);border-radius:22px;padding:36px 28px;width:100%;max-width:440px;box-shadow:0 24px 80px rgba(0,0,0,.7)}
 .drop{width:64px;height:64px;background:linear-gradient(135deg,var(--acc),#f97316);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 10px;box-shadow:0 8px 28px rgba(245,158,11,.35)}
 h1{font-family:'Syne',sans-serif;color:var(--acc);font-size:1.6rem;text-align:center;margin-bottom:4px}
-.sub{text-align:center;color:var(--txt2);font-size:.82rem;margin-bottom:22px}
-.inpG{margin-bottom:14px}
+.sub{text-align:center;color:var(--txt2);font-size:.82rem;margin-bottom:18px}
+.inpG{margin-bottom:13px}
 .inpG label{display:block;font-size:.78rem;color:var(--txt2);margin-bottom:5px;font-weight:500}
 .inp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:12px 15px;color:var(--txt);font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:.2s}
 .inp:focus{border-color:var(--acc)}
-.btn{width:100%;padding:13px;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.95rem;background:linear-gradient(135deg,var(--acc),#f97316);color:#000;transition:.18s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn{width:100%;padding:13px;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.95rem;background:linear-gradient(135deg,var(--acc),#f97316);color:#000;transition:.18s;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px}
 .btn:hover{opacity:.9}.btn:active{transform:scale(.98)}.btn:disabled{opacity:.6;cursor:not-allowed}
-.err{background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.28);color:#fca5a5;padding:9px 13px;border-radius:8px;font-size:.83rem;margin-bottom:12px;display:none}
-.ok{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#34d399;padding:14px 16px;border-radius:10px;font-size:.85rem;margin-bottom:12px;display:none;line-height:1.6}
+.msgBox{border-radius:10px;padding:12px 15px;font-size:.83rem;margin-bottom:12px;display:none;line-height:1.6}
+.msgBox.err{background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.28);color:#fca5a5}
+.msgBox.ok{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#34d399}
+.msgBox.inf{background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);color:#93c5fd}
 .spin{width:18px;height:18px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:sp .6s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
-.progress{margin:10px 0;font-size:.78rem;color:var(--txt2);min-height:18px;text-align:center}
-.divider{height:1px;background:var(--bdr2);margin:18px 0}
-.step{display:flex;gap:10px;align-items:flex-start;font-size:.8rem;color:var(--txt2);margin-bottom:8px;line-height:1.5}
-.step .num{background:rgba(245,158,11,.15);color:var(--acc);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;flex-shrink:0;margin-top:1px}
+.log{background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:12px;font-size:.75rem;color:var(--txt2);font-family:monospace;max-height:160px;overflow-y:auto;margin-bottom:12px;display:none}
+.log .line{padding:2px 0;display:flex;gap:8px}
+.log .line.ok{color:#34d399}.log .line.err{color:#fca5a5}.log .line.inf{color:#93c5fd}
+.log .ts{color:var(--txt2);flex-shrink:0}
+.rulesBox{background:var(--bg3);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:14px;margin-bottom:14px;display:none}
+.rulesBox h4{color:var(--acc);font-size:.82rem;margin-bottom:8px;font-weight:600}
+.rulesBox pre{font-size:.72rem;color:var(--txt2);line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.rulesBox .copyBtn{margin-top:8px;padding:6px 14px;border-radius:7px;border:1px solid var(--bdr2);background:transparent;color:var(--acc);font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif}
 </style>
 </head>
 <body>
@@ -40,137 +44,210 @@ h1{font-family:'Syne',sans-serif;color:var(--acc);font-size:1.6rem;text-align:ce
   <h1>Admin Setup</h1>
   <p class="sub">Create your first admin account</p>
 
-  <div class="warn">
-    <span class="ico">⚠️</span>
-    <span>This page is for <strong>first-time setup only</strong>. Delete <code>setup.html</code> from your server after creating your admin account.</span>
+  <div class="msgBox err" id="errMsg"></div>
+  <div class="msgBox ok"  id="okMsg"></div>
+  <div class="msgBox inf" id="infMsg"></div>
+
+  <!-- STEP 1: Rules check notice -->
+  <div class="rulesBox" id="rulesBox">
+    <h4>⚠️ Fix your Firestore Security Rules first</h4>
+    <p style="font-size:.78rem;color:var(--txt2);margin-bottom:8px">Go to Firebase Console → Firestore → Rules and paste these rules, then click Publish:</p>
+    <pre id="rulesText">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Allow authenticated users to read/write their own user doc
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Allow authenticated users to read all other collections
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}</pre>
+    <button class="copyBtn" onclick="copyRules()">📋 Copy Rules</button>
   </div>
 
-  <div class="err" id="err"></div>
-  <div class="ok" id="okMsg"></div>
-
   <div class="inpG"><label>Admin Name</label><input class="inp" id="aName" placeholder="Your full name"></div>
-  <div class="inpG"><label>Admin Email</label><input class="inp" id="aEmail" type="email" inputmode="email" placeholder="admin@aminamilk.com"></div>
-  <div class="inpG"><label>Password</label><input class="inp" id="aPwd" type="password" placeholder="Min 6 characters"></div>
-  <div class="inpG"><label>Confirm Password</label><input class="inp" id="aPwd2" type="password" placeholder="Repeat password"></div>
+  <div class="inpG"><label>Admin Email</label><input class="inp" id="aEmail" type="email" inputmode="email" placeholder="admin@aminamilk.com" autocomplete="username"></div>
+  <div class="inpG"><label>Password</label><input class="inp" id="aPwd" type="password" placeholder="Min 6 characters" autocomplete="new-password"></div>
+  <div class="inpG"><label>Confirm Password</label><input class="inp" id="aPwd2" type="password" placeholder="Repeat password" autocomplete="new-password"></div>
 
-  <div class="progress" id="progress"></div>
+  <div class="log" id="logBox"></div>
   <button class="btn" id="btn" onclick="createAdmin()">🚀 Create Admin Account</button>
-
-  <div class="divider"></div>
-  <div style="font-size:.75rem;color:var(--txt2);margin-bottom:8px;font-weight:600">After setup:</div>
-  <div class="step"><div class="num">1</div><span>Delete or rename <code>setup.html</code> from your server</span></div>
-  <div class="step"><div class="num">2</div><span>Go to <a href="index.html" style="color:var(--acc)">index.html</a> and sign in with your new admin credentials</span></div>
-  <div class="step"><div class="num">3</div><span>Add customers and staff from the admin panel</span></div>
+  <div style="text-align:center;font-size:.72rem;color:var(--txt2)">⚠️ Delete this file from your server after setup</div>
 </div>
 
 <script>
-function setProgress(msg){document.getElementById('progress').textContent=msg;}
-function showErr(m){var e=document.getElementById('err');e.textContent=m;e.style.display='block';}
+var logEl = document.getElementById('logBox');
 
-// Helper: write Firestore doc with retries
-async function writeAdminDoc(uid, email, name, retries){
-  retries = retries || 5;
-  var docData = {
-    name: name,
-    email: email,
-    role: 'admin',
-    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    active: true
-  };
-  for(var i = 0; i < retries; i++){
-    try{
-      await db.collection('users').doc(uid).set(docData, {merge: true});
-      // Verify it was actually written
-      var check = await db.collection('users').doc(uid).get();
-      if(check.exists && check.data().role === 'admin'){
-        return true;
-      }
-    }catch(e){
-      setProgress('Retrying... (' + (i+1) + '/' + retries + ')');
-    }
-    await new Promise(r => setTimeout(r, 800));
+function log(msg, type){
+  logEl.style.display = 'block';
+  type = type || 'inf';
+  var now = new Date().toLocaleTimeString('en-IN',{hour12:false});
+  var line = document.createElement('div');
+  line.className = 'line ' + type;
+  line.innerHTML = '<span class="ts">['+now+']</span><span>'+msg+'</span>';
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function showMsg(id, msg){
+  ['errMsg','okMsg','infMsg'].forEach(function(i){ document.getElementById(i).style.display='none'; });
+  var el = document.getElementById(id);
+  el.innerHTML = msg;
+  el.style.display = 'block';
+}
+
+function copyRules(){
+  var text = document.getElementById('rulesText').textContent;
+  navigator.clipboard.writeText(text).then(function(){
+    document.querySelector('.copyBtn').textContent = '✓ Copied!';
+    setTimeout(function(){ document.querySelector('.copyBtn').textContent = '📋 Copy Rules'; }, 2000);
+  });
+}
+
+// Test if Firestore writes are working BEFORE creating the user
+async function testFirestoreWrite(){
+  try{
+    var testRef = db.collection('_setup_test').doc('ping');
+    await testRef.set({ ts: firebase.firestore.FieldValue.serverTimestamp() });
+    await testRef.delete();
+    return { ok: true };
+  }catch(e){
+    return { ok: false, code: e.code, message: e.message };
   }
-  return false;
+}
+
+async function writeUserDoc(uid, email, name){
+  var data = {
+    name:      name,
+    email:     email,
+    role:      'admin',
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    active:    true
+  };
+  // Try set with merge
+  await db.collection('users').doc(uid).set(data, { merge: true });
+  // Verify
+  var snap = await db.collection('users').doc(uid).get();
+  if(!snap.exists) throw new Error('Document not found after write');
+  if(snap.data().role !== 'admin') throw new Error('Role field missing after write');
+  return snap.data();
 }
 
 async function createAdmin(){
-  var name    = document.getElementById('aName').value.trim();
-  var email   = document.getElementById('aEmail').value.trim();
-  var pwd     = document.getElementById('aPwd').value;
-  var pwd2    = document.getElementById('aPwd2').value;
-  var btn     = document.getElementById('btn');
-  var errEl   = document.getElementById('err');
-  var okEl    = document.getElementById('okMsg');
-  errEl.style.display='none'; okEl.style.display='none';
+  var name  = document.getElementById('aName').value.trim();
+  var email = document.getElementById('aEmail').value.trim();
+  var pwd   = document.getElementById('aPwd').value;
+  var pwd2  = document.getElementById('aPwd2').value;
+  var btn   = document.getElementById('btn');
 
-  if(!name)  {showErr('Enter your name.');return;}
-  if(!email) {showErr('Enter an email address.');return;}
-  if(!pwd || pwd.length < 6){showErr('Password must be at least 6 characters.');return;}
-  if(pwd !== pwd2){showErr('Passwords do not match.');return;}
+  ['errMsg','okMsg','infMsg'].forEach(function(i){ document.getElementById(i).style.display='none'; });
+  logEl.innerHTML = ''; logEl.style.display = 'none';
 
-  btn.innerHTML='<div class="spin"></div> Creating…'; btn.disabled=true;
+  if(!name)              { showMsg('errMsg','Enter your name.');                     return; }
+  if(!email)             { showMsg('errMsg','Enter an email address.');              return; }
+  if(!pwd||pwd.length<6) { showMsg('errMsg','Password must be at least 6 chars.');  return; }
+  if(pwd !== pwd2)       { showMsg('errMsg','Passwords do not match.');              return; }
 
+  btn.innerHTML = '<div class="spin"></div> Setting up…';
+  btn.disabled  = true;
+
+  // ── STEP 1: Test Firestore write permission ──
+  log('Testing Firestore write permissions…');
+  var test = await testFirestoreWrite();
+  if(!test.ok){
+    log('Firestore write FAILED: ' + (test.code||'') + ' – ' + (test.message||''), 'err');
+    document.getElementById('rulesBox').style.display = 'block';
+    showMsg('errMsg',
+      '❌ <strong>Firestore write permission denied.</strong><br><br>'
+      + 'Your Firestore Security Rules are blocking writes. '
+      + 'See the rules box above — copy and publish those rules in Firebase Console first, then try again.'
+    );
+    btn.innerHTML = '🚀 Create Admin Account'; btn.disabled = false;
+    return;
+  }
+  log('Firestore write permission OK ✓', 'ok');
+
+  // ── STEP 2: Check no admin already exists ──
+  log('Checking for existing admin accounts…');
   try{
-    // 1. Check no admin already exists
-    setProgress('Checking existing accounts…');
     var existCheck = await db.collection('users').where('role','==','admin').limit(1).get();
     if(!existCheck.empty){
-      showErr('An admin account already exists. Use the login page instead.');
-      btn.innerHTML='🚀 Create Admin Account'; btn.disabled=false;
-      setProgress(''); return;
+      log('Admin account already exists', 'err');
+      showMsg('errMsg', 'An admin account already exists. <a href="index.html" style="color:#fca5a5">Go to login →</a>');
+      btn.innerHTML = '🚀 Create Admin Account'; btn.disabled = false;
+      return;
     }
-
-    // 2. Create Firebase Auth user
-    setProgress('Creating login credentials…');
-    var cred = await auth.createUserWithEmailAndPassword(email, pwd);
-    var uid  = cred.user.uid;
-
-    // 3. Write Firestore document with retries
-    setProgress('Saving admin profile to database…');
-    var written = await writeAdminDoc(uid, email, name);
-    if(!written){
-      // Auth user exists but Firestore failed — still show success with manual instructions
-      okEl.innerHTML = '⚠️ Auth account created (UID: <code>' + uid + '</code>) but database write failed. '
-        + 'Please go to Firestore Console → users → Add document with ID = <code>' + uid + '</code> '
-        + 'and fields: name, email, role="admin", active=true';
-      okEl.style.display='block';
-      btn.innerHTML='🚀 Retry';btn.disabled=false;
-      setProgress('');return;
-    }
-
-    // 4. Bootstrap system collections
-    setProgress('Initialising system settings…');
-    await bootstrapSystem(uid, 'admin');
-
-    // 5. Done
-    setProgress('');
-    okEl.innerHTML = '✅ <strong>Admin account created successfully!</strong><br>'
-      + 'Email: ' + email + '<br><br>'
-      + '⚠️ Please <strong>delete setup.html</strong> from your server now, then '
-      + '<a href="index.html" style="color:#34d399;font-weight:600">click here to sign in →</a>';
-    okEl.style.display='block';
-    btn.innerHTML='→ Go to Login';
-    btn.onclick=function(){window.location.href='index.html';};
-    btn.disabled=false;
-
+    log('No existing admin found ✓', 'ok');
   }catch(e){
-    setProgress('');
-    var msg = e.code==='auth/email-already-in-use'
-      ? 'This email is already registered. Try logging in at index.html, or use a different email.'
-      : e.code==='auth/invalid-email'
-      ? 'Invalid email address format.'
-      : e.code==='auth/weak-password'
-      ? 'Password is too weak. Use at least 6 characters.'
-      : e.code==='auth/network-request-failed'
-      ? 'Network error. Check your internet connection and try again.'
-      : e.message || 'Setup failed. Check console for details.';
-    showErr(msg);
-    btn.innerHTML='🚀 Create Admin Account'; btn.disabled=false;
+    log('Could not check existing admins: ' + e.message + ' (continuing…)', 'inf');
   }
+
+  // ── STEP 3: Create Firebase Auth account ──
+  log('Creating Firebase Auth account for ' + email + '…');
+  var uid;
+  try{
+    var cred = await auth.createUserWithEmailAndPassword(email, pwd);
+    uid = cred.user.uid;
+    log('Auth account created. UID: ' + uid, 'ok');
+  }catch(e){
+    log('Auth creation failed: ' + e.code + ' – ' + e.message, 'err');
+    var msg = e.code === 'auth/email-already-in-use'
+      ? 'This email already has an Auth account. Use a different email, or go to <a href="index.html" style="color:#fca5a5">login</a>.'
+      : e.code === 'auth/invalid-email' ? 'Invalid email format.'
+      : e.code === 'auth/weak-password' ? 'Password too weak (min 6 chars).'
+      : e.code === 'auth/network-request-failed' ? 'Network error. Check internet connection.'
+      : e.message;
+    showMsg('errMsg', '❌ Auth failed: ' + msg);
+    btn.innerHTML = '🚀 Create Admin Account'; btn.disabled = false;
+    return;
+  }
+
+  // ── STEP 4: Write Firestore document ──
+  log('Writing Firestore users/' + uid + ' document…');
+  try{
+    var saved = await writeUserDoc(uid, email, name);
+    log('Firestore document created. role=' + saved.role, 'ok');
+  }catch(e){
+    log('Firestore write failed: ' + e.code + ' – ' + e.message, 'err');
+    // Auth account was created — show UID so user can manually create doc
+    showMsg('errMsg',
+      '⚠️ Auth account created (UID: <code style="font-size:.75rem">' + uid + '</code>) but Firestore save failed: ' + e.message + '<br><br>'
+      + 'Go to Firebase Console → Firestore → users → Add document with ID = <code style="font-size:.75rem">'+ uid +'</code> '
+      + 'and fields: name, email, role="admin", active=true'
+    );
+    btn.innerHTML = '🚀 Retry'; btn.disabled = false;
+    return;
+  }
+
+  // ── STEP 5: Bootstrap system collections ──
+  log('Bootstrapping system settings…');
+  try{
+    await bootstrapSystem(uid, 'admin');
+    log('System settings initialised ✓', 'ok');
+  }catch(e){
+    log('Bootstrap warning (non-fatal): ' + e.message, 'inf');
+  }
+
+  // ── DONE ──
+  log('Setup complete! ✓', 'ok');
+  showMsg('okMsg',
+    '✅ <strong>Admin account created successfully!</strong><br>'
+    + 'Name: ' + name + '<br>Email: ' + email + '<br><br>'
+    + '🔐 <strong>Delete setup.html</strong> from your server now.<br>'
+    + '<a href="index.html" style="color:#34d399;font-weight:600">→ Go to Login</a>'
+  );
+  btn.innerHTML  = '→ Go to Login';
+  btn.onclick    = function(){ window.location.href = 'index.html'; };
+  btn.disabled   = false;
 }
 
 document.getElementById('aPwd2').addEventListener('keydown', function(e){
-  if(e.key==='Enter') createAdmin();
+  if(e.key === 'Enter') createAdmin();
 });
 </script>
 </body>
