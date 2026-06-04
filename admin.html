@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AMINA MILK – Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0e1a;--bg2:#111827;--bg3:#1a2234;--bg4:#1e2a40;
+  --acc:#f59e0b;--acc2:#fbbf24;--grn:#10b981;--red:#ef4444;--blu:#3b82f6;
+  --txt:#f1f5f9;--txt2:#94a3b8;--txt3:#64748b;
+  --bdr:rgba(245,158,11,0.15);--bdr2:rgba(255,255,255,0.07);
+  --sh:0 4px 24px rgba(0,0,0,0.4);--rnd:14px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
+h1,h2,h3,.brand{font-family:'Syne',sans-serif}
+/* ---- AUTH ---- */
+#authScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at 30% 20%,rgba(245,158,11,0.12),transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(59,130,246,0.08),transparent 60%),var(--bg)}
+.authBox{background:var(--bg2);border:1px solid var(--bdr);border-radius:20px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 24px 80px rgba(0,0,0,0.6)}
+.authLogo{text-align:center;margin-bottom:32px}
+.authLogo .drop{width:60px;height:60px;background:linear-gradient(135deg,var(--acc),#f97316);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:12px;box-shadow:0 8px 24px rgba(245,158,11,0.3)}
+.authLogo h1{font-size:1.6rem;color:var(--acc);letter-spacing:-0.5px}
+.authLogo p{color:var(--txt2);font-size:.85rem;margin-top:4px}
+.inp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:12px 16px;color:var(--txt);font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:.2s}
+.inp:focus{border-color:var(--acc);background:var(--bg4)}
+.inpG{margin-bottom:16px}
+.inpG label{display:block;font-size:.8rem;color:var(--txt2);margin-bottom:6px;font-weight:500}
+.btn{padding:12px 20px;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.95rem;transition:.2s}
+.btnPri{background:linear-gradient(135deg,var(--acc),#f97316);color:#000;width:100%}
+.btnPri:hover{opacity:.9;transform:translateY(-1px)}
+.btnSm{padding:7px 14px;font-size:.8rem;border-radius:8px}
+.btnGhost{background:transparent;border:1px solid var(--bdr2);color:var(--txt2)}
+.btnGhost:hover{border-color:var(--acc);color:var(--acc)}
+.btnGrn{background:var(--grn);color:#fff}
+.btnRed{background:var(--red);color:#fff}
+.btnBlu{background:var(--blu);color:#fff}
+.btnAcc{background:var(--acc);color:#000}
+.errMsg{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;padding:10px 14px;border-radius:8px;font-size:.85rem;margin-bottom:12px;display:none}
+/* ---- LAYOUT ---- */
+#app{display:none}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--bdr2);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar .brand{font-size:1.2rem;color:var(--acc);font-weight:800;display:flex;align-items:center;gap:10px}
+.topbar .brand span{background:linear-gradient(135deg,var(--acc),#f97316);color:#000;padding:3px 8px;border-radius:6px;font-size:.75rem}
+.topNav{display:flex;gap:4px;align-items:center;overflow-x:auto;flex:1;margin:0 16px;padding:4px 0}
+.topNav::-webkit-scrollbar{height:0}
+.navBtn{background:none;border:none;color:var(--txt2);padding:8px 14px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;white-space:nowrap;transition:.2s;display:flex;align-items:center;gap:6px}
+.navBtn:hover{background:var(--bg3);color:var(--txt)}
+.navBtn.active{background:rgba(245,158,11,.15);color:var(--acc)}
+.topRight{display:flex;align-items:center;gap:8px}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--acc),#f97316);display:flex;align-items:center;justify-content:center;font-weight:700;color:#000;font-size:.85rem;cursor:pointer}
+/* ---- PAGES ---- */
+.page{display:none;padding:20px;max-width:1400px;margin:0 auto}
+.page.active{display:block}
+/* ---- CARDS / GRID ---- */
+.statsGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+.statCard{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--rnd);padding:18px 16px;position:relative;overflow:hidden}
+.statCard::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.08}
+.statCard.gold::before{background:var(--acc)}
+.statCard.grn::before{background:var(--grn)}
+.statCard.red::before{background:var(--red)}
+.statCard.blu::before{background:var(--blu)}
+.statCard .val{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;line-height:1}
+.statCard .lbl{font-size:.75rem;color:var(--txt2);margin-top:6px;text-transform:uppercase;letter-spacing:.5px}
+.statCard .ico{font-size:1.5rem;margin-bottom:8px}
+.card{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--rnd);padding:20px;box-shadow:var(--sh)}
+.cardHd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cardHd h3{font-size:1rem;font-weight:700}
+/* ---- TABLE ---- */
+.tblWrap{overflow-x:auto;border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{background:var(--bg3);color:var(--txt2);padding:10px 12px;text-align:left;font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--bdr2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600}
+.badge.grn{background:rgba(16,185,129,.15);color:#34d399}
+.badge.red{background:rgba(239,68,68,.15);color:#fca5a5}
+.badge.yel{background:rgba(245,158,11,.15);color:var(--acc)}
+.badge.blu{background:rgba(59,130,246,.15);color:#93c5fd}
+/* ---- MODAL ---- */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;padding:20px}
+.overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--bdr2);border-radius:20px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.7)}
+.modalHd{padding:20px 24px 16px;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;justify-content:space-between}
+.modalHd h3{font-size:1.05rem;font-weight:700}
+.modalClose{background:none;border:none;color:var(--txt2);font-size:1.3rem;cursor:pointer;padding:4px 8px;border-radius:6px}
+.modalClose:hover{background:var(--bg3);color:var(--txt)}
+.modalBody{padding:20px 24px}
+.modalFt{padding:16px 24px;border-top:1px solid var(--bdr2);display:flex;gap:10px;justify-content:flex-end}
+/* ---- SEARCH ---- */
+.searchWrap{position:relative;margin-bottom:20px}
+.searchWrap .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--txt3);font-size:1rem}
+.searchInp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:11px 16px 11px 42px;color:var(--txt);font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:.2s}
+.searchInp:focus{border-color:var(--acc)}
+/* ---- FILTERS ROW ---- */
+.filtersRow{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;align-items:center}
+.filtersRow .inp{width:auto;flex:1;min-width:140px}
+.select{appearance:none;background:var(--bg3) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' fill='none' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;border:1px solid var(--bdr2);border-radius:10px;padding:11px 36px 11px 14px;color:var(--txt);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer}
+.select:focus{border-color:var(--acc)}
+/* ---- QR ---- */
+.qrBox{display:flex;flex-direction:column;align-items:center;gap:12px}
+.qrBox canvas,.qrBox img{border:4px solid var(--bg4);border-radius:12px}
+/* ---- TOAST ---- */
+#toast{position:fixed;bottom:24px;right:24px;z-index:500;display:flex;flex-direction:column;gap:8px}
+.toastItem{background:var(--bg2);border:1px solid var(--bdr2);border-radius:10px;padding:12px 18px;font-size:.85rem;box-shadow:var(--sh);animation:slideIn .3s ease;display:flex;align-items:center;gap:10px;max-width:320px}
+.toastItem.ok{border-left:3px solid var(--grn)}
+.toastItem.err{border-left:3px solid var(--red)}
+.toastItem.inf{border-left:3px solid var(--blu)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+/* ---- CONFIRM ---- */
+#confirmBox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;align-items:center;justify-content:center}
+#confirmBox.open{display:flex}
+.confirmCard{background:var(--bg2);border:1px solid var(--bdr2);border-radius:16px;padding:28px;max-width:360px;width:100%;text-align:center}
+.confirmCard h3{font-size:1.05rem;margin-bottom:8px}
+.confirmCard p{color:var(--txt2);font-size:.88rem;margin-bottom:20px}
+.confirmBtns{display:flex;gap:10px;justify-content:center}
+/* ---- REPORT EXPORT PANEL ---- */
+.exportPanel{background:var(--bg3);border-radius:10px;padding:14px;margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+/* ---- TABS ---- */
+.tabs{display:flex;gap:4px;background:var(--bg3);border-radius:10px;padding:4px;margin-bottom:20px}
+.tab{flex:1;text-align:center;padding:8px;border-radius:7px;cursor:pointer;font-size:.85rem;font-weight:500;color:var(--txt2);transition:.2s}
+.tab.active{background:var(--bg2);color:var(--acc);font-weight:600}
+/* ---- SECTION HEAD ---- */
+.secHd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.secHd h2{font-size:1.3rem;font-weight:700}
+/* ---- LOADER ---- */
+.spin{width:36px;height:36px;border:3px solid var(--bdr2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;margin:40px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ---- CUSTOMER CARD ---- */
+.custCard{display:grid;grid-template-columns:1fr auto;gap:10px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:12px;padding:14px 16px;margin-bottom:8px;transition:.2s}
+.custCard:hover{border-color:rgba(245,158,11,.3);background:var(--bg4)}
+.custCard .nm{font-weight:600;font-size:.95rem}
+.custCard .meta{font-size:.78rem;color:var(--txt2);margin-top:3px}
+.custCard .acts{display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap}
+/* ---- MOBILE ---- */
+@media(max-width:600px){
+  .topNav{display:none}
+  .mobileMenu{display:flex}
+  .statsGrid{grid-template-columns:repeat(2,1fr)}
+  .filtersRow .inp,.filtersRow .select{flex:1 1 100%}
+  .modal{max-width:100%;margin:0;border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0;max-height:85vh}
+  .overlay{align-items:flex-end;padding:0}
+  table{font-size:.78rem}
+  td,th{padding:8px}
+  .page{padding:14px}
+}
+.mobileMenu{display:none;background:none;border:none;color:var(--txt);font-size:1.4rem;cursor:pointer}
+#mobileNav{display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.6)}
+#mobileNav.open{display:block}
+.mobileNavPanel{position:absolute;right:0;top:0;bottom:0;width:240px;background:var(--bg2);border-left:1px solid var(--bdr2);padding:20px;display:flex;flex-direction:column;gap:4px}
+.mobileNavPanel .navBtn{text-align:left;font-size:.92rem;padding:10px 14px}
+/* ---- CHART ---- */
+.chartBar{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin:4px 0}
+.chartBar .fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--acc),#f97316);transition:.6s}
+/* ---- EMPTY ---- */
+.empty{text-align:center;padding:40px 20px;color:var(--txt3)}
+.empty .ico{font-size:2.5rem;margin-bottom:12px}
+/* ---- DELIVERY HISTORY ---- */
+.delRow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr2);font-size:.85rem}
+.delRow:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+<!-- AUTH -->
+<div id="authScreen">
+  <div class="authBox">
+    <div class="authLogo">
+      <div class="drop">🥛</div>
+      <h1>AMINA MILK</h1>
+      <p>Smart Distribution Management</p>
+    </div>
+    <div class="errMsg" id="authErr"></div>
+    <div class="inpG"><label>Email Address</label><input class="inp" id="loginEmail" type="email" placeholder="admin@aminamilk.com"></div>
+    <div class="inpG"><label>Password</label><input class="inp" id="loginPwd" type="password" placeholder="••••••••"></div>
+    <button class="btn btnPri" onclick="doLogin()" id="loginBtn">Sign In to Admin Panel</button>
+    <p style="text-align:center;margin-top:16px;font-size:.8rem;color:var(--txt3)">Admin access only • Staff use Milkman app</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="brand">🥛 <span>ADMIN</span> AMINA MILK</div>
+    <nav class="topNav">
+      <button class="navBtn active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
+      <button class="navBtn" onclick="showPage('customers',this)">👥 Customers</button>
+      <button class="navBtn" onclick="showPage('deliveries',this)">🚚 Deliveries</button>
+      <button class="navBtn" onclick="showPage('reports',this)">📋 Reports</button>
+      <button class="navBtn" onclick="showPage('staff',this)">👤 Staff</button>
+      <button class="navBtn" onclick="showPage('settings',this)">⚙️ Settings</button>
+    </nav>
+    <div class="topRight">
+      <div class="avatar" id="adminAvatar" title="Admin">A</div>
+      <button class="btn btnSm btnGhost" onclick="doLogout()">Logout</button>
+      <button class="mobileMenu" onclick="toggleMobileNav()">☰</button>
+    </div>
+  </div>
+  <!-- MOBILE NAV -->
+  <div id="mobileNav"><div class="mobileNavPanel">
+    <div style="font-family:'Syne',sans-serif;font-size:1rem;color:var(--acc);margin-bottom:16px;font-weight:700">🥛 AMINA MILK</div>
+    <button class="navBtn active" onclick="showPage('dashboard',this);closeMobileNav()">📊 Dashboard</button>
+    <button class="navBtn" onclick="showPage('customers',this);closeMobileNav()">👥 Customers</button>
+    <button class="navBtn" onclick="showPage('deliveries',this);closeMobileNav()">🚚 Deliveries</button>
+    <button class="navBtn" onclick="showPage('reports',this);closeMobileNav()">📋 Reports</button>
+    <button class="navBtn" onclick="showPage('staff',this);closeMobileNav()">👤 Staff</button>
+    <button class="navBtn" onclick="showPage('settings',this);closeMobileNav()">⚙️ Settings</button>
+    <button class="btn btnSm btnGhost" style="margin-top:auto" onclick="doLogout()">Logout</button>
+  </div></div>
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="pgDashboard">
+    <div class="secHd"><h2>Dashboard Overview</h2><span id="dashDate" style="color:var(--txt2);font-size:.85rem"></span></div>
+    <div class="statsGrid" id="statsGrid">
+      <div class="statCard gold"><div class="ico">👥</div><div class="val" id="s1">—</div><div class="lbl">Total Customers</div></div>
+      <div class="statCard grn"><div class="ico">✅</div><div class="val" id="s2">—</div><div class="lbl">Served Today</div></div>
+      <div class="statCard red"><div class="ico">⏳</div><div class="val" id="s3">—</div><div class="lbl">Pending Today</div></div>
+      <div class="statCard blu"><div class="ico">🥛</div><div class="val" id="s4">—</div><div class="lbl">Litres Today</div></div>
+      <div class="statCard gold"><div class="ico">➕</div><div class="val" id="s5">—</div><div class="lbl">Extra Milk Today</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="dashGrid">
+      <div class="card" id="recentDel"><div class="cardHd"><h3>Recent Deliveries</h3><button class="btn btnSm btnGhost" onclick="showPage('deliveries',null)">View All</button></div><div id="recentDelList"><div class="spin"></div></div></div>
+      <div class="card" id="topCust"><div class="cardHd"><h3>Top Customers (Weekly)</h3></div><div id="topCustList"><div class="spin"></div></div></div>
+    </div>
+  </div>
+
+  <!-- CUSTOMERS -->
+  <div class="page" id="pgCustomers">
+    <div class="secHd"><h2>Customer Management</h2><button class="btn btnAcc" onclick="openAddCustomer()">+ Add Customer</button></div>
+    <div class="searchWrap"><span class="ico">🔍</span><input class="searchInp" id="custSearch" placeholder="Search name, mobile, ID, address…" oninput="filterCustomers()"></div>
+    <div id="custList"><div class="spin"></div></div>
+  </div>
+
+  <!-- DELIVERIES -->
+  <div class="page" id="pgDeliveries">
+    <div class="secHd"><h2>Delivery Records</h2></div>
+    <div class="filtersRow">
+      <input class="inp" id="fCust" placeholder="Customer name/ID" style="flex:1;min-width:130px">
+      <input class="inp" type="date" id="fFrom" style="flex:1;min-width:130px">
+      <input class="inp" type="date" id="fTo" style="flex:1;min-width:130px">
+      <button class="btn btnAcc btnSm" onclick="loadDeliveries()">Filter</button>
+      <button class="btn btnGhost btnSm" onclick="clearDelFilters()">Clear</button>
+    </div>
+    <div id="delList"><div class="spin"></div></div>
+  </div>
+
+  <!-- REPORTS -->
+  <div class="page" id="pgReports">
+    <div class="secHd"><h2>Reports & Exports</h2></div>
+    <div class="card" style="margin-bottom:16px">
+      <h3 style="margin-bottom:14px;font-size:.95rem">Filter & Export</h3>
+      <div class="filtersRow">
+        <input class="inp" id="rCust" placeholder="Customer" style="flex:1;min-width:120px">
+        <input class="inp" id="rStaff" placeholder="Staff" style="flex:1;min-width:120px">
+        <input class="inp" type="date" id="rFrom" style="flex:1;min-width:120px">
+        <input class="inp" type="date" id="rTo" style="flex:1;min-width:120px">
+        <select class="select" id="rStatus"><option value="">All Status</option><option>delivered</option><option>pending</option></select>
+      </div>
+      <div class="exportPanel">
+        <span style="font-size:.82rem;color:var(--txt2);margin-right:6px">Export filtered:</span>
+        <button class="btn btnSm btnAcc" onclick="exportReport('pdf')">📄 PDF</button>
+        <button class="btn btnSm btnGrn" onclick="exportReport('csv')">📊 CSV</button>
+        <button class="btn btnSm btnBlu" onclick="exportReport('excel')">📗 Excel</button>
+        <button class="btn btnSm btnGhost" onclick="exportReport('json')">{ } JSON</button>
+        <button class="btn btnSm btnGhost" onclick="loadReport()">🔍 Preview</button>
+      </div>
+    </div>
+    <div id="reportList"><div class="empty"><div class="ico">📋</div><p>Apply filters and click Preview</p></div></div>
+  </div>
+
+  <!-- STAFF -->
+  <div class="page" id="pgStaff">
+    <div class="secHd"><h2>Staff Management</h2><button class="btn btnAcc" onclick="openAddStaff()">+ Add Staff</button></div>
+    <div id="staffList"><div class="spin"></div></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="page" id="pgSettings">
+    <div class="secHd"><h2>Settings</h2></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:800px" id="settingsGrid">
+      <div class="card">
+        <h3 style="margin-bottom:14px">Business Info</h3>
+        <div class="inpG"><label>Business Name</label><input class="inp" id="bizName" value="Amina Milk" placeholder="Business Name"></div>
+        <div class="inpG"><label>Phone</label><input class="inp" id="bizPhone" placeholder="+91 ..."></div>
+        <div class="inpG"><label>Address</label><input class="inp" id="bizAddr" placeholder="Address"></div>
+        <button class="btn btnAcc" onclick="saveBizSettings()">Save Info</button>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:14px">Delivery Defaults</h3>
+        <div class="inpG"><label>Default Milk Qty (L)</label><input class="inp" type="number" id="defQty" value="1" min="0.5" step="0.5"></div>
+        <div class="inpG"><label>Delivery Start Time</label><input class="inp" type="time" id="delStart" value="06:00"></div>
+        <div class="inpG"><label>Delivery End Time</label><input class="inp" type="time" id="delEnd" value="10:00"></div>
+        <button class="btn btnAcc" onclick="saveDelSettings()">Save Defaults</button>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:14px">Security</h3>
+        <div class="inpG"><label>Admin Email</label><input class="inp" id="adminEmail" type="email" readonly style="opacity:.6"></div>
+        <div class="inpG"><label>New Password</label><input class="inp" id="newPwd" type="password" placeholder="Leave blank to keep"></div>
+        <button class="btn btnAcc" onclick="updateAdminPwd()">Update Password</button>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:14px;color:var(--red)">⚠ Danger Zone</h3>
+        <p style="font-size:.82rem;color:var(--txt2);margin-bottom:14px">These actions cannot be undone. Admin only.</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn btnSm btnRed" onclick="confirmAction('Delete ALL delivery records?','deleteAllDeliveries')">🗑 Delete All Deliveries</button>
+          <button class="btn btnSm btnRed" onclick="confirmAction('Delete ALL customers? (Cannot undo)','deleteAllCustomers')">🗑 Delete All Customers</button>
+          <button class="btn btnSm btnRed" onclick="confirmAction('Reset search history?','resetSearchHistory')">🗑 Clear Search History</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<!-- Add/Edit Customer -->
+<div class="overlay" id="custModal">
+  <div class="modal">
+    <div class="modalHd"><h3 id="custModalTitle">Add Customer</h3><button class="modalClose" onclick="closeModal('custModal')">✕</button></div>
+    <div class="modalBody">
+      <input type="hidden" id="editCustId">
+      <div class="inpG"><label>Full Name *</label><input class="inp" id="cName" placeholder="Customer full name"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="inpG"><label>Mobile *</label><input class="inp" id="cMobile" type="tel" placeholder="+91 ..."></div>
+        <div class="inpG"><label>Alt Mobile</label><input class="inp" id="cMobile2" type="tel" placeholder="Optional"></div>
+      </div>
+      <div class="inpG"><label>Address *</label><input class="inp" id="cAddress" placeholder="Delivery address"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="inpG"><label>Default Qty (L)</label><input class="inp" type="number" id="cQty" value="1" min="0.5" step="0.5"></div>
+        <div class="inpG"><label>Milk Type</label><select class="select" id="cMilkType" style="width:100%"><option>Full Cream</option><option>Toned</option><option>Skim</option><option>Buffalo</option></select></div>
+      </div>
+      <div class="inpG"><label>Notes</label><input class="inp" id="cNotes" placeholder="Special instructions..."></div>
+    </div>
+    <div class="modalFt">
+      <button class="btn btnGhost" onclick="closeModal('custModal')">Cancel</button>
+      <button class="btn btnAcc" id="saveCustBtn" onclick="saveCustomer()">Save Customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Profile/QR Modal -->
+<div class="overlay" id="custProfileModal">
+  <div class="modal">
+    <div class="modalHd"><h3>Customer Profile</h3><button class="modalClose" onclick="closeModal('custProfileModal')">✕</button></div>
+    <div class="modalBody" id="custProfileBody"></div>
+  </div>
+</div>
+
+<!-- Add Staff -->
+<div class="overlay" id="staffModal">
+  <div class="modal">
+    <div class="modalHd"><h3>Add Staff Member</h3><button class="modalClose" onclick="closeModal('staffModal')">✕</button></div>
+    <div class="modalBody">
+      <div class="inpG"><label>Full Name *</label><input class="inp" id="sName" placeholder="Staff full name"></div>
+      <div class="inpG"><label>Email *</label><input class="inp" id="sEmail" type="email" placeholder="staff@aminamilk.com"></div>
+      <div class="inpG"><label>Password *</label><input class="inp" id="sPwd" type="password" placeholder="Min 6 characters"></div>
+      <div class="inpG"><label>Phone</label><input class="inp" id="sPhone" type="tel" placeholder="+91 ..."></div>
+    </div>
+    <div class="modalFt">
+      <button class="btn btnGhost" onclick="closeModal('staffModal')">Cancel</button>
+      <button class="btn btnAcc" onclick="saveStaff()">Add Staff</button>
+    </div>
+  </div>
+</div>
+
+<!-- QR View Modal -->
+<div class="overlay" id="qrModal">
+  <div class="modal" style="max-width:360px">
+    <div class="modalHd"><h3 id="qrModalTitle">Customer QR Code</h3><button class="modalClose" onclick="closeModal('qrModal')">✕</button></div>
+    <div class="modalBody">
+      <div class="qrBox" id="qrDisplay"></div>
+      <div id="qrCustInfo" style="text-align:center;margin-top:12px;font-size:.85rem;color:var(--txt2)"></div>
+    </div>
+    <div class="modalFt" id="qrModalFt"></div>
+  </div>
+</div>
+
+<!-- Delivery History Modal -->
+<div class="overlay" id="histModal">
+  <div class="modal">
+    <div class="modalHd"><h3 id="histTitle">Delivery History</h3><button class="modalClose" onclick="closeModal('histModal')">✕</button></div>
+    <div class="modalBody" id="histBody"></div>
+  </div>
+</div>
+
+<!-- Confirm -->
+<div id="confirmBox">
+  <div class="confirmCard">
+    <h3 id="confirmQ">Are you sure?</h3>
+    <p id="confirmD">This action cannot be undone.</p>
+    <div class="confirmBtns">
+      <button class="btn btnGhost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btnRed" onclick="runConfirm()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- SCRIPTS -->
+<script src="firebase.js"></script>
+<script>
+// ---- STATE ----
+let CU=null,CUR=null,CUSTS=[],DELS=[],STAFF=[],SETTINGS={};
+let pendingConfirm=null;
+const today=new Date().toISOString().slice(0,10);
+
+// ---- AUTH ----
+async function doLogin(){
+  const e=document.getElementById('loginEmail').value.trim();
+  const p=document.getElementById('loginPwd').value;
+  const btn=document.getElementById('loginBtn');
+  const err=document.getElementById('authErr');
+  if(!e||!p){showErr(err,'Please enter email and password.');return;}
+  btn.textContent='Signing in…';btn.disabled=true;err.style.display='none';
+  try{
+    const c=await signIn(e,p);
+    const role=await getUserRole(c.user.uid);
+    if(role!=='admin'){await signOut();showErr(err,'Admin access only.');btn.textContent='Sign In to Admin Panel';btn.disabled=false;return;}
+    CU=c.user;CUR=role;await bootstrapSystem(c.user.uid,role);
+    document.getElementById('authScreen').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('adminAvatar').textContent=(c.user.email||'A')[0].toUpperCase();
+    document.getElementById('adminEmail').value=c.user.email||'';
+    document.getElementById('dashDate').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    loadDashboard();loadCustomers();
+  }catch(er){showErr(err,er.message||'Login failed');btn.textContent='Sign In to Admin Panel';btn.disabled=false;}
+}
+async function doLogout(){await signOut();location.reload();}
+function showErr(el,msg){el.textContent=msg;el.style.display='block';}
+document.getElementById('loginPwd').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+// ---- NAVIGATION ----
+let activePage='dashboard';
+function showPage(p,btn){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.getElementById('pg'+p.charAt(0).toUpperCase()+p.slice(1)).classList.add('active');
+  document.querySelectorAll('.navBtn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  activePage=p;
+  if(p==='dashboard')loadDashboard();
+  else if(p==='customers')loadCustomers();
+  else if(p==='deliveries')loadDeliveries();
+  else if(p==='staff')loadStaff();
+  else if(p==='settings')loadSettings();
+}
+function toggleMobileNav(){document.getElementById('mobileNav').classList.add('open');}
+function closeMobileNav(){document.getElementById('mobileNav').classList.remove('open');}
+document.getElementById('mobileNav').addEventListener('click',e=>{if(e.target===document.getElementById('mobileNav'))closeMobileNav();});
+
+// ---- TOAST ----
+function toast(msg,type='ok'){
+  const d=document.createElement('div');d.className=`toastItem ${type}`;
+  d.innerHTML=(type==='ok'?'✅':type==='err'?'❌':'ℹ️')+' '+msg;
+  document.getElementById('toast').appendChild(d);
+  setTimeout(()=>d.remove(),3500);
+}
+
+// ---- CONFIRM ----
+function confirmAction(q,fn,data){pendingConfirm={fn,data};document.getElementById('confirmQ').textContent=q||'Confirm?';document.getElementById('confirmBox').classList.add('open');}
+function closeConfirm(){document.getElementById('confirmBox').classList.remove('open');pendingConfirm=null;}
+function runConfirm(){if(pendingConfirm)window[pendingConfirm.fn](pendingConfirm.data);closeConfirm();}
+
+// ---- MODALS ----
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ---- DASHBOARD ----
+async function loadDashboard(){
+  try{
+    const st=await getStats();
+    document.getElementById('s1').textContent=st.totalCustomers;
+    document.getElementById('s2').textContent=st.todayServed;
+    document.getElementById('s3').textContent=st.totalPending;
+    document.getElementById('s4').textContent=st.totalMilk+'L';
+    document.getElementById('s5').textContent=st.extraMilk+'L';
+    // Recent deliveries
+    const dels=await getTodayDeliveries();
+    const rl=document.getElementById('recentDelList');
+    if(!dels.length){rl.innerHTML='<div class="empty"><div class="ico">🚚</div><p>No deliveries today yet</p></div>';return;}
+    rl.innerHTML=dels.slice(0,6).map(d=>`<div class="delRow"><div><div style="font-weight:600;font-size:.88rem">${d.customerName||d.customerId}</div><div style="font-size:.75rem;color:var(--txt2)">${d.time||''} • ${d.staffName||'Staff'}</div></div><div><span class="badge grn">${d.deliveredQty||0}L</span></div></div>`).join('');
+    // Top customers (placeholder with week data)
+    const tl=document.getElementById('topCustList');
+    const weekAgo=new Date();weekAgo.setDate(weekAgo.getDate()-7);
+    const wf=weekAgo.toISOString().slice(0,10);
+    const wDels=await getDeliveries({dateFrom:wf});
+    const freq={};
+    wDels.forEach(d=>{if(d.customerId)freq[d.customerId]=(freq[d.customerId]||{nm:d.customerName||d.customerId,cnt:0,ml:0});freq[d.customerId].cnt++;freq[d.customerId].ml+=(d.deliveredQty||0);});
+    const top=Object.values(freq).sort((a,b)=>b.cnt-a.cnt).slice(0,5);
+    const mx=top[0]?.cnt||1;
+    tl.innerHTML=top.length?top.map(t=>`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:.83rem"><span>${t.nm}</span><span style="color:var(--acc)">${t.cnt} del • ${t.ml}L</span></div><div class="chartBar"><div class="fill" style="width:${(t.cnt/mx)*100}%"></div></div></div>`).join(''):'<div class="empty"><div class="ico">📊</div><p>No data this week</p></div>';
+  }catch(e){console.error(e);}
+}
+
+// ---- CUSTOMERS ----
+async function loadCustomers(){
+  document.getElementById('custList').innerHTML='<div class="spin"></div>';
+  try{
+    CUSTS=await getCustomers();
+    renderCustomers(CUSTS);
+    CACHE.set('customers',CUSTS);
+  }catch{
+    const cached=CACHE.get('customers',600000);
+    if(cached){CUSTS=cached;renderCustomers(CUSTS);toast('Offline mode – cached data','inf');}
+    else document.getElementById('custList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Failed to load customers</p></div>';
+  }
+}
+function renderCustomers(list){
+  const el=document.getElementById('custList');
+  if(!list.length){el.innerHTML='<div class="empty"><div class="ico">👥</div><p>No customers yet. Add one!</p></div>';return;}
+  el.innerHTML=list.map(c=>`<div class="custCard">
+    <div>
+      <div class="nm">${c.name} <span class="badge grn" style="font-size:.65rem">${c.customerId}</span></div>
+      <div class="meta">📱 ${c.mobile} • 📍 ${c.address||'—'} • 🥛 ${c.defaultQty||1}L ${c.milkType||''}</div>
+      <div class="meta" style="margin-top:4px">Added: ${c.createdAt?.toDate?c.createdAt.toDate().toLocaleDateString('en-IN'):''}</div>
+    </div>
+    <div class="acts">
+      <button class="btn btnSm btnAcc" onclick='showQR("${c.customerId}","${c.qrData||''}","${c.name}")'>QR</button>
+      <button class="btn btnSm btnGhost" onclick='showCustHistory("${c.customerId}","${c.name}")'>History</button>
+      <button class="btn btnSm btnBlu" onclick='openEditCustomer("${c.customerId}")'>Edit</button>
+      <button class="btn btnSm btnRed" onclick='confirmAction("Delete customer ${c.name}?","doDeleteCustomer","${c.customerId}")'>Del</button>
+    </div>
+  </div>`).join('');
+}
+function filterCustomers(){
+  const q=document.getElementById('custSearch').value.toLowerCase();
+  renderCustomers(CUSTS.filter(c=>
+    (c.name||'').toLowerCase().includes(q)||(c.mobile||'').includes(q)||
+    (c.customerId||'').toLowerCase().includes(q)||(c.address||'').toLowerCase().includes(q)
+  ));
+}
+function openAddCustomer(){
+  document.getElementById('custModalTitle').textContent='Add Customer';
+  document.getElementById('saveCustBtn').textContent='Save Customer';
+  ['editCustId','cName','cMobile','cMobile2','cAddress','cNotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cQty').value=1;
+  openModal('custModal');
+}
+function openEditCustomer(cid){
+  const c=CUSTS.find(x=>x.customerId===cid||x.id===cid);
+  if(!c)return;
+  document.getElementById('custModalTitle').textContent='Edit Customer';
+  document.getElementById('saveCustBtn').textContent='Update Customer';
+  document.getElementById('editCustId').value=c.customerId||c.id;
+  document.getElementById('cName').value=c.name||'';
+  document.getElementById('cMobile').value=c.mobile||'';
+  document.getElementById('cMobile2').value=c.mobile2||'';
+  document.getElementById('cAddress').value=c.address||'';
+  document.getElementById('cQty').value=c.defaultQty||1;
+  document.getElementById('cNotes').value=c.notes||'';
+  openModal('custModal');
+}
+async function saveCustomer(){
+  const eid=document.getElementById('editCustId').value;
+  const name=document.getElementById('cName').value.trim();
+  const mobile=document.getElementById('cMobile').value.trim();
+  const address=document.getElementById('cAddress').value.trim();
+  if(!name||!mobile||!address){toast('Fill required fields','err');return;}
+  const data={name,mobile,mobile2:document.getElementById('cMobile2').value.trim(),address,defaultQty:parseFloat(document.getElementById('cQty').value)||1,milkType:document.getElementById('cMilkType').value,notes:document.getElementById('cNotes').value.trim()};
+  try{
+    if(eid){
+      await updateCustomer(eid,data);
+      toast('Customer updated ✓');
+    } else {
+      const res=await addCustomer(data,CU.uid);
+      closeModal('custModal');
+      showNewQR(res);
+      toast('Customer added & QR generated ✓');
+      loadCustomers();return;
+    }
+    closeModal('custModal');loadCustomers();
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+function showNewQR(res){
+  document.getElementById('qrModalTitle').textContent='New Customer QR Code';
+  const el=document.getElementById('qrDisplay');
+  el.innerHTML='';
+  renderQR(res.qrData,el,200);
+  document.getElementById('qrCustInfo').innerHTML=`<strong>${res.doc.name}</strong><br>ID: ${res.cid}<br><small style="color:var(--txt3)">Save or share this QR code</small>`;
+  document.getElementById('qrModalFt').innerHTML=`
+    <button class="btn btnGhost" onclick="closeModal('qrModal')">Close</button>
+    <button class="btn btnAcc" onclick="downloadQR('${res.qrData}','${res.cid}_QR')">Download QR</button>`;
+  openModal('qrModal');
+  loadCustomers();
+}
+async function doDeleteCustomer(cid){
+  try{await deleteCustomer(cid);toast('Customer deleted');loadCustomers();}
+  catch(e){toast('Error: '+e.message,'err');}
+}
+async function showQR(cid,qrData,name){
+  if(!qrData){const c=CUSTS.find(x=>x.customerId===cid);qrData=c?.qrData||'';}
+  if(!qrData){toast('No QR data found','err');return;}
+  document.getElementById('qrModalTitle').textContent=`QR Code – ${name}`;
+  const el=document.getElementById('qrDisplay');el.innerHTML='';
+  renderQR(qrData,el,200);
+  document.getElementById('qrCustInfo').innerHTML=`<strong>${name}</strong><br>ID: ${cid}`;
+  document.getElementById('qrModalFt').innerHTML=`
+    <button class="btn btnGhost" onclick="closeModal('qrModal')">Close</button>
+    <button class="btn btnAcc" onclick="downloadQR('${qrData}','${cid}_QR')">⬇ Download</button>
+    <button class="btn btnGhost" onclick="regenQR('${cid}')">🔄 Regenerate</button>`;
+  openModal('qrModal');
+}
+async function regenQR(cid){
+  try{
+    const newQ=generateQRData(cid);
+    await updateCustomer(cid,{qrData:newQ});
+    toast('QR regenerated ✓');
+    const idx=CUSTS.findIndex(c=>c.customerId===cid||c.id===cid);
+    if(idx>-1)CUSTS[idx].qrData=newQ;
+    showQR(cid,newQ,CUSTS[idx]?.name||cid);
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+async function showCustHistory(cid,name){
+  document.getElementById('histTitle').textContent=`History – ${name}`;
+  document.getElementById('histBody').innerHTML='<div class="spin"></div>';
+  openModal('histModal');
+  try{
+    const dels=await getDeliveries({customerId:cid});
+    const el=document.getElementById('histBody');
+    if(!dels.length){el.innerHTML='<div class="empty"><div class="ico">📦</div><p>No deliveries yet</p></div>';return;}
+    el.innerHTML=dels.slice(0,30).map(d=>`<div class="delRow">
+      <div><div style="font-weight:600;font-size:.88rem">${d.date}</div><div style="font-size:.75rem;color:var(--txt2)">${d.time||''} • ${d.staffName||'Staff'}</div></div>
+      <div style="text-align:right"><div style="font-size:.9rem;font-weight:600">${d.deliveredQty||0}L</div>${d.extraQty?`<div style="font-size:.72rem;color:var(--acc)">+${d.extraQty}L extra</div>`:''}</div>
+    </div>`).join('');
+  }catch(e){document.getElementById('histBody').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Error loading history</p></div>';}
+}
+
+// ---- DELIVERIES ----
+async function loadDeliveries(){
+  document.getElementById('delList').innerHTML='<div class="spin"></div>';
+  const filters={};
+  const fc=document.getElementById('fCust').value.trim();
+  const ff=document.getElementById('fFrom').value;
+  const ft=document.getElementById('fTo').value;
+  if(ff)filters.dateFrom=ff;if(ft)filters.dateTo=ft;
+  try{
+    let dels=await getDeliveries(filters);
+    if(fc)dels=dels.filter(d=>(d.customerName||'').toLowerCase().includes(fc.toLowerCase())||(d.customerId||'').toLowerCase().includes(fc.toLowerCase()));
+    DELS=dels;renderDeliveries(dels);
+  }catch(e){document.getElementById('delList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Failed to load</p></div>';}
+}
+function renderDeliveries(list){
+  const el=document.getElementById('delList');
+  if(!list.length){el.innerHTML='<div class="empty"><div class="ico">🚚</div><p>No deliveries found</p></div>';return;}
+  el.innerHTML=`<div class="tblWrap"><table><thead><tr><th>Customer</th><th>Date</th><th>Time</th><th>Qty</th><th>Extra</th><th>Staff</th><th>Status</th></tr></thead><tbody>${
+    list.map(d=>`<tr><td><div style="font-weight:600">${d.customerName||d.customerId}</div><div style="font-size:.73rem;color:var(--txt3)">${d.customerId}</div></td><td>${d.date}</td><td>${d.time||'—'}</td><td>${d.deliveredQty||0}L</td><td>${d.extraQty?`<span style="color:var(--acc)">+${d.extraQty}L</span>`:'—'}</td><td>${d.staffName||'—'}</td><td><span class="badge grn">Delivered</span></td></tr>`).join('')
+  }</tbody></table></div>`;
+}
+function clearDelFilters(){
+  ['fCust','fFrom','fTo'].forEach(id=>document.getElementById(id).value='');
+  loadDeliveries();
+}
+
+// ---- REPORTS ----
+let reportData=[];
+async function loadReport(){
+  document.getElementById('reportList').innerHTML='<div class="spin"></div>';
+  const filters={};
+  const rf=document.getElementById('rFrom').value;const rt=document.getElementById('rTo').value;
+  if(rf)filters.dateFrom=rf;if(rt)filters.dateTo=rt;
+  try{
+    let data=await getDeliveries(filters);
+    const rc=document.getElementById('rCust').value.trim().toLowerCase();
+    const rs=document.getElementById('rStaff').value.trim().toLowerCase();
+    if(rc)data=data.filter(d=>(d.customerName||'').toLowerCase().includes(rc)||(d.customerId||'').toLowerCase().includes(rc));
+    if(rs)data=data.filter(d=>(d.staffName||'').toLowerCase().includes(rs));
+    reportData=data;
+    renderDeliveries(data);
+    document.getElementById('reportList').innerHTML='';
+    const wrap=document.createElement('div');
+    wrap.innerHTML=`<div style="margin-bottom:10px;font-size:.85rem;color:var(--txt2)">${data.length} records found</div>`;
+    document.getElementById('reportList').appendChild(wrap);
+    if(!data.length){document.getElementById('reportList').innerHTML='<div class="empty"><div class="ico">📊</div><p>No records match filters</p></div>';return;}
+    const tbl=document.createElement('div');tbl.className='tblWrap';
+    tbl.innerHTML=`<table><thead><tr><th>Customer</th><th>Date</th><th>Time</th><th>Qty</th><th>Extra</th><th>Staff</th></tr></thead><tbody>${data.map(d=>`<tr><td>${d.customerName||d.customerId}</td><td>${d.date}</td><td>${d.time||'—'}</td><td>${d.deliveredQty||0}L</td><td>${d.extraQty||0}L</td><td>${d.staffName||'—'}</td></tr>`).join('')}</tbody></table>`;
+    document.getElementById('reportList').appendChild(tbl);
+  }catch(e){document.getElementById('reportList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Error loading report</p></div>';}
+}
+function getFiltersText(){
+  const parts=[];
+  const rc=document.getElementById('rCust').value.trim();
+  const rs=document.getElementById('rStaff').value.trim();
+  const rf=document.getElementById('rFrom').value;const rt=document.getElementById('rTo').value;
+  if(rc)parts.push('Customer: '+rc);if(rs)parts.push('Staff: '+rs);
+  if(rf)parts.push('From: '+rf);if(rt)parts.push('To: '+rt);
+  return parts.join(' | ')||'All records';
+}
+async function exportReport(fmt){
+  if(!reportData.length){toast('Preview report first','inf');await loadReport();}
+  if(!reportData.length){toast('No data to export','err');return;}
+  const filtersText=getFiltersText();
+  if(fmt==='pdf')exportPDF(reportData,filtersText);
+  else if(fmt==='csv')exportCSV(reportData);
+  else if(fmt==='excel')exportExcel(reportData);
+  else if(fmt==='json'){const b=new Blob([JSON.stringify(reportData,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='aminamilk_report.json';a.click();}
+}
+function exportPDF(data,filters){
+  const {jsPDF}=window.jspdf;const doc=new jsPDF();
+  doc.setFontSize(22);doc.setTextColor(245,158,11);doc.text('AMINA MILK',105,18,{align:'center'});
+  doc.setFontSize(11);doc.setTextColor(148,163,184);doc.text('Smart Milk Distribution Report',105,26,{align:'center'});
+  doc.setFontSize(9);doc.setTextColor(100,116,139);
+  doc.text('Exported: '+new Date().toLocaleString('en-IN'),14,34);
+  doc.text('Filters: '+filters,14,40);
+  doc.setDrawColor(245,158,11,0.3);doc.line(14,44,196,44);
+  let y=52;
+  const heads=['Customer','Date','Time','Qty','Extra','Staff'];
+  const cols=[52,22,20,16,16,30];
+  doc.setFontSize(8);doc.setTextColor(245,158,11);
+  let x=14;heads.forEach((h,i)=>{doc.text(h,x,y);x+=cols[i];});
+  y+=6;doc.setTextColor(30,42,64);doc.setFillColor(30,42,64);doc.rect(14,y-4,182,0.5,'F');
+  doc.setTextColor(241,245,249);doc.setFontSize(8);
+  data.forEach((d,idx)=>{
+    if(y>270){doc.addPage();y=20;}
+    if(idx%2===0){doc.setFillColor(26,34,52);doc.rect(14,y-4,182,8,'F');}
+    x=14;const row=[d.customerName||d.customerId,d.date,d.time||'—',(d.deliveredQty||0)+'L',(d.extraQty||0)+'L',d.staffName||'—'];
+    row.forEach((v,i)=>{doc.text(String(v).slice(0,cols[i]>20?18:10),x,y);x+=cols[i];});
+    y+=8;
+  });
+  y+=6;doc.setTextColor(148,163,184);doc.setFontSize(9);
+  doc.text(`Total Records: ${data.length} | Total Milk: ${data.reduce((s,d)=>s+(d.deliveredQty||0),0)}L`,14,y);
+  doc.save('aminamilk_report.pdf');toast('PDF exported ✓');
+}
+function exportCSV(data){
+  const heads='Customer,ID,Date,Time,Qty,Extra,Staff\n';
+  const rows=data.map(d=>`${d.customerName||''},${d.customerId||''},${d.date},${d.time||''},${d.deliveredQty||0},${d.extraQty||0},${d.staffName||''}`).join('\n');
+  const b=new Blob([heads+rows],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='aminamilk_report.csv';a.click();toast('CSV exported ✓');
+}
+function exportExcel(data){
+  const ws=XLSX.utils.json_to_sheet(data.map(d=>({'Customer':d.customerName,'ID':d.customerId,'Date':d.date,'Time':d.time||'','Qty(L)':d.deliveredQty||0,'Extra(L)':d.extraQty||0,'Staff':d.staffName||''})));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Report');
+  XLSX.writeFile(wb,'aminamilk_report.xlsx');toast('Excel exported ✓');
+}
+
+// ---- STAFF ----
+async function loadStaff(){
+  document.getElementById('staffList').innerHTML='<div class="spin"></div>';
+  try{
+    STAFF=await getStaff();
+    if(!STAFF.length){document.getElementById('staffList').innerHTML='<div class="empty"><div class="ico">👤</div><p>No staff added yet</p></div>';return;}
+    document.getElementById('staffList').innerHTML=`<div class="tblWrap"><table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody>${
+      STAFF.map(s=>`<tr><td><div style="font-weight:600">${s.name}</div></td><td>${s.email}</td><td>${s.phone||'—'}</td><td><span class="badge blu">Staff</span></td><td><span class="badge grn">Active</span></td><td><button class="btn btnSm btnRed" onclick='confirmAction("Remove staff ${s.name}?","doRemoveStaff","${s.id}")'>Remove</button></td></tr>`).join('')
+    }</tbody></table></div>`;
+  }catch(e){document.getElementById('staffList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Error loading staff</p></div>';}
+}
+function openAddStaff(){['sName','sEmail','sPwd','sPhone'].forEach(id=>document.getElementById(id).value='');openModal('staffModal');}
+async function saveStaff(){
+  const name=document.getElementById('sName').value.trim();
+  const email=document.getElementById('sEmail').value.trim();
+  const pwd=document.getElementById('sPwd').value;
+  const phone=document.getElementById('sPhone').value.trim();
+  if(!name||!email||!pwd){toast('Fill all required fields','err');return;}
+  if(pwd.length<6){toast('Password must be 6+ characters','err');return;}
+  try{
+    await createStaffUser(email,pwd,name,phone);
+    toast('Staff account created ✓');closeModal('staffModal');loadStaff();
+  }catch(e){toast('Error: '+e.message,'err');}
+}
+async function doRemoveStaff(uid){
+  try{await deactivateStaff(uid);toast('Staff removed');loadStaff();}
+  catch(e){toast('Error: '+e.message,'err');}
+}
+
+// ---- SETTINGS ----
+async function loadSettings(){
+  const s=await getSettings();
+  const map={'bizName':'bizName','bizPhone':'bizPhone','bizAddr':'bizAddress','defQty':'defaultQty','delStart':'deliveryStart','delEnd':'deliveryEnd'};
+  Object.entries(map).forEach(([elId,key])=>{if(s[key]!==undefined&&document.getElementById(elId))document.getElementById(elId).value=s[key];});
+}
+async function saveBizSettings(){
+  await saveSettings({bizName:document.getElementById('bizName').value,bizPhone:document.getElementById('bizPhone').value,bizAddress:document.getElementById('bizAddr').value});
+  toast('Business info saved ✓');
+}
+async function saveDelSettings(){
+  await saveSettings({defaultQty:parseFloat(document.getElementById('defQty').value)||1,deliveryStart:document.getElementById('delStart').value,deliveryEnd:document.getElementById('delEnd').value});
+  toast('Delivery settings saved ✓');
+}
+async function updateAdminPwd(){
+  const p=document.getElementById('newPwd').value;
+  if(!p||p.length<6){toast('Enter a 6+ character password','err');return;}
+  try{await CU.updatePassword(p);toast('Password updated ✓');document.getElementById('newPwd').value='';}
+  catch(e){toast('Error: '+e.message,'err');}
+}
+// Danger zone actions
+async function deleteAllDeliveries(){
+  toast('Deleting all deliveries…','inf');
+  const snap=await db.collection('deliveries').get();
+  const batch=db.batch();snap.docs.forEach(d=>batch.delete(d.ref));
+  await batch.commit();toast('All deliveries deleted ✓');
+}
+async function deleteAllCustomers(){
+  toast('Deleting all customers…','inf');
+  const snap=await db.collection('customers').get();
+  const batch=db.batch();snap.docs.forEach(d=>batch.update(d.ref,{active:false}));
+  await batch.commit();toast('All customers removed ✓');CUSTS=[];loadCustomers();
+}
+async function resetSearchHistory(){
+  const snap=await db.collection('searchHistory').get();
+  const batch=db.batch();snap.docs.forEach(d=>batch.delete(d.ref));
+  await batch.commit();toast('Search history cleared ✓');
+}
+
+// ---- AUTH CHECK ----
+auth.onAuthStateChanged(async u=>{
+  if(u){
+    const role=await getUserRole(u.uid);
+    if(role==='admin'){CU=u;CUR=role;bootstrapSystem(u.uid,role);document.getElementById('authScreen').style.display='none';document.getElementById('app').style.display='block';document.getElementById('adminAvatar').textContent=(u.email||'A')[0].toUpperCase();document.getElementById('adminEmail').value=u.email||'';document.getElementById('dashDate').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});loadDashboard();loadCustomers();}
+  }
+});
+
+// ---- RESPONSIVE GRID ----
+function fixGrid(){
+  const w=window.innerWidth;
+  const g=document.getElementById('dashGrid');
+  if(g)g.style.gridTemplateColumns=w<700?'1fr':'1fr 1fr';
+  const sg=document.getElementById('settingsGrid');
+  if(sg)sg.style.gridTemplateColumns=w<700?'1fr':'1fr 1fr';
+}
+window.addEventListener('resize',fixGrid);fixGrid();
+</script>
+</body>
+</html>
