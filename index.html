@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
 <title>AMINA MILK – Login</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -11,118 +12,245 @@
 <script src="firebase.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{--bg:#060d1a;--bg2:#0f1a2e;--bg3:#162236;--acc:#f59e0b;--grn:#10b981;--red:#ef4444;--txt:#f1f5f9;--txt2:#94a3b8;--bdr:rgba(245,158,11,.18);--bdr2:rgba(255,255,255,.07)}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 20% 10%,rgba(245,158,11,.1),transparent 55%),radial-gradient(ellipse at 85% 85%,rgba(16,185,129,.07),transparent 55%),var(--bg)}
-.box{background:var(--bg2);border:1px solid var(--bdr);border-radius:22px;padding:36px 28px;width:100%;max-width:400px;box-shadow:0 24px 80px rgba(0,0,0,.7)}
-h1{font-family:'Syne',sans-serif;color:var(--acc);font-size:1.7rem;text-align:center;margin-bottom:4px}
-.drop{width:64px;height:64px;background:linear-gradient(135deg,var(--acc),#f97316);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 10px;box-shadow:0 8px 28px rgba(245,158,11,.35)}
-.sub{text-align:center;color:var(--txt2);font-size:.82rem;margin-bottom:28px}
-.inpG{margin-bottom:14px}
-.inpG label{display:block;font-size:.78rem;color:var(--txt2);margin-bottom:5px;font-weight:500}
-.inp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:12px 15px;color:var(--txt);font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:.2s}
-.inp:focus{border-color:var(--acc)}
-.btn{width:100%;padding:13px;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.95rem;background:linear-gradient(135deg,var(--acc),#f97316);color:#000;transition:.18s;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn:hover{opacity:.9}.btn:active{transform:scale(.98)}.btn:disabled{opacity:.6;cursor:not-allowed}
-.err{background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.28);color:#fca5a5;padding:9px 13px;border-radius:8px;font-size:.83rem;margin-bottom:12px;display:none}
-.spin{width:18px;height:18px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:sp .6s linear infinite}
+:root{
+  --bg:#06090f;--bg2:#0d1526;--bg3:#141f33;
+  --acc:#f59e0b;--acc2:#fbbf24;--grn:#10b981;--red:#ef4444;
+  --txt:#f0f4ff;--txt2:#8899bb;--txt3:#4a5a7a;
+  --bdr:rgba(245,158,11,.2);--bdr2:rgba(100,130,200,.1);
+  --sh:0 0 80px rgba(245,158,11,.08)
+}
+body{
+  font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:20px;overflow:hidden;
+  background-image:
+    radial-gradient(ellipse 70% 50% at 15% 5%,rgba(245,158,11,.07),transparent),
+    radial-gradient(ellipse 60% 60% at 90% 95%,rgba(16,185,129,.05),transparent),
+    radial-gradient(ellipse 40% 40% at 50% 50%,rgba(245,158,11,.03),transparent);
+}
+
+/* Animated grain overlay */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:0.4;
+}
+
+/* Grid lines background */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(245,158,11,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(245,158,11,.03) 1px,transparent 1px);
+  background-size:48px 48px;pointer-events:none;z-index:0;
+}
+
+.wrap{position:relative;z-index:1;width:100%;max-width:420px;}
+
+/* Logo area */
+.logo-area{text-align:center;margin-bottom:32px;animation:fadeUp .6s ease both;}
+.drop-icon{
+  width:72px;height:72px;
+  background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(245,158,11,.05));
+  border:1px solid rgba(245,158,11,.25);
+  border-radius:20px;display:flex;align-items:center;justify-content:center;
+  font-size:32px;margin:0 auto 14px;
+  box-shadow:0 0 40px rgba(245,158,11,.15),inset 0 1px 0 rgba(255,255,255,.08);
+  animation:float 4s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.logo-title{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;letter-spacing:-.5px;
+  background:linear-gradient(135deg,var(--acc),var(--acc2) 60%,#fff);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:.78rem;color:var(--txt2);margin-top:4px;letter-spacing:.8px;text-transform:uppercase;}
+
+/* Card */
+.box{
+  background:linear-gradient(160deg,rgba(20,31,51,.95),rgba(13,21,38,.98));
+  border:1px solid var(--bdr2);border-radius:24px;padding:32px 28px;
+  box-shadow:0 24px 80px rgba(0,0,0,.6),0 0 0 1px rgba(245,158,11,.05),var(--sh);
+  animation:fadeUp .6s .1s ease both;backdrop-filter:blur(20px);
+  position:relative;overflow:hidden;
+}
+.box::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(245,158,11,.3),transparent);
+}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+/* Form elements */
+.inpG{margin-bottom:16px;position:relative;}
+.inpG label{display:block;font-size:.72rem;color:var(--txt2);margin-bottom:6px;font-weight:500;letter-spacing:.4px;text-transform:uppercase;}
+.inp-wrap{position:relative;}
+.inp-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:.9rem;pointer-events:none;color:var(--txt3);}
+.inp{
+  width:100%;background:rgba(255,255,255,.03);
+  border:1px solid var(--bdr2);border-radius:12px;
+  padding:13px 14px 13px 42px;color:var(--txt);
+  font-size:.92rem;font-family:'DM Sans',sans-serif;outline:none;
+  transition:border .2s,background .2s,box-shadow .2s;
+}
+.inp:focus{
+  border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.03);
+  box-shadow:0 0 0 3px rgba(245,158,11,.08);
+}
+.inp::placeholder{color:var(--txt3);}
+
+/* Password toggle */
+.pwd-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--txt3);cursor:pointer;font-size:.85rem;padding:4px;transition:color .15s;}
+.pwd-toggle:hover{color:var(--txt2);}
+
+/* Submit button */
+.btn-submit{
+  width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:.3px;
+  background:linear-gradient(135deg,#f59e0b,#f97316);color:#000;
+  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;
+  position:relative;overflow:hidden;margin-top:8px;
+  box-shadow:0 4px 20px rgba(245,158,11,.25);
+}
+.btn-submit::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent,rgba(255,255,255,.15),transparent);
+  transform:translateX(-100%);transition:transform .4s;
+}
+.btn-submit:hover::before{transform:translateX(100%);}
+.btn-submit:hover{box-shadow:0 6px 28px rgba(245,158,11,.4);transform:translateY(-1px);}
+.btn-submit:active{transform:scale(.98);}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+
+/* Error */
+.err{
+  background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);
+  color:#fca5a5;padding:10px 14px;border-radius:10px;
+  font-size:.82rem;margin-bottom:14px;display:none;
+  align-items:center;gap:8px;
+}
+.err.show{display:flex;}
+
+/* Spinner */
+.spin{width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:sp .5s linear infinite;flex-shrink:0;}
 @keyframes sp{to{transform:rotate(360deg)}}
-.note{text-align:center;margin-top:14px;font-size:.73rem;color:var(--txt2)}
+
+/* Note */
+.note{text-align:center;margin-top:18px;font-size:.72rem;color:var(--txt3);line-height:1.6;}
+.note span{color:var(--txt2);}
+
+/* Divider */
+.divider{height:1px;background:var(--bdr2);margin:20px 0;}
 </style>
 </head>
 <body>
-<div class="box">
-  <div class="drop">🥛</div>
-  <h1>AMINA MILK</h1>
-  <p class="sub">Staff & Admin Portal</p>
-  <div class="err" id="err"></div>
-  <div class="inpG"><label>Email</label><input class="inp" id="em" type="email" inputmode="email" placeholder="you@aminamilk.com" autocomplete="username"></div>
-  <div class="inpG"><label>Password</label><input class="inp" id="pw" type="password" placeholder="••••••••" autocomplete="current-password"></div>
-  <button class="btn" id="btn" onclick="doLogin()">Sign In</button>
-  <p class="note">Redirects automatically based on your role</p>
+<div class="wrap">
+  <div class="logo-area">
+    <div class="drop-icon">🥛</div>
+    <div class="logo-title">AMINA MILK</div>
+    <div class="logo-sub">Staff & Admin Portal</div>
+  </div>
+  <div class="box">
+    <div class="err" id="err"><span>⚠️</span><span id="errMsg"></span></div>
+    <div class="inpG">
+      <label>Email Address</label>
+      <div class="inp-wrap">
+        <span class="inp-icon">✉️</span>
+        <input class="inp" id="em" type="email" inputmode="email" placeholder="you@aminamilk.com" autocomplete="username">
+      </div>
+    </div>
+    <div class="inpG">
+      <label>Password</label>
+      <div class="inp-wrap">
+        <span class="inp-icon">🔒</span>
+        <input class="inp" id="pw" type="password" placeholder="Enter your password" autocomplete="current-password">
+        <button class="pwd-toggle" type="button" onclick="togglePwd()" id="pwdToggle">👁</button>
+      </div>
+    </div>
+    <button class="btn-submit" id="btn" onclick="doLogin()">Sign In →</button>
+    <div class="note">
+      Access is role-based. You'll be redirected automatically.<br>
+      <span>Admin → Dashboard &nbsp;|&nbsp; Staff → Milkman App</span>
+    </div>
+  </div>
 </div>
 <script>
-// If already logged in, redirect immediately
+function togglePwd(){
+  var pw=document.getElementById('pw');
+  var btn=document.getElementById('pwdToggle');
+  if(pw.type==='password'){pw.type='text';btn.textContent='🙈';}
+  else{pw.type='password';btn.textContent='👁';}
+}
+
 auth.onAuthStateChanged(async function(u){
-  if(!u) return;
-  var role = await ensureUserDoc(u);
-  if(role === 'admin')       window.location.replace('admin.html');
-  else if(role === 'staff')  window.location.replace('milkman.html');
-  else await signOut();
+  if(!u)return;
+  try{
+    var role=await ensureUserDoc(u);
+    if(role==='admin')window.location.replace('admin.html');
+    else if(role==='staff')window.location.replace('milkman.html');
+    else await signOut();
+  }catch(e){console.error(e);}
 });
 
-// Ensures the Firestore users/{uid} doc exists.
-// If the user authenticated but has no doc (e.g. created via Firebase Console),
-// this auto-creates it. Returns the role string or null.
 async function ensureUserDoc(u){
   try{
-    var ref  = db.collection('users').doc(u.uid);
-    var snap = await ref.get();
-
-    if(snap.exists){
-      return snap.data().role || null;
-    }
-
-    // Doc is missing — check if ANY admin exists yet
-    var adminCheck = await db.collection('users').where('role','==','admin').limit(1).get();
-    var role = adminCheck.empty ? 'admin' : null;   // first ever user becomes admin; otherwise no access
-
+    var ref=db.collection('users').doc(u.uid);
+    var snap=await ref.get();
+    if(snap.exists)return snap.data().role||null;
+    var adminCheck=await db.collection('users').where('role','==','admin').limit(1).get();
+    var role=adminCheck.empty?'admin':null;
     if(role){
       await ref.set({
-        name:      u.displayName || u.email.split('@')[0],
-        email:     u.email,
-        role:      role,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        active:    true
+        name:u.displayName||u.email.split('@')[0],
+        email:u.email,role,
+        createdAt:firebase.firestore.FieldValue.serverTimestamp(),active:true
       });
       return role;
     }
-
-    return null; // user exists in Auth but not granted a role
-  }catch(e){
-    console.error('ensureUserDoc:', e);
     return null;
-  }
+  }catch(e){console.error('ensureUserDoc:',e);return null;}
 }
 
 async function doLogin(){
-  var e   = document.getElementById('em').value.trim();
-  var p   = document.getElementById('pw').value;
-  var btn = document.getElementById('btn');
-  var err = document.getElementById('err');
-  err.style.display = 'none';
-
-  if(!e || !p){showErr('Enter email and password.'); return;}
-  btn.innerHTML = '<div class="spin"></div>'; btn.disabled = true;
-
+  var e=document.getElementById('em').value.trim();
+  var p=document.getElementById('pw').value;
+  var btn=document.getElementById('btn');
+  hideErr();
+  if(!e||!p){showErr('Please enter your email and password.');return;}
+  if(!/\S+@\S+\.\S+/.test(e)){showErr('Enter a valid email address.');return;}
+  btn.innerHTML='<div class="spin"></div> Signing in…';btn.disabled=true;
   try{
-    var c    = await signIn(e, p);
-    var role = await ensureUserDoc(c.user);
-
+    var c=await signIn(e,p);
+    var role=await ensureUserDoc(c.user);
     if(!role){
       await signOut();
-      showErr('No access. Contact your admin.');
-      btn.innerHTML = 'Sign In'; btn.disabled = false;
-      return;
+      showErr('Access denied. Contact your administrator.');
+      btn.innerHTML='Sign In →';btn.disabled=false;return;
     }
-
-    await bootstrapSystem(c.user.uid, role);
-    window.location.replace(role === 'admin' ? 'admin.html' : 'milkman.html');
-
+    await bootstrapSystem(c.user.uid,role);
+    window.location.replace(role==='admin'?'admin.html':'milkman.html');
   }catch(er){
-    var msg = er.code === 'auth/user-not-found' || er.code === 'auth/wrong-password'
-      ? 'Invalid email or password.'
-      : er.code === 'auth/too-many-requests'
-      ? 'Too many attempts. Try later.'
-      : er.code === 'auth/network-request-failed'
-      ? 'Network error. Check your connection.'
-      : er.message || 'Login failed.';
+    var msg='Login failed. Please try again.';
+    if(er.code==='auth/user-not-found'||er.code==='auth/wrong-password'||er.code==='auth/invalid-credential')msg='Invalid email or password.';
+    else if(er.code==='auth/too-many-requests')msg='Too many attempts. Please try again later.';
+    else if(er.code==='auth/network-request-failed')msg='Network error. Check your connection.';
+    else if(er.code==='auth/invalid-email')msg='Invalid email format.';
+    else if(er.message)msg=er.message;
     showErr(msg);
-    btn.innerHTML = 'Sign In'; btn.disabled = false;
+    btn.innerHTML='Sign In →';btn.disabled=false;
   }
 }
 
-function showErr(m){var e=document.getElementById('err');e.textContent=m;e.style.display='block';}
-document.getElementById('pw').addEventListener('keydown', function(e){if(e.key==='Enter') doLogin();});
+function showErr(m){
+  var e=document.getElementById('err');
+  document.getElementById('errMsg').textContent=m;
+  e.classList.add('show');
+}
+function hideErr(){document.getElementById('err').classList.remove('show');}
+
+document.getElementById('pw').addEventListener('keydown',function(e){
+  if(e.key==='Enter')doLogin();
+});
+document.getElementById('em').addEventListener('keydown',function(e){
+  if(e.key==='Enter')document.getElementById('pw').focus();
+});
 </script>
 </body>
 </html>
