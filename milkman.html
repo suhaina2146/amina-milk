@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<title>AMINA MILK – Milkman</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- ZXing for QR scanning -->
+<script src="https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#060d1a;--bg2:#0f1a2e;--bg3:#162236;--bg4:#1c2b42;
+  --acc:#f59e0b;--acc2:#fbbf24;--grn:#10b981;--red:#ef4444;--blu:#3b82f6;--pur:#8b5cf6;
+  --txt:#f1f5f9;--txt2:#94a3b8;--txt3:#64748b;
+  --bdr:rgba(245,158,11,0.18);--bdr2:rgba(255,255,255,0.07);
+  --sh:0 4px 24px rgba(0,0,0,0.5);--rnd:14px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;max-width:100vw}
+h1,h2,h3,.brand{font-family:'Syne',sans-serif}
+
+/* ─── AUTH ─── */
+#authScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:radial-gradient(ellipse at 20% 10%,rgba(245,158,11,.12),transparent 55%),radial-gradient(ellipse at 85% 85%,rgba(16,185,129,.07),transparent 55%),var(--bg)}
+.authBox{background:var(--bg2);border:1px solid var(--bdr);border-radius:22px;padding:36px 28px;width:100%;max-width:400px;box-shadow:0 24px 80px rgba(0,0,0,.7)}
+.authLogo{text-align:center;margin-bottom:28px}
+.authLogo .drop{width:64px;height:64px;background:linear-gradient(135deg,var(--acc),#f97316);border-radius:18px;display:inline-flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:10px;box-shadow:0 8px 28px rgba(245,158,11,.35)}
+.authLogo h1{font-size:1.7rem;color:var(--acc);letter-spacing:-0.5px}
+.authLogo p{color:var(--txt2);font-size:.83rem;margin-top:4px}
+.inp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:12px 15px;color:var(--txt);font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:.2s}
+.inp:focus{border-color:var(--acc)}
+.inpG{margin-bottom:14px}
+.inpG label{display:block;font-size:.78rem;color:var(--txt2);margin-bottom:5px;font-weight:500}
+.btn{padding:11px 18px;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.9rem;transition:.18s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btnPri{background:linear-gradient(135deg,var(--acc),#f97316);color:#000;width:100%}
+.btnPri:hover{opacity:.9}
+.btnPri:active{transform:scale(.98)}
+.btnSm{padding:7px 13px;font-size:.78rem;border-radius:8px}
+.btnXs{padding:5px 10px;font-size:.72rem;border-radius:7px}
+.btnGhost{background:transparent;border:1px solid var(--bdr2);color:var(--txt2)}
+.btnGhost:hover{border-color:var(--acc);color:var(--acc)}
+.btnGrn{background:var(--grn);color:#fff}
+.btnRed{background:var(--red);color:#fff}
+.btnBlu{background:var(--blu);color:#fff}
+.btnAcc{background:var(--acc);color:#000}
+.btnPur{background:var(--pur);color:#fff}
+.errMsg{background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.28);color:#fca5a5;padding:9px 13px;border-radius:8px;font-size:.83rem;margin-bottom:12px;display:none}
+
+/* ─── APP SHELL ─── */
+#app{display:none;padding-bottom:80px}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--bdr2);padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:10px}
+.topbar .brand{font-size:1.1rem;color:var(--acc);font-weight:800;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.topbar .brand .pill{background:rgba(16,185,129,.15);color:var(--grn);font-size:.65rem;padding:2px 7px;border-radius:20px;font-weight:700;letter-spacing:.5px}
+.staffInfo{font-size:.75rem;color:var(--txt2);text-align:right;line-height:1.3}
+.staffInfo strong{color:var(--txt);font-size:.82rem}
+
+/* ─── BOTTOM NAV ─── */
+.bottomNav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--bdr2);display:flex;z-index:100;padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
+.bnBtn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;cursor:pointer;border:none;background:none;color:var(--txt3);font-size:.65rem;font-family:'DM Sans',sans-serif;font-weight:600;letter-spacing:.3px;transition:.18s}
+.bnBtn .ico{font-size:1.3rem;transition:.18s}
+.bnBtn.active{color:var(--acc)}
+.bnBtn.active .ico{transform:scale(1.15)}
+.bnBtn.scan{color:#000;flex:0 0 70px}
+.bnBtn.scan .ico-wrap{width:52px;height:52px;background:linear-gradient(135deg,var(--acc),#f97316);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin-top:-22px;box-shadow:0 4px 20px rgba(245,158,11,.5);transition:.18s}
+.bnBtn.scan:active .ico-wrap{transform:scale(.94)}
+
+/* ─── PAGES ─── */
+.page{display:none;padding:16px;animation:fadeIn .2s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── STAT CARDS ─── */
+.statsGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.statCard{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--rnd);padding:14px;position:relative;overflow:hidden}
+.statCard::after{content:'';position:absolute;top:-16px;right:-16px;width:60px;height:60px;border-radius:50%;opacity:.1}
+.statCard.gold::after{background:var(--acc)}
+.statCard.grn::after{background:var(--grn)}
+.statCard.red::after{background:var(--red)}
+.statCard.blu::after{background:var(--blu)}
+.statCard .ico{font-size:1.2rem;margin-bottom:6px}
+.statCard .val{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;line-height:1}
+.statCard .lbl{font-size:.68rem;color:var(--txt2);margin-top:4px;text-transform:uppercase;letter-spacing:.4px}
+
+/* ─── CARD ─── */
+.card{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--rnd);padding:16px;box-shadow:var(--sh)}
+.cardHd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cardHd h3{font-size:.95rem;font-weight:700}
+
+/* ─── SEARCH ─── */
+.searchWrap{position:relative;margin-bottom:14px}
+.searchWrap .sIco{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--txt3)}
+.searchInp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:12px 14px 12px 40px;color:var(--txt);font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:.2s}
+.searchInp:focus{border-color:var(--acc);background:var(--bg4)}
+.suggestions{background:var(--bg2);border:1px solid var(--bdr2);border-radius:10px;overflow:hidden;display:none;margin-top:4px;box-shadow:var(--sh);z-index:50;position:relative}
+.suggestions.show{display:block}
+.sugItem{padding:11px 14px;cursor:pointer;font-size:.85rem;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;gap:10px;transition:.15s}
+.sugItem:last-child{border-bottom:none}
+.sugItem:hover,.sugItem:active{background:var(--bg3)}
+.sugItem .icon{font-size:1rem;width:22px;text-align:center;flex-shrink:0}
+.sugItem .inf{flex:1;min-width:0}
+.sugItem .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sugItem .sub{font-size:.72rem;color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sugLabel{padding:6px 14px;font-size:.68rem;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;background:var(--bg3)}
+
+/* ─── CUSTOMER PANEL ─── */
+#custPanel{display:none;margin-top:14px}
+.custHead{background:linear-gradient(135deg,var(--bg3),var(--bg4));border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px}
+.custHead .topRow{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
+.custHead .nm{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700}
+.custHead .cid{font-size:.72rem;color:var(--acc);background:rgba(245,158,11,.12);padding:3px 8px;border-radius:20px;display:inline-block;margin-top:2px}
+.custHead .meta{font-size:.8rem;color:var(--txt2);margin-top:3px;display:flex;align-items:center;gap:6px}
+.statusBadge{padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:700;flex-shrink:0}
+.statusBadge.delivered{background:rgba(16,185,129,.15);color:#34d399}
+.statusBadge.pending{background:rgba(245,158,11,.15);color:var(--acc)}
+.qtyRow{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--bdr2);border-radius:10px;padding:10px 14px}
+.qtyRow .lbl{font-size:.75rem;color:var(--txt2);flex:1}
+.qtyCtrl{display:flex;align-items:center;gap:8px}
+.qtyCtrl .qval{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;min-width:40px;text-align:center;color:var(--acc)}
+.qtyCtrl button{width:32px;height:32px;border-radius:8px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--txt);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+.qtyCtrl button:active{background:var(--bg4);transform:scale(.93)}
+.modeRow{display:flex;gap:6px;margin:10px 0}
+.modeBtn{flex:1;padding:8px 4px;border-radius:9px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--txt2);font-size:.72rem;font-weight:600;cursor:pointer;text-align:center;transition:.18s}
+.modeBtn.active.normal{border-color:var(--grn);background:rgba(16,185,129,.12);color:var(--grn)}
+.modeBtn.active.extra{border-color:var(--acc);background:rgba(245,158,11,.12);color:var(--acc)}
+.modeBtn.active.less{border-color:var(--red);background:rgba(239,68,68,.12);color:var(--red)}
+.custActions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.custActions .btn{flex:1;min-width:80px}
+.submitBtn{width:100%;padding:14px;font-size:1rem;border-radius:12px;margin-top:4px}
+.dupWarning{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--acc2);padding:10px 14px;border-radius:10px;font-size:.83rem;text-align:center;margin-top:8px}
+
+/* ─── SCANNER ─── */
+#pgScan{display:none;padding:0}
+.scanPage{min-height:calc(100vh - 56px - 80px)}
+.scanHeader{padding:16px;background:var(--bg2);border-bottom:1px solid var(--bdr2);display:flex;align-items:center;gap:12px}
+.scanHeader h2{font-size:1rem;font-weight:700}
+#scannerBox{position:relative;background:#000;overflow:hidden}
+#scannerBox video{width:100%;display:block;max-height:60vw;object-fit:cover}
+#scannerBox .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.scanFrame{width:200px;height:200px;position:relative}
+.scanFrame::before,.scanFrame::after{content:'';position:absolute;width:40px;height:40px;border-color:var(--acc);border-style:solid}
+.scanFrame::before{top:0;left:0;border-width:3px 0 0 3px;border-radius:4px 0 0 0}
+.scanFrame::after{bottom:0;right:0;border-width:0 3px 3px 0;border-radius:0 0 4px 0}
+.scanCornerTR{position:absolute;top:0;right:0;width:40px;height:40px;border-top:3px solid var(--acc);border-right:3px solid var(--acc);border-radius:0 4px 0 0}
+.scanCornerBL{position:absolute;bottom:0;left:0;width:40px;height:40px;border-bottom:3px solid var(--acc);border-left:3px solid var(--acc);border-radius:0 0 0 4px}
+.scanLine{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:scanAnim 2s ease-in-out infinite}
+@keyframes scanAnim{0%,100%{top:0}50%{top:calc(100% - 2px)}}
+.scanStatus{padding:14px 16px;text-align:center}
+.scanStatus .msg{font-size:.9rem;color:var(--txt2)}
+.scanStatus .msg.active{color:var(--grn)}
+#scanResult{padding:16px;display:none}
+
+/* ─── HISTORY ─── */
+.histItem{background:var(--bg2);border:1px solid var(--bdr2);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.histItem .row{display:flex;justify-content:space-between;align-items:center}
+.histItem .date{font-weight:600;font-size:.88rem}
+.histItem .qty{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--acc)}
+.histItem .sub{font-size:.75rem;color:var(--txt2);margin-top:2px}
+
+/* ─── REPORT ─── */
+.filterGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.exportRow{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.exportRow .btn{flex:1;min-width:60px}
+
+/* ─── MODAL ─── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--bdr2);border-radius:20px 20px 0 0;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.7)}
+.modalHd{padding:16px 20px 12px;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;justify-content:space-between}
+.modalHd h3{font-size:1rem;font-weight:700}
+.modalClose{background:none;border:none;color:var(--txt2);font-size:1.3rem;cursor:pointer;padding:4px 8px;border-radius:6px}
+.modalBody{padding:16px 20px}
+.modalFt{padding:12px 20px;border-top:1px solid var(--bdr2);display:flex;gap:8px}
+.modalFt .btn{flex:1}
+
+/* ─── TOAST ─── */
+#toast{position:fixed;top:70px;right:12px;z-index:500;display:flex;flex-direction:column;gap:6px;max-width:300px}
+.toastItem{background:var(--bg2);border:1px solid var(--bdr2);border-radius:10px;padding:10px 14px;font-size:.82rem;box-shadow:var(--sh);animation:toastIn .25s ease;display:flex;align-items:center;gap:8px}
+.toastItem.ok{border-left:3px solid var(--grn)}
+.toastItem.err{border-left:3px solid var(--red)}
+.toastItem.inf{border-left:3px solid var(--blu)}
+@keyframes toastIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ─── CONFIRM ─── */
+#confirmBox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;align-items:center;justify-content:center;padding:20px}
+#confirmBox.open{display:flex}
+.confirmCard{background:var(--bg2);border:1px solid var(--bdr2);border-radius:16px;padding:24px 20px;width:100%;max-width:320px;text-align:center}
+.confirmCard h3{font-size:1rem;margin-bottom:6px}
+.confirmCard p{color:var(--txt2);font-size:.83rem;margin-bottom:18px}
+.confirmBtns{display:flex;gap:8px}
+.confirmBtns .btn{flex:1}
+
+/* ─── MISC ─── */
+.secHd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.secHd h2{font-size:1.15rem;font-weight:700}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.7rem;font-weight:600}
+.badge.grn{background:rgba(16,185,129,.15);color:#34d399}
+.badge.red{background:rgba(239,68,68,.15);color:#fca5a5}
+.badge.yel{background:rgba(245,158,11,.15);color:var(--acc)}
+.badge.blu{background:rgba(59,130,246,.15);color:#93c5fd}
+.spin{width:32px;height:32px;border:3px solid var(--bdr2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;margin:30px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:30px 16px;color:var(--txt3)}
+.empty .ico{font-size:2.2rem;margin-bottom:10px}
+.tblWrap{overflow-x:auto;border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:.78rem}
+th{background:var(--bg3);color:var(--txt2);padding:9px 10px;text-align:left;font-weight:600;font-size:.68rem;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--bdr2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.select{appearance:none;background:var(--bg3) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394a3b8' fill='none' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 10px center;border:1px solid var(--bdr2);border-radius:10px;padding:11px 32px 11px 12px;color:var(--txt);font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;width:100%}
+.divider{height:1px;background:var(--bdr2);margin:12px 0}
+.qrBox{display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 0}
+.qrBox canvas,.qrBox img{border:4px solid var(--bg4);border-radius:10px}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ AUTH ═══════════ -->
+<div id="authScreen">
+  <div class="authBox">
+    <div class="authLogo">
+      <div class="drop">🥛</div>
+      <h1>AMINA MILK</h1>
+      <p>Milkman Delivery App</p>
+    </div>
+    <div class="errMsg" id="authErr"></div>
+    <div class="inpG"><label>Email</label><input class="inp" id="loginEmail" type="email" inputmode="email" placeholder="staff@aminamilk.com"></div>
+    <div class="inpG"><label>Password</label><input class="inp" id="loginPwd" type="password" placeholder="••••••••"></div>
+    <button class="btn btnPri" onclick="doLogin()" id="loginBtn">Sign In</button>
+    <p style="text-align:center;margin-top:14px;font-size:.75rem;color:var(--txt3)">Staff & Admin access</p>
+  </div>
+</div>
+
+<!-- ═══════════ APP ═══════════ -->
+<div id="app">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="brand">🥛 <span class="pill">MILKMAN</span></div>
+    <div class="staffInfo" id="staffInfoBar"></div>
+  </div>
+
+  <!-- PAGES -->
+
+  <!-- HOME (DELIVER) -->
+  <div class="page active" id="pgHome">
+    <div class="statsGrid" id="homeStats">
+      <div class="statCard gold"><div class="ico">✅</div><div class="val" id="hs1">—</div><div class="lbl">Served Today</div></div>
+      <div class="statCard red"><div class="ico">⏳</div><div class="val" id="hs2">—</div><div class="lbl">Pending</div></div>
+      <div class="statCard blu"><div class="ico">🥛</div><div class="val" id="hs3">—</div><div class="lbl">Litres</div></div>
+      <div class="statCard grn"><div class="ico">➕</div><div class="val" id="hs4">—</div><div class="lbl">Extra Today</div></div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="cardHd"><h3>🔍 Find Customer</h3></div>
+      <div class="searchWrap">
+        <span class="sIco">🔍</span>
+        <input class="searchInp" id="mainSearch" placeholder="Name, mobile, ID, address…" oninput="handleSearch(this.value)" autocomplete="off">
+      </div>
+      <div class="suggestions" id="suggestions"></div>
+    </div>
+
+    <!-- CUSTOMER PANEL -->
+    <div id="custPanel">
+      <div class="custHead" id="custHead"></div>
+
+      <div class="card">
+        <div class="modeRow">
+          <div class="modeBtn normal active" onclick="setMode('normal',this)">🥛 Normal</div>
+          <div class="modeBtn extra" onclick="setMode('extra',this)">➕ Extra</div>
+          <div class="modeBtn less" onclick="setMode('less',this)">➖ Less</div>
+        </div>
+        <div class="qtyRow">
+          <div class="lbl">
+            <div style="font-weight:600;font-size:.9rem" id="qtyLabel">Delivery Quantity</div>
+            <div style="margin-top:2px;font-size:.72rem;color:var(--txt3)" id="qtyNote">Normal delivery</div>
+          </div>
+          <div class="qtyCtrl">
+            <button onclick="adjustQty(-0.5)">−</button>
+            <span class="qval" id="qtyDisplay">1.0</span>
+            <button onclick="adjustQty(0.5)">+</button>
+          </div>
+        </div>
+        <div id="dupWarning" class="dupWarning" style="display:none">⚠️ Already delivered today! Submitting again will overwrite.</div>
+        <div class="custActions">
+          <button class="btn btnSm btnGhost" onclick="viewCustQR()">📱 QR</button>
+          <button class="btn btnSm btnGhost" onclick="viewCustHistory()">📋 History</button>
+          <button class="btn btnSm btnGhost" onclick="downloadCustQR()">⬇ DL QR</button>
+        </div>
+        <button class="btn btnGrn submitBtn" id="submitBtn" onclick="submitDeliveryAction()">✓ Submit Delivery</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCAN PAGE -->
+  <div class="page" id="pgScan">
+    <div class="scanHeader">
+      <span style="font-size:1.4rem">📷</span>
+      <div><h2>Scan Customer QR</h2><div style="font-size:.72rem;color:var(--txt2)">Point camera at AMINA MILK QR code</div></div>
+      <button class="btn btnSm btnGhost" style="margin-left:auto" onclick="toggleTorch()" id="torchBtn">🔦</button>
+    </div>
+    <div id="scannerBox">
+      <video id="scannerVideo" playsinline autoplay muted></video>
+      <div class="overlay">
+        <div class="scanFrame">
+          <div class="scanCornerTR"></div>
+          <div class="scanCornerBL"></div>
+          <div class="scanLine"></div>
+        </div>
+      </div>
+    </div>
+    <div class="scanStatus"><div class="msg active" id="scanMsg">📷 Scanner active – hold steady</div></div>
+    <div id="scanResult" style="padding:16px"></div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="page" id="pgHistory">
+    <div class="secHd"><h2>My Delivery History</h2></div>
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;gap:8px">
+        <input class="inp" id="hFrom" type="date" style="flex:1">
+        <input class="inp" id="hTo" type="date" style="flex:1">
+        <button class="btn btnSm btnAcc" onclick="loadMyHistory()">Go</button>
+      </div>
+    </div>
+    <div id="historyList"><div class="spin"></div></div>
+  </div>
+
+  <!-- STATISTICS -->
+  <div class="page" id="pgStats">
+    <div class="secHd"><h2>Statistics</h2><span id="statsDateLbl" style="font-size:.75rem;color:var(--txt2)"></span></div>
+    <div class="statsGrid" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="statCard gold"><div class="ico">👥</div><div class="val" id="ss1">—</div><div class="lbl">Customers</div></div>
+      <div class="statCard grn"><div class="ico">✅</div><div class="val" id="ss2">—</div><div class="lbl">Today</div></div>
+      <div class="statCard red"><div class="ico">⏳</div><div class="val" id="ss3">—</div><div class="lbl">Pending</div></div>
+    </div>
+    <div class="statsGrid" style="grid-template-columns:1fr 1fr">
+      <div class="statCard blu"><div class="ico">🥛</div><div class="val" id="ss4">—</div><div class="lbl">Litres Today</div></div>
+      <div class="statCard grn"><div class="ico">➕</div><div class="val" id="ss5">—</div><div class="lbl">Extra Today</div></div>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="cardHd"><h3>📈 Weekly Overview</h3></div>
+      <div id="weekChart"></div>
+    </div>
+    <div class="card">
+      <div class="cardHd"><h3>🏆 Top 5 This Week</h3></div>
+      <div id="topWeekList"></div>
+    </div>
+  </div>
+
+  <!-- REPORTS -->
+  <div class="page" id="pgReports">
+    <div class="secHd"><h2>Reports</h2></div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="filterGrid">
+        <input class="inp" id="rCust" placeholder="Customer">
+        <input class="inp" id="rFrom" type="date">
+        <input class="inp" id="rTo" type="date">
+        <select class="select" id="rStatus"><option value="">All</option><option>delivered</option></select>
+      </div>
+      <button class="btn btnAcc" style="width:100%" onclick="loadReport()">🔍 Load Report</button>
+      <div class="exportRow">
+        <button class="btn btnSm btnGhost" onclick="exportRep('pdf')">📄 PDF</button>
+        <button class="btn btnSm btnGhost" onclick="exportRep('csv')">📊 CSV</button>
+        <button class="btn btnSm btnGhost" onclick="exportRep('excel')">📗 Excel</button>
+        <button class="btn btnSm btnGhost" onclick="exportRep('json')">{ } JSON</button>
+      </div>
+    </div>
+    <div id="reportList"><div class="empty"><div class="ico">📋</div><p>Load a report to see data</p></div></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottomNav">
+    <button class="bnBtn active" id="bn0" onclick="showPage('Home',0)"><span class="ico">🏠</span>Home</button>
+    <button class="bnBtn" id="bn1" onclick="showPage('History',1)"><span class="ico">📋</span>History</button>
+    <button class="bnBtn scan" id="bnScan" onclick="showPage('Scan',99)">
+      <div class="ico-wrap">📷</div>
+    </button>
+    <button class="bnBtn" id="bn2" onclick="showPage('Stats',2)"><span class="ico">📊</span>Stats</button>
+    <button class="bnBtn" id="bn3" onclick="showPage('Reports',3)"><span class="ico">📑</span>Reports</button>
+  </div>
+</div>
+
+<!-- ─── MODALS ─── -->
+<!-- QR Modal -->
+<div class="overlay" id="qrModal">
+  <div class="modal">
+    <div class="modalHd"><h3 id="qrTitle">Customer QR</h3><button class="modalClose" onclick="closeModal('qrModal')">✕</button></div>
+    <div class="modalBody"><div class="qrBox" id="qrDisplay"></div><div id="qrInfo" style="text-align:center;font-size:.82rem;color:var(--txt2);margin-top:8px"></div></div>
+    <div class="modalFt" id="qrFt"></div>
+  </div>
+</div>
+<!-- History Modal -->
+<div class="overlay" id="histModal">
+  <div class="modal">
+    <div class="modalHd"><h3 id="histModalTitle">Delivery History</h3><button class="modalClose" onclick="closeModal('histModal')">✕</button></div>
+    <div class="modalBody" id="histModalBody"></div>
+  </div>
+</div>
+<!-- Confirm -->
+<div id="confirmBox">
+  <div class="confirmCard">
+    <h3 id="confirmQ">Confirm?</h3>
+    <p id="confirmD">This cannot be undone.</p>
+    <div class="confirmBtns">
+      <button class="btn btnGhost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btnGrn" onclick="runConfirm()">Confirm</button>
+    </div>
+  </div>
+</div>
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ═══════════ SCRIPTS ═══════════ -->
+<script src="firebase.js"></script>
+<script>
+// ─── STATE ───
+let CU=null,CUR=null,CUSTS=[],SCAN_ACTIVE=false;
+let activeCust=null,deliveryQty=1,deliveryMode='normal',defaultQty=1;
+let searchTimeout=null,recentSearches=[],freqSearches=[];
+let reportData=[],pendingConfirm=null;
+let scanner=null,stream=null,torchOn=false,torchTrack=null;
+let todayDeliveredIds=new Set();
+const today=()=>new Date().toISOString().slice(0,10);
+
+// ─── AUTH ───
+async function doLogin(){
+  const e=document.getElementById('loginEmail').value.trim();
+  const p=document.getElementById('loginPwd').value;
+  const btn=document.getElementById('loginBtn');
+  const err=document.getElementById('authErr');
+  if(!e||!p){showErr(err,'Please enter email and password.');return;}
+  btn.textContent='Signing in…';btn.disabled=true;err.style.display='none';
+  try{
+    const c=await signIn(e,p);
+    const role=await getUserRole(c.user.uid);
+    if(role!=='staff'&&role!=='admin'){await signOut();showErr(err,'No access. Contact admin.');btn.textContent='Sign In';btn.disabled=false;return;}
+    CU=c.user;CUR=role;initApp();
+  }catch(er){showErr(err,er.message||'Login failed');btn.textContent='Sign In';btn.disabled=false;}
+}
+function showErr(el,m){el.textContent=m;el.style.display='block';}
+document.getElementById('loginPwd').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+async function initApp(){
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('app').style.display='block';
+  // Get staff name
+  const ud=await db.collection('users').doc(CU.uid).get();
+  const udata=ud.exists?ud.data():{};
+  document.getElementById('staffInfoBar').innerHTML=`<strong>${udata.name||CU.email}</strong><br>${today()}`;
+  document.getElementById('statsDateLbl').textContent=new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+  // Load data
+  await loadCustomersCache();
+  await loadTodayDeliveries();
+  await loadHomeSuggestions();
+  refreshStats();
+}
+auth.onAuthStateChanged(async u=>{
+  if(u){const r=await getUserRole(u.uid);if(r==='staff'||r==='admin'){CU=u;CUR=r;initApp();}}
+});
+
+async function doLogout(){if(SCAN_ACTIVE)stopScanner();await signOut();location.reload();}
+
+// ─── NAV ───
+let activePageName='Home',activeBnIdx=0;
+function showPage(name,idx){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg'+name).classList.add('active');
+  document.querySelectorAll('.bnBtn').forEach(b=>b.classList.remove('active'));
+  if(idx===99){document.getElementById('bnScan').classList.add('active');}
+  else if(idx>=0){document.getElementById('bn'+idx).classList.add('active');}
+  if(activePageName==='Scan'&&name!=='Scan')stopScanner();
+  activePageName=name;activeBnIdx=idx;
+  if(name==='Scan')startScanner();
+  else if(name==='Stats')loadStats();
+  else if(name==='History')loadMyHistory();
+}
+
+// ─── TOAST ───
+function toast(msg,type='ok'){
+  const d=document.createElement('div');d.className=`toastItem ${type}`;
+  d.innerHTML=(type==='ok'?'✅':type==='err'?'❌':'ℹ️')+' '+msg;
+  document.getElementById('toast').appendChild(d);
+  setTimeout(()=>d.remove(),3200);
+}
+
+// ─── CONFIRM ───
+function confirmAction(q,fn,data){pendingConfirm={fn,data};document.getElementById('confirmQ').textContent=q;document.getElementById('confirmBox').classList.add('open');}
+function closeConfirm(){document.getElementById('confirmBox').classList.remove('open');pendingConfirm=null;}
+function runConfirm(){if(pendingConfirm)window[pendingConfirm.fn](pendingConfirm.data);closeConfirm();}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ─── CUSTOMERS CACHE ───
+async function loadCustomersCache(){
+  const cached=CACHE.get('customers',300000);
+  if(cached&&cached.length){CUSTS=cached;return;}
+  try{CUSTS=await getCustomers();CACHE.set('customers',CUSTS);}
+  catch{CUSTS=CACHE.get('customers',3600000)||[];}
+}
+async function loadTodayDeliveries(){
+  try{
+    const dels=await getTodayDeliveries();
+    todayDeliveredIds=new Set(dels.map(d=>d.customerId));
+    document.getElementById('hs1').textContent=dels.length;
+    const total=dels.reduce((s,d)=>s+(d.deliveredQty||0),0);
+    const extra=dels.reduce((s,d)=>s+(d.extraQty||0),0);
+    document.getElementById('hs3').textContent=total+'L';
+    document.getElementById('hs4').textContent=extra+'L';
+    document.getElementById('hs2').textContent=Math.max(0,CUSTS.length-dels.length);
+  }catch{
+    ['hs1','hs2','hs3','hs4'].forEach(id=>document.getElementById(id).textContent='?');
+  }
+}
+
+// ─── SEARCH ───
+async function loadHomeSuggestions(){
+  try{recentSearches=await getRecentSearches(CU.uid,8);}catch{recentSearches=[];}
+  try{freqSearches=await getFrequentSearches(CU.uid);}catch{freqSearches=[];}
+}
+async function handleSearch(q){
+  clearTimeout(searchTimeout);
+  const sug=document.getElementById('suggestions');
+  if(!q||q.length<1){sug.classList.remove('show');sug.innerHTML='';return;}
+  if(q.length<2){return;}
+  searchTimeout=setTimeout(async()=>{
+    // Local filter first
+    const local=CUSTS.filter(c=>
+      (c.name||'').toLowerCase().includes(q.toLowerCase())||
+      (c.mobile||'').includes(q)||
+      (c.customerId||'').toLowerCase().includes(q.toLowerCase())||
+      (c.address||'').toLowerCase().includes(q.toLowerCase())
+    ).slice(0,6);
+    renderSuggestions(local,q);
+    // Then try server
+    try{
+      const srv=await searchCustomers(q);
+      const merged=[...new Map([...local,...srv].map(c=>[c.customerId||c.id,c])).values()].slice(0,8);
+      renderSuggestions(merged,q);
+    }catch{}
+  },280);
+}
+function renderSuggestions(list,q){
+  const el=document.getElementById('suggestions');
+  if(!list.length){el.classList.remove('show');return;}
+  el.innerHTML=list.map(c=>{
+    const del=todayDeliveredIds.has(c.customerId||c.id);
+    return `<div class="sugItem" onclick="selectCustomer('${c.customerId||c.id}')">
+      <span class="icon">${del?'✅':'🥛'}</span>
+      <div class="inf">
+        <div class="nm">${highlight(c.name,q)}</div>
+        <div class="sub">${c.mobile||''} • ${c.address||''} • ${c.customerId||''}</div>
+      </div>
+      ${del?'<span class="badge grn" style="flex-shrink:0">Done</span>':''}
+    </div>`;
+  }).join('');
+  el.classList.add('show');
+}
+function highlight(text,q){
+  if(!q||!text)return text||'';
+  const re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+  return text.replace(re,'<mark style="background:rgba(245,158,11,.25);color:var(--acc);border-radius:2px">$1</mark>');
+}
+async function selectCustomer(cid){
+  document.getElementById('suggestions').classList.remove('show');
+  const c=CUSTS.find(x=>(x.customerId||x.id)===cid)||await (async()=>{const d=await db.collection('customers').doc(cid).get();return d.exists?{id:d.id,...d.data()}:null;})();
+  if(!c){toast('Customer not found','err');return;}
+  activeCust=c;
+  // Save search history
+  try{saveSearchHistory(CU.uid,c.name,cid);}catch{}
+  const q=document.getElementById('mainSearch').value;
+  document.getElementById('mainSearch').value=c.name;
+  showCustPanel(c);
+}
+function showCustPanel(c){
+  const cid=c.customerId||c.id;
+  const delivered=todayDeliveredIds.has(cid);
+  defaultQty=c.defaultQty||1;deliveryQty=defaultQty;deliveryMode='normal';
+  document.getElementById('qtyDisplay').textContent=deliveryQty.toFixed(1);
+  document.getElementById('qtyNote').textContent='Normal delivery';
+  // Mode reset
+  document.querySelectorAll('.modeBtn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.modeBtn.normal').classList.add('active');
+  document.getElementById('dupWarning').style.display=delivered?'block':'none';
+  document.getElementById('custPanel').style.display='block';
+  document.getElementById('submitBtn').textContent=delivered?'✓ Re-Submit Delivery':'✓ Submit Delivery';
+  document.getElementById('submitBtn').style.background=delivered?'var(--acc)':'var(--grn)';
+  // Customer header
+  document.getElementById('custHead').innerHTML=`
+    <div class="topRow">
+      <div>
+        <div class="nm">${c.name}</div>
+        <div class="cid">${cid}</div>
+        <div class="meta">📱 ${c.mobile||'—'}</div>
+        <div class="meta">📍 ${c.address||'—'}</div>
+        <div class="meta">🥛 Default: ${c.defaultQty||1}L ${c.milkType||''}</div>
+      </div>
+      <span class="statusBadge ${delivered?'delivered':'pending'}">${delivered?'✓ Done':'⏳ Pending'}</span>
+    </div>`;
+  // Scroll to panel
+  document.getElementById('custPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ─── DELIVERY MODE ───
+function setMode(mode,btn){
+  deliveryMode=mode;
+  document.querySelectorAll('.modeBtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(mode==='normal'){deliveryQty=defaultQty;document.getElementById('qtyNote').textContent='Normal delivery';}
+  else if(mode==='extra'){deliveryQty=defaultQty+0.5;document.getElementById('qtyNote').textContent='Extra milk requested';}
+  else{deliveryQty=Math.max(0.5,defaultQty-0.5);document.getElementById('qtyNote').textContent='Less milk today';}
+  document.getElementById('qtyDisplay').textContent=deliveryQty.toFixed(1);
+}
+function adjustQty(d){
+  deliveryQty=Math.max(0.5,parseFloat((deliveryQty+d).toFixed(1)));
+  document.getElementById('qtyDisplay').textContent=deliveryQty.toFixed(1);
+}
+
+// ─── SUBMIT DELIVERY ───
+async function submitDeliveryAction(){
+  if(!activeCust){toast('Select a customer first','err');return;}
+  const cid=activeCust.customerId||activeCust.id;
+  const btn=document.getElementById('submitBtn');
+  btn.textContent='Submitting…';btn.disabled=true;
+  const normalQty=activeCust.defaultQty||1;
+  const extraQty=deliveryMode==='extra'?Math.max(0,deliveryQty-normalQty):0;
+  const staffData=await db.collection('users').doc(CU.uid).get();
+  const staffName=staffData.exists?staffData.data().name:CU.email;
+  const delivery={
+    customerId:cid,customerName:activeCust.name,customerAddress:activeCust.address||'',
+    staffId:CU.uid,staffName,
+    normalQty,deliveredQty:deliveryQty,extraQty,lessQty:deliveryMode==='less'?Math.max(0,normalQty-deliveryQty):0,
+    mode:deliveryMode,status:'delivered'
+  };
+  try{
+    await submitDelivery(delivery);
+    todayDeliveredIds.add(cid);
+    toast(`Delivered ${deliveryQty}L to ${activeCust.name} ✓`);
+    document.getElementById('dupWarning').style.display='block';
+    btn.textContent='✓ Delivered!';btn.style.background='var(--grn)';
+    document.getElementById('custHead').querySelector('.statusBadge').textContent='✓ Done';
+    document.getElementById('custHead').querySelector('.statusBadge').className='statusBadge delivered';
+    loadTodayDeliveries();
+    setTimeout(()=>{btn.textContent='✓ Re-Submit Delivery';btn.disabled=false;},2000);
+  }catch(e){
+    if(e.message==='DUPLICATE'){
+      toast('Already delivered today – use re-submit','inf');
+      // Force update
+      try{
+        const snap=await db.collection('deliveries').where('customerId','==',cid).where('date','==',today()).get();
+        if(!snap.empty)await snap.docs[0].ref.update({deliveredQty:deliveryQty,extraQty,mode:deliveryMode,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+        toast('Updated existing delivery ✓');
+      }catch(e2){toast('Error: '+e2.message,'err');}
+    }else{toast('Error: '+e.message,'err');}
+    btn.textContent='✓ Submit Delivery';btn.disabled=false;
+  }
+}
+
+// ─── CUSTOMER QR / HISTORY ───
+function viewCustQR(){
+  if(!activeCust)return;
+  const qrData=activeCust.qrData;
+  if(!qrData){toast('No QR for this customer','err');return;}
+  document.getElementById('qrTitle').textContent=activeCust.name+' – QR';
+  const el=document.getElementById('qrDisplay');el.innerHTML='';
+  renderQR(qrData,el,180);
+  document.getElementById('qrInfo').innerHTML=`${activeCust.customerId}<br>${activeCust.address||''}`;
+  document.getElementById('qrFt').innerHTML=`<button class="btn btnGhost" onclick="closeModal('qrModal')">Close</button><button class="btn btnAcc" onclick="downloadQR('${qrData}','${activeCust.customerId}_QR')">⬇ Download</button>`;
+  openModal('qrModal');
+}
+function downloadCustQR(){if(activeCust&&activeCust.qrData)downloadQR(activeCust.qrData,(activeCust.customerId||'QR')+'_QR');}
+async function viewCustHistory(){
+  if(!activeCust)return;
+  const cid=activeCust.customerId||activeCust.id;
+  document.getElementById('histModalTitle').textContent=activeCust.name+' – History';
+  document.getElementById('histModalBody').innerHTML='<div class="spin"></div>';
+  openModal('histModal');
+  try{
+    const dels=await getDeliveries({customerId:cid});
+    const el=document.getElementById('histModalBody');
+    if(!dels.length){el.innerHTML='<div class="empty"><div class="ico">📦</div><p>No deliveries yet</p></div>';return;}
+    el.innerHTML=dels.slice(0,30).map(d=>`<div class="histItem"><div class="row"><span class="date">${d.date}</span><span class="qty">${d.deliveredQty||0}L</span></div><div class="sub">${d.time||''} • ${d.staffName||''} ${d.extraQty?'• +'+d.extraQty+'L extra':''}</div></div>`).join('');
+  }catch{document.getElementById('histModalBody').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Error loading history</p></div>';}
+}
+
+// ─── QR SCANNER ───
+async function startScanner(){
+  if(SCAN_ACTIVE)return;
+  document.getElementById('scanMsg').textContent='📷 Starting camera…';
+  document.getElementById('scanResult').style.display='none';
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}});
+    const video=document.getElementById('scannerVideo');
+    video.srcObject=stream;
+    // Try to get torch track
+    const tracks=stream.getVideoTracks();
+    if(tracks.length)torchTrack=tracks[0];
+    SCAN_ACTIVE=true;
+    document.getElementById('scanMsg').textContent='📷 Scanner active – hold steady';
+    // Use ZXing
+    if(window.ZXing){
+      const hints=new Map();
+      hints.set(ZXing.DecodeHintType.TRY_HARDER,true);
+      scanner=new ZXing.BrowserMultiFormatReader(hints);
+      scanner.decodeFromVideoElement(video,(result,err)=>{
+        if(result){onQRScanned(result.getText());}
+      });
+    } else {
+      // Fallback: canvas-based scan loop
+      scanLoop();
+    }
+  }catch(e){
+    document.getElementById('scanMsg').textContent='⚠️ Camera access denied – grant permission';
+    console.error(e);
+  }
+}
+let scanLoopId=null;
+async function scanLoop(){
+  if(!SCAN_ACTIVE)return;
+  const video=document.getElementById('scannerVideo');
+  if(video.readyState===video.HAVE_ENOUGH_DATA){
+    const canvas=document.createElement('canvas');
+    canvas.width=video.videoWidth;canvas.height=video.videoHeight;
+    canvas.getContext('2d').drawImage(video,0,0);
+    // Without jsQR fallback – just show camera
+  }
+  scanLoopId=requestAnimationFrame(scanLoop);
+}
+function stopScanner(){
+  SCAN_ACTIVE=false;
+  if(scanner){try{scanner.reset();}catch{}}
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+  if(scanLoopId){cancelAnimationFrame(scanLoopId);scanLoopId=null;}
+  torchTrack=null;torchOn=false;
+}
+async function toggleTorch(){
+  if(!torchTrack)return;
+  try{
+    torchOn=!torchOn;
+    await torchTrack.applyConstraints({advanced:[{torch:torchOn}]});
+    document.getElementById('torchBtn').textContent=torchOn?'💡':'🔦';
+  }catch{toast('Torch not supported','inf');}
+}
+let lastScanned='',lastScanTime=0;
+async function onQRScanned(raw){
+  const now=Date.now();
+  if(raw===lastScanned&&now-lastScanTime<5000)return; // debounce
+  lastScanned=raw;lastScanTime=now;
+  const cid=validateQRData(raw);
+  if(!cid){
+    document.getElementById('scanMsg').textContent='❌ Invalid QR – use AMINA MILK QR only';
+    document.getElementById('scanMsg').style.color='var(--red)';
+    setTimeout(()=>{document.getElementById('scanMsg').textContent='📷 Scanner active – hold steady';document.getElementById('scanMsg').style.color='';},2500);
+    return;
+  }
+  // Valid AMINA MILK QR
+  document.getElementById('scanMsg').textContent='✅ QR Validated – loading customer…';
+  // Find customer
+  let cust=CUSTS.find(c=>(c.customerId||c.id)===cid);
+  if(!cust){
+    try{const d=await db.collection('customers').doc(cid).get();if(d.exists)cust={id:d.id,...d.data()};}catch{}
+  }
+  if(!cust){
+    document.getElementById('scanMsg').textContent='⚠️ Customer not found in database';
+    return;
+  }
+  // Show in scan result
+  const delivered=todayDeliveredIds.has(cid);
+  const res=document.getElementById('scanResult');
+  res.style.display='block';
+  res.innerHTML=`<div class="custHead" style="margin-bottom:10px">
+    <div class="topRow">
+      <div>
+        <div class="nm">${cust.name}</div>
+        <div class="cid">${cid}</div>
+        <div class="meta">📱 ${cust.mobile||'—'} • 📍 ${cust.address||'—'}</div>
+        <div class="meta">🥛 ${cust.defaultQty||1}L ${cust.milkType||''}</div>
+      </div>
+      <span class="statusBadge ${delivered?'delivered':'pending'}">${delivered?'✓ Done':'⏳ Pending'}</span>
+    </div>
+  </div>
+  <div class="card">
+    <div class="modeRow">
+      <div class="modeBtn normal active" id="sm0" onclick="setScanMode('normal',0)">🥛 Normal</div>
+      <div class="modeBtn extra" id="sm1" onclick="setScanMode('extra',1)">➕ Extra</div>
+      <div class="modeBtn less" id="sm2" onclick="setScanMode('less',2)">➖ Less</div>
+    </div>
+    <div class="qtyRow">
+      <div class="lbl"><div style="font-weight:600;font-size:.88rem">Quantity</div><div style="font-size:.7rem;color:var(--txt3)" id="scanQtyNote">Normal</div></div>
+      <div class="qtyCtrl">
+        <button onclick="adjustScanQty(-0.5)">−</button>
+        <span class="qval" id="scanQtyDisplay">${(cust.defaultQty||1).toFixed(1)}</span>
+        <button onclick="adjustScanQty(0.5)">+</button>
+      </div>
+    </div>
+    ${delivered?'<div class="dupWarning">⚠️ Already delivered today</div>':''}
+    <button class="btn btnGrn submitBtn" onclick="submitScanDelivery('${cid}','${cust.name}')" id="scanSubmitBtn">✓ Submit Delivery</button>
+  </div>`;
+  // Set scan-side state
+  window._scanCust=cust;window._scanQty=cust.defaultQty||1;window._scanMode='normal';
+  res.scrollIntoView({behavior:'smooth',block:'start'});
+}
+window._scanQty=1;window._scanMode='normal';
+function setScanMode(mode,idx){
+  window._scanMode=mode;
+  document.querySelectorAll('#scanResult .modeBtn').forEach((b,i)=>b.classList.toggle('active',i===idx));
+  const c=window._scanCust;if(!c)return;
+  const dq=c.defaultQty||1;
+  if(mode==='normal')window._scanQty=dq;
+  else if(mode==='extra')window._scanQty=dq+0.5;
+  else window._scanQty=Math.max(0.5,dq-0.5);
+  document.getElementById('scanQtyDisplay').textContent=window._scanQty.toFixed(1);
+  document.getElementById('scanQtyNote').textContent=mode==='normal'?'Normal':mode==='extra'?'Extra milk':'Less milk';
+}
+function adjustScanQty(d){
+  window._scanQty=Math.max(0.5,parseFloat((window._scanQty+d).toFixed(1)));
+  document.getElementById('scanQtyDisplay').textContent=window._scanQty.toFixed(1);
+}
+async function submitScanDelivery(cid,custName){
+  const btn=document.getElementById('scanSubmitBtn');
+  if(!btn)return;btn.textContent='Submitting…';btn.disabled=true;
+  const c=window._scanCust||{};
+  const normalQty=c.defaultQty||1;
+  const delivQty=window._scanQty||normalQty;
+  const mode=window._scanMode||'normal';
+  const extraQty=mode==='extra'?Math.max(0,delivQty-normalQty):0;
+  const staffData=await db.collection('users').doc(CU.uid).get();
+  const staffName=staffData.exists?staffData.data().name:CU.email;
+  const delivery={
+    customerId:cid,customerName:custName,customerAddress:c.address||'',
+    staffId:CU.uid,staffName,
+    normalQty,deliveredQty:delivQty,extraQty,lessQty:mode==='less'?Math.max(0,normalQty-delivQty):0,
+    mode,status:'delivered'
+  };
+  try{
+    await submitDelivery(delivery);
+    todayDeliveredIds.add(cid);
+    toast(`Delivered ${delivQty}L to ${custName} ✓`);
+    btn.textContent='✅ Delivered!';btn.style.background='var(--grn)';
+    loadTodayDeliveries();
+    document.getElementById('scanMsg').textContent='✅ Delivery submitted – scan next';
+    lastScanned='';// allow re-scan
+    setTimeout(()=>{document.getElementById('scanResult').style.display='none';btn.textContent='✓ Submit';btn.disabled=false;},3000);
+  }catch(e){
+    if(e.message==='DUPLICATE'){
+      toast('Already delivered – updating…','inf');
+      try{
+        const snap=await db.collection('deliveries').where('customerId','==',cid).where('date','==',today()).get();
+        if(!snap.empty)await snap.docs[0].ref.update({deliveredQty:delivQty,extraQty,mode,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+        toast('Updated ✓');btn.textContent='✅ Updated';
+      }catch(e2){toast('Error: '+e2.message,'err');}
+    }else{toast('Error: '+e.message,'err');}
+    btn.textContent='✓ Submit Delivery';btn.disabled=false;
+  }
+}
+
+// ─── MY HISTORY ───
+async function loadMyHistory(){
+  document.getElementById('historyList').innerHTML='<div class="spin"></div>';
+  const f={};
+  const hf=document.getElementById('hFrom').value;
+  const ht=document.getElementById('hTo').value;
+  if(hf)f.dateFrom=hf;if(ht)f.dateTo=ht;
+  f.staffId=CU.uid;
+  try{
+    const dels=await getDeliveries(f);
+    const el=document.getElementById('historyList');
+    if(!dels.length){el.innerHTML='<div class="empty"><div class="ico">📦</div><p>No deliveries in this range</p></div>';return;}
+    const total=dels.reduce((s,d)=>s+(d.deliveredQty||0),0);
+    const extra=dels.reduce((s,d)=>s+(d.extraQty||0),0);
+    el.innerHTML=`<div class="card" style="margin-bottom:12px;display:flex;gap:16px;justify-content:center;text-align:center">
+      <div><div style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800">${dels.length}</div><div style="font-size:.7rem;color:var(--txt2)">Deliveries</div></div>
+      <div><div style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--acc)">${total}L</div><div style="font-size:.7rem;color:var(--txt2)">Total Milk</div></div>
+      <div><div style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--grn)">${extra}L</div><div style="font-size:.7rem;color:var(--txt2)">Extra</div></div>
+    </div>`+dels.map(d=>`<div class="histItem"><div class="row"><span class="date">${d.date}</span><span class="qty">${d.deliveredQty||0}L</span></div><div class="sub">${d.customerName||d.customerId} • ${d.time||''} ${d.extraQty?'• +'+d.extraQty+'L extra':''}</div></div>`).join('');
+  }catch(e){document.getElementById('historyList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Error loading history</p></div>';}
+}
+
+// ─── STATS ───
+async function refreshStats(){try{const st=await getStats();document.getElementById('hs1').textContent=st.todayServed;document.getElementById('hs2').textContent=st.totalPending;document.getElementById('hs3').textContent=st.totalMilk+'L';document.getElementById('hs4').textContent=st.extraMilk+'L';}catch{}}
+async function loadStats(){
+  try{
+    const st=await getStats();
+    document.getElementById('ss1').textContent=st.totalCustomers;
+    document.getElementById('ss2').textContent=st.todayServed;
+    document.getElementById('ss3').textContent=st.totalPending;
+    document.getElementById('ss4').textContent=st.totalMilk+'L';
+    document.getElementById('ss5').textContent=st.extraMilk+'L';
+    // Weekly chart
+    const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
+    const wSnap=await Promise.all(days.map(d=>db.collection('deliveries').where('date','==',d).get()));
+    const wData=wSnap.map((s,i)=>({date:days[i],count:s.size,total:s.docs.reduce((acc,d)=>acc+(d.data().deliveredQty||0),0)}));
+    const mx=Math.max(...wData.map(d=>d.total),1);
+    document.getElementById('weekChart').innerHTML=wData.map(d=>{
+      const short=new Date(d.date).toLocaleDateString('en-IN',{weekday:'short'});
+      return `<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:3px"><span>${short}</span><span style="color:var(--acc)">${d.total}L • ${d.count} del</span></div><div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden"><div style="width:${(d.total/mx)*100}%;height:100%;background:linear-gradient(90deg,var(--acc),#f97316);border-radius:4px;transition:.5s"></div></div></div>`;
+    }).join('');
+    // Top weekly
+    const wf=days[0];
+    const wDels=await getDeliveries({dateFrom:wf});
+    const freq={};wDels.forEach(d=>{if(d.customerId){freq[d.customerId]=(freq[d.customerId]||{nm:d.customerName||d.customerId,cnt:0,ml:0});freq[d.customerId].cnt++;freq[d.customerId].ml+=(d.deliveredQty||0);}});
+    const top=Object.values(freq).sort((a,b)=>b.cnt-a.cnt).slice(0,5);
+    const tmx=top[0]?.cnt||1;
+    document.getElementById('topWeekList').innerHTML=top.length?top.map(t=>`<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:.8rem"><span style="font-weight:600">${t.nm}</span><span style="color:var(--acc)">${t.cnt}× • ${t.ml}L</span></div><div style="height:6px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-top:3px"><div style="width:${(t.cnt/tmx)*100}%;height:100%;background:linear-gradient(90deg,var(--grn),#34d399);border-radius:4px"></div></div></div>`).join(''):'<div class="empty"><div class="ico">📊</div><p>No data this week</p></div>';
+  }catch(e){console.error(e);}
+}
+
+// ─── REPORTS ───
+let myReportData=[];
+async function loadReport(){
+  document.getElementById('reportList').innerHTML='<div class="spin"></div>';
+  const f={};
+  const rf=document.getElementById('rFrom').value;const rt=document.getElementById('rTo').value;
+  if(rf)f.dateFrom=rf;if(rt)f.dateTo=rt;
+  try{
+    let data=await getDeliveries(f);
+    const rc=document.getElementById('rCust').value.trim().toLowerCase();
+    if(rc)data=data.filter(d=>(d.customerName||'').toLowerCase().includes(rc)||(d.customerId||'').toLowerCase().includes(rc));
+    myReportData=data;
+    if(!data.length){document.getElementById('reportList').innerHTML='<div class="empty"><div class="ico">📋</div><p>No records found</p></div>';return;}
+    document.getElementById('reportList').innerHTML=`<div style="font-size:.78rem;color:var(--txt2);margin-bottom:8px">${data.length} records</div><div class="tblWrap"><table><thead><tr><th>Customer</th><th>Date</th><th>Qty</th><th>Staff</th></tr></thead><tbody>${data.map(d=>`<tr><td><div style="font-weight:600">${d.customerName||d.customerId}</div></td><td>${d.date}</td><td>${d.deliveredQty||0}L</td><td>${d.staffName||'—'}</td></tr>`).join('')}</tbody></table></div>`;
+  }catch{document.getElementById('reportList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Error loading report</p></div>';}
+}
+function exportRep(fmt){
+  if(!myReportData.length){toast('Load report first','inf');return;}
+  const data=myReportData;
+  if(fmt==='pdf'){
+    const{jsPDF}=window.jspdf;const doc=new jsPDF();
+    doc.setFontSize(20);doc.setTextColor(245,158,11);doc.text('AMINA MILK',105,16,{align:'center'});
+    doc.setFontSize(10);doc.setTextColor(148,163,184);doc.text('Delivery Report – Exported: '+new Date().toLocaleString('en-IN'),105,24,{align:'center'});
+    doc.setDrawColor(245,158,11,0.3);doc.line(14,28,196,28);
+    let y=36;doc.setFontSize(8);doc.setTextColor(245,158,11);
+    ['Customer','Date','Time','Qty','Extra','Staff'].forEach((h,i)=>doc.text(h,14+[0,52,74,94,110,126][i],y));
+    y+=7;doc.setTextColor(241,245,249);
+    data.forEach((d,idx)=>{if(y>270){doc.addPage();y=20;}if(idx%2===0){doc.setFillColor(26,34,52);doc.rect(14,y-4,182,8,'F');}
+    [d.customerName||d.customerId,d.date,d.time||'—',(d.deliveredQty||0)+'L',(d.extraQty||0)+'L',d.staffName||'—'].forEach((v,i)=>doc.text(String(v).slice(0,14),14+[0,52,74,94,110,126][i],y));y+=8;});
+    doc.save('aminamilk_report.pdf');toast('PDF exported ✓');
+  }else if(fmt==='csv'){
+    const rows=data.map(d=>`${d.customerName||''},${d.customerId||''},${d.date},${d.time||''},${d.deliveredQty||0},${d.extraQty||0},${d.staffName||''}`);
+    const b=new Blob(['Customer,ID,Date,Time,Qty,Extra,Staff\n'+rows.join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='aminamilk.csv';a.click();toast('CSV exported ✓');
+  }else if(fmt==='excel'){
+    const ws=XLSX.utils.json_to_sheet(data.map(d=>({'Customer':d.customerName,'Date':d.date,'Time':d.time||'','Qty':d.deliveredQty||0,'Extra':d.extraQty||0,'Staff':d.staffName||''})));
+    const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Report');XLSX.writeFile(wb,'aminamilk.xlsx');toast('Excel exported ✓');
+  }else{
+    const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='aminamilk.json';a.click();toast('JSON exported ✓');
+  }
+}
+
+// ─── SUGGESTION PANEL DISMISS ───
+document.addEventListener('click',e=>{
+  if(!document.getElementById('mainSearch').contains(e.target)&&!document.getElementById('suggestions').contains(e.target)){
+    document.getElementById('suggestions').classList.remove('show');
+  }
+});
+
+// ─── HOME QUICK SUGGESTIONS (on focus) ───
+document.getElementById('mainSearch').addEventListener('focus',async()=>{
+  const q=document.getElementById('mainSearch').value;
+  if(q.length>1)return;
+  const sug=document.getElementById('suggestions');
+  let html='';
+  if(recentSearches.length){
+    html+=`<div class="sugLabel">Recent</div>`;
+    html+=recentSearches.slice(0,4).map(s=>`<div class="sugItem" onclick="selectCustomer('${s.customerId||''}')"><span class="icon">🕐</span><div class="inf"><div class="nm">${s.query||s.customerId}</div></div></div>`).join('');
+  }
+  if(freqSearches.length){
+    html+=`<div class="sugLabel">Frequent</div>`;
+    html+=freqSearches.slice(0,3).map(s=>`<div class="sugItem" onclick="selectCustomer('${s.customerId}')"><span class="icon">⭐</span><div class="inf"><div class="nm">${s.query||s.customerId}</div><div class="sub">${s.count} deliveries</div></div></div>`).join('');
+  }
+  if(html){sug.innerHTML=html;sug.classList.add('show');}
+});
+
+// ─── PERIODIC REFRESH ───
+setInterval(()=>{if(activePageName==='Home')loadTodayDeliveries();},60000);
+</script>
+</body>
+</html>
