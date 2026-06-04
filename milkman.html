@@ -70,27 +70,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 .sbtn{width:100%;padding:15px;font-size:1rem;border-radius:12px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.3px;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px}
 .sbtn:active{transform:scale(.98)}
 .dupwarn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:#fbbf24;padding:9px 12px;border-radius:9px;font-size:.8rem;text-align:center;margin-bottom:8px}
-/* SCANNER */
+/* SCANNER – photo capture approach */
 .scanHd{padding:12px 14px;background:var(--bg2);border-bottom:1px solid var(--bdr2);display:flex;align-items:center;gap:10px;flex-shrink:0}
 .scanHd h2{font-size:.95rem;font-weight:700;font-family:'Syne',sans-serif}
 .scanHd .st{font-size:.68rem;color:var(--txt2)}
-#scanBox{position:relative;background:#000;overflow:hidden;width:100%;flex-shrink:0;aspect-ratio:4/3;max-height:300px}
-#sv{width:100%;height:100%;object-fit:cover;display:block}
-#scanCv{position:absolute;top:0;left:0;width:100%;height:100%;display:none}
-.scanOverlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
-.frame{width:180px;height:180px;position:relative}
-.frame::before{content:'';position:absolute;top:0;left:0;width:36px;height:36px;border-top:3px solid var(--acc);border-left:3px solid var(--acc);border-radius:4px 0 0 0}
-.frame::after{content:'';position:absolute;bottom:0;right:0;width:36px;height:36px;border-bottom:3px solid var(--acc);border-right:3px solid var(--acc);border-radius:0 0 4px 0}
-.frTR{position:absolute;top:0;right:0;width:36px;height:36px;border-top:3px solid var(--acc);border-right:3px solid var(--acc);border-radius:0 4px 0 0}
-.frBL{position:absolute;bottom:0;left:0;width:36px;height:36px;border-bottom:3px solid var(--acc);border-left:3px solid var(--acc);border-radius:0 0 0 4px}
-.scanLine{position:absolute;left:6px;right:6px;height:2px;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:scanAnim 2s ease-in-out infinite}
-@keyframes scanAnim{0%,100%{top:6px}50%{top:calc(100% - 8px)}}
-#camState{position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;background:var(--bg3);gap:12px;padding:20px;text-align:center;display:none}
-#camState h3{font-size:.95rem;font-weight:700}
-#camState p{font-size:.8rem;color:var(--txt2);line-height:1.5;max-width:260px}
-/* Debug overlay */
-#dbgOverlay{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.75);color:#fff;font-size:10px;font-family:monospace;padding:4px 8px;line-height:1.6;display:none;z-index:10;max-height:80px;overflow:hidden}
-.scanBar{padding:8px 14px;background:var(--bg2);border-bottom:1px solid var(--bdr2);display:flex;align-items:center;gap:8px;flex-shrink:0}
 .scanMsg{flex:1;font-size:.82rem;padding:5px 10px;border-radius:8px;text-align:center}
 .scanMsg.ok{color:var(--grn);background:rgba(16,185,129,.1)}.scanMsg.err{color:var(--red);background:rgba(239,68,68,.1)}.scanMsg.sc{color:var(--acc)}
 .scBtn{padding:6px 10px;border-radius:8px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--txt2);font-size:.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
@@ -103,6 +86,33 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 .hi .r{display:flex;justify-content:space-between;align-items:center}
 .hi .dt{font-weight:600;font-size:.85rem}.hi .qty{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:var(--acc)}
 .hi .sb{font-size:.72rem;color:var(--txt2);margin-top:2px}
+/* Camera capture UI */
+#scanCaptureArea{padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:14px;flex:1}
+.capBtn{width:100%;max-width:340px;padding:18px;border-radius:16px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:.3px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .18s;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.capBtn:active{transform:scale(.97)}
+.capBtn.primary{background:linear-gradient(135deg,var(--acc),#f97316);color:#000}
+.capBtn.secondary{background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);font-size:.9rem;padding:14px}
+.capHint{font-size:.75rem;color:var(--txt3);text-align:center;line-height:1.6;max-width:280px}
+.capDivider{display:flex;align-items:center;gap:10px;width:100%;max-width:340px}
+.capDivider::before,.capDivider::after{content:'';flex:1;height:1px;background:var(--bdr2)}
+.capDivider span{font-size:.7rem;color:var(--txt3)}
+.manualBox{width:100%;max-width:340px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:14px;padding:14px}
+.manualBox label{display:block;font-size:.72rem;color:var(--txt2);margin-bottom:7px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.manualRow{display:flex;gap:8px}
+.manualInp{flex:1;background:var(--bg2);border:1px solid var(--bdr2);border-radius:9px;padding:11px 13px;color:var(--txt);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;text-transform:uppercase}
+.manualInp:focus{border-color:var(--acc)}
+.manualGoBtn{padding:11px 16px;background:var(--acc);color:#000;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;white-space:nowrap;transition:.15s}
+.manualGoBtn:active{transform:scale(.97)}
+#scanStatus{font-size:.82rem;text-align:center;padding:6px 14px;border-radius:8px;min-height:32px;display:flex;align-items:center;justify-content:center;gap:6px;width:100%;max-width:340px}
+#scanStatus.ok{color:var(--grn);background:rgba(16,185,129,.1)}
+#scanStatus.err{color:var(--red);background:rgba(239,68,68,.1)}
+#scanStatus.sc{color:var(--acc);background:rgba(245,158,11,.07)}
+#scanStatus.inf{color:#94a3b8;background:var(--bg3)}
+#photoPreview{display:none;width:100%;max-width:340px;border-radius:12px;overflow:hidden;border:1px solid var(--bdr2)}
+#photoPreview img{width:100%;display:block}
+#photoPreview canvas{display:none}
+.previewSpin{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px}
+.previewSpin .spin{width:28px;height:28px;border-width:3px}
 .inp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:11px 14px;color:var(--txt);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s}
 .inp:focus{border-color:var(--acc)}
 .inpG{margin-bottom:12px}.inpG label{display:block;font-size:.75rem;color:var(--txt2);margin-bottom:5px;font-weight:500}
@@ -194,36 +204,42 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
   <div class="page" id="pgScan">
     <div class="scanHd">
       <span style="font-size:1.3rem">📷</span>
-      <div><h2>Scan QR Code</h2><div class="st" id="scanSubtitle">Point camera at AMINA MILK QR code</div></div>
-      <div style="margin-left:auto;display:flex;gap:5px">
-        <button class="scBtn" id="torchBtn" onclick="toggleTorch()">🔦</button>
-        <button class="scBtn" onclick="flipCam()">🔄</button>
-        <button class="scBtn" id="dbgBtn" onclick="toggleDebug()" title="Debug">🐛</button>
-      </div>
+      <div><h2>Scan QR Code</h2><div class="st" id="scanSubtitle">Take a photo of the customer QR card</div></div>
     </div>
-    <div id="scanBox">
-      <video id="sv" playsinline autoplay muted webkit-playsinline></video>
-      <canvas id="scanCv"></canvas>
-      <div class="scanOverlay">
-        <div class="frame"><div class="frTR"></div><div class="frBL"></div><div class="scanLine"></div></div>
+
+    <!-- hidden file inputs -->
+    <input type="file" id="qrFileInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoCapture(this)">
+    <input type="file" id="qrGalleryInput" accept="image/*" style="display:none" onchange="handlePhotoCapture(this)">
+    <!-- hidden canvas for decoding -->
+    <canvas id="decodeCv" style="display:none"></canvas>
+
+    <div id="scanCaptureArea">
+      <div id="scanStatus" class="sc">📷 Ready – tap the button below to scan</div>
+
+      <!-- Main camera button -->
+      <button class="capBtn primary" onclick="triggerCamera()">
+        <span style="font-size:1.4rem">📸</span> Open Camera &amp; Scan QR
+      </button>
+      <div class="capHint">Tap above → your camera opens → point at QR code → tap capture.<br>Works on all Android &amp; iOS phones.</div>
+
+      <!-- Photo preview area -->
+      <div id="photoPreview"></div>
+
+      <div class="capDivider"><span>OR ENTER ID MANUALLY</span></div>
+
+      <!-- Manual ID entry -->
+      <div class="manualBox">
+        <label>Customer ID / Mobile Number</label>
+        <div class="manualRow">
+          <input class="manualInp" id="manualIdInp" placeholder="e.g. AMB3GUB388" autocomplete="off" autocorrect="off" spellcheck="false"
+            oninput="this.value=this.value.toUpperCase()"
+            onkeydown="if(event.key==='Enter')doManualLookup()">
+          <button class="manualGoBtn" onclick="doManualLookup()">Go →</button>
+        </div>
       </div>
-      <div id="camState">
-        <div style="font-size:2.5rem" id="camIco">📷</div>
-        <h3 id="camTitle">Starting camera…</h3>
-        <p id="camDesc">Please allow camera access when prompted.</p>
-        <button class="btn bacc" id="camBtn" style="display:none;margin-top:8px" onclick="retryCamera()">Try Again</button>
-      </div>
-      <div id="dbgOverlay"></div>
-    </div>
-    <div class="scanBar">
-      <div class="scanMsg sc" id="scanMsg">📷 Initialising…</div>
-      <span style="width:8px;height:8px;border-radius:50%;background:var(--acc);display:inline-block;animation:pulse 1.5s ease infinite;flex-shrink:0"></span>
-    </div>
-    <div id="scanResult" style="display:none"></div>
-    <div id="scanPlaceholder" style="padding:24px;text-align:center;color:var(--txt3);flex:1">
-      <div style="font-size:2.5rem;margin-bottom:8px">📲</div>
-      <div style="font-size:.85rem;margin-bottom:6px">Hold the QR card steady inside the frame</div>
-      <div style="font-size:.75rem;color:var(--txt3)">Good lighting helps – tap 🔦 for torch</div>
+
+      <!-- Result area -->
+      <div id="scanResult" style="display:none;width:100%;max-width:340px"></div>
     </div>
   </div>
 
@@ -343,12 +359,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 var CU=null,CUSTS=[],todayIds=new Set(),activeCust=null,selQtyVal=1,activePageName='Home';
 var recentSearches=[],searchTO=null,myData={};
 var acQtyVal=1;
-
-// ── SCANNER ──
-var SCAN_ACTIVE=false,scanStream=null,loopTimer=null,loopRaf=null;
-var torchTrack=null,torchOn=false,facingMode='environment';
-var lastValidCid='',lastScanMs=0,scanCooldown=false;
-var debugMode=false,framesScanned=0,lastDecodeRaw='';
+var lastValidCid='';
 
 // ── CLOCK ──
 function updateClock(){
@@ -385,9 +396,9 @@ function nav(name,idx){
   document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('active');});
   if(idx===99)document.getElementById('bnScan').classList.add('active');
   else if(idx>=0)document.getElementById('bn'+idx).classList.add('active');
-  if(activePageName==='Scan'&&name!=='Scan')stopScanner();
+  if(activePageName==='Scan'&&name!=='Scan')resetScanPage();
   activePageName=name;
-  if(name==='Scan')startScanner();
+  if(name==='Scan')setScanStatus('📷 Ready – tap the button below to scan','sc');
   else if(name==='History')loadHistory();
   else if(name==='Settings')loadSettingsPage();
 }
@@ -614,260 +625,179 @@ document.getElementById('mainSearch').addEventListener('focus',function(){
   el.classList.add('show');
 });
 
-// ════════════════════════════════
-//  QR SCANNER – robust fixed version
-// ════════════════════════════════
+// ════════════════════════════════════════════════════
+//  QR SCANNER v3 – Photo Capture Method
+//  Approach: native camera via <input capture>, decode
+//  still image with jsQR. Works 100% on Android/iOS.
+// ════════════════════════════════════════════════════
 
-// FIXED validateQR – works on all mobile browsers
-// The original used escape()/unescape() which is deprecated and broken on some Android browsers
-function safeValidateQR(raw){
-  try{
-    if(!raw||typeof raw!=='string')return null;
-    var prefix='AMINAMILK://';
-    var token='AMINA_MILK_SECURE_v1_2025';
-    if(!raw.startsWith(prefix))return null;
-    var b64=raw.slice(prefix.length);
-    // Pad base64 if needed
-    b64=b64.replace(/-/g,'+').replace(/_/g,'/');
-    while(b64.length%4!==0)b64+='=';
-    var binary=atob(b64);
-    // Try TextDecoder first (modern, correct), then fallback to decodeURIComponent
-    var jsonStr;
-    try{
-      var bytes=new Uint8Array(binary.length);
-      for(var i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
-      jsonStr=new TextDecoder('utf-8').decode(bytes);
-    }catch(e){
-      jsonStr=decodeURIComponent(escape(binary));
-    }
-    var p=JSON.parse(jsonStr);
-    if(p&&p.t===token&&p.id)return p.id;
-    return null;
-  }catch(e){
-    return null;
-  }
+function setScanStatus(msg, type){
+  var e = document.getElementById('scanStatus');
+  if(!e) return;
+  e.textContent = msg;
+  e.className = type || 'sc';
 }
 
-function setScanMsg(msg,type){
-  var e=document.getElementById('scanMsg');
-  e.textContent=msg;e.className='scanMsg '+(type||'sc');
-}
-function dbg(msg){
-  if(!debugMode)return;
-  var el=document.getElementById('dbgOverlay');
-  el.style.display='block';
-  el.textContent='['+framesScanned+'] '+msg;
-}
-function toggleDebug(){
-  debugMode=!debugMode;
-  var el=document.getElementById('dbgOverlay');
-  el.style.display=debugMode?'block':'none';
-  if(!debugMode)el.textContent='';
-  document.getElementById('dbgBtn').textContent=debugMode?'✅':'🐛';
+// Open native camera (capture="environment" = rear camera)
+function triggerCamera(){
+  document.getElementById('qrFileInput').value = '';
+  document.getElementById('qrFileInput').click();
 }
 
-function showCamState(ico,title,desc,showBtn){
-  var cs=document.getElementById('camState');
-  document.getElementById('camIco').textContent=ico;
-  document.getElementById('camTitle').textContent=title;
-  document.getElementById('camDesc').textContent=desc;
-  document.getElementById('camBtn').style.display=showBtn?'block':'none';
-  cs.style.display='flex';
-  document.getElementById('sv').style.display='none';
-}
-function hideCamState(){
-  document.getElementById('camState').style.display='none';
-  document.getElementById('sv').style.display='block';
-}
+// Decode QR from a chosen photo file
+function handlePhotoCapture(input){
+  var file = input.files && input.files[0];
+  if(!file) return;
+  setScanStatus('⏳ Reading QR code…', 'sc');
 
-async function startScanner(){
-  if(SCAN_ACTIVE)return;
-  document.getElementById('scanResult').style.display='none';
-  document.getElementById('scanPlaceholder').style.display='block';
-  setScanMsg('📷 Starting camera…');
-  showCamState('📷','Starting camera…','Please allow camera access.',false);
-  framesScanned=0;
+  var prev = document.getElementById('photoPreview');
+  prev.innerHTML = '<div class="previewSpin"><div class="spin"></div><div style="font-size:.75rem;color:var(--txt2)">Decoding…</div></div>';
+  prev.style.display = 'block';
 
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    showCamState('🚫','Camera not supported','Use Chrome or Safari over HTTPS.',false);
-    setScanMsg('❌ Camera not supported','err');return;
-  }
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var img = new Image();
+    img.onload = function(){
+      // Draw onto hidden canvas at capped size (800px max) for jsQR speed
+      var cv = document.getElementById('decodeCv');
+      var MAX = 800;
+      var scale = Math.min(1, MAX / Math.max(img.width, img.height));
+      cv.width  = Math.round(img.width  * scale);
+      cv.height = Math.round(img.height * scale);
+      var ctx = cv.getContext('2d', {willReadFrequently: true});
+      ctx.drawImage(img, 0, 0, cv.width, cv.height);
 
-  // Try constraints in order from best to most compatible
-  var tries=[
-    {video:{facingMode:{exact:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false},
-    {video:{facingMode:'environment'},audio:false},
-    {video:{facingMode:{ideal:facingMode}},audio:false},
-    {video:true,audio:false}
-  ];
-  var stream=null;
-  for(var i=0;i<tries.length;i++){
-    try{stream=await navigator.mediaDevices.getUserMedia(tries[i]);break;}
-    catch(e){dbg('Constraint '+i+' failed: '+e.name);}
-  }
-  if(!stream){
-    showCamState('🚫','Camera access denied','Allow camera permission and tap Try Again.',true);
-    setScanMsg('❌ Camera access denied','err');return;
-  }
+      // Show the photo thumbnail
+      var thumb = document.createElement('img');
+      thumb.src = e.target.result;
+      thumb.style.cssText = 'width:100%;display:block;border-radius:10px';
+      prev.innerHTML = '';
+      prev.appendChild(thumb);
 
-  try{
-    var video=document.getElementById('sv');
-    video.srcObject=stream;
-    scanStream=stream;
-    await new Promise(function(res,rej){
-      var t=setTimeout(function(){rej(new Error('timeout'));},10000);
-      video.onloadedmetadata=function(){
-        clearTimeout(t);
-        video.play().then(res).catch(rej);
-      };
-      video.onerror=function(){clearTimeout(t);rej(new Error('video error'));};
-    });
-    hideCamState();
-    SCAN_ACTIVE=true;
-    lastValidCid='';lastScanMs=0;scanCooldown=false;
-    torchTrack=stream.getVideoTracks&&stream.getVideoTracks()[0]||null;
-    setScanMsg('📷 Ready – point at QR code','sc');
-    document.getElementById('scanSubtitle').textContent='Camera active – hold QR steady';
-    scheduleNextFrame();
-  }catch(e){
-    console.error('Scanner start error:',e);
-    if(stream)stream.getTracks().forEach(function(t){t.stop();});
-    scanStream=null;
-    var msg=e.name==='NotAllowedError'?'Permission denied':e.name==='NotReadableError'?'Camera in use by another app':'Camera error';
-    showCamState('🚫',msg,'Tap Try Again after resolving the issue.',true);
-    setScanMsg('❌ '+msg,'err');
-  }
-}
+      var imgData = ctx.getImageData(0, 0, cv.width, cv.height);
 
-function scheduleNextFrame(){
-  if(!SCAN_ACTIVE)return;
-  // 200ms between frames = 5fps, enough for QR, saves battery
-  loopTimer=setTimeout(function(){
-    loopRaf=requestAnimationFrame(decodeFrame);
-  },200);
-}
+      // Try dontInvert first (fastest), then invertFirst as fallback
+      var code = jsQR(imgData.data, imgData.width, imgData.height, {inversionAttempts: 'dontInvert'});
+      if(!code) code = jsQR(imgData.data, imgData.width, imgData.height, {inversionAttempts: 'invertFirst'});
+      if(!code) code = jsQR(imgData.data, imgData.width, imgData.height, {inversionAttempts: 'attemptBoth'});
 
-function decodeFrame(){
-  if(!SCAN_ACTIVE){loopRaf=null;return;}
-  framesScanned++;
-  var video=document.getElementById('sv');
-  // Guard: video must have real dimensions
-  if(!video||!video.srcObject||video.videoWidth===0||video.videoHeight===0||video.readyState<2){
-    dbg('video not ready (readyState='+(video?video.readyState:'N/A')+', w='+(video?video.videoWidth:0)+')');
-    scheduleNextFrame();return;
-  }
-  var cv=document.getElementById('scanCv');
-  var vw=video.videoWidth,vh=video.videoHeight;
-  // Downscale to max 640px wide – jsQR decodes reliably at this size
-  // and it's much faster on mid-range Android phones than full 1280x720
-  var scale=Math.min(1,640/vw);
-  var dw=Math.round(vw*scale),dh=Math.round(vh*scale);
-  if(cv.width!==dw)cv.width=dw;
-  if(cv.height!==dh)cv.height=dh;
-  var ctx=cv.getContext('2d',{willReadFrequently:true,alpha:false});
-  ctx.drawImage(video,0,0,dw,dh);
-  var imgData;
-  try{imgData=ctx.getImageData(0,0,dw,dh);}catch(e){scheduleNextFrame();return;}
-  var code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'dontInvert'});
-  if(code&&code.data){
-    dbg('jsQR raw: '+code.data.slice(0,40));
-    processQRData(code.data);
-  }else{
-    dbg('no QR (frame '+framesScanned+', '+dw+'x'+dh+')');
-  }
-  scheduleNextFrame();
-}
-
-function processQRData(raw){
-  if(scanCooldown)return;
-  console.log('QR RAW:', raw);
-  var cid=safeValidateQR(raw);
-  console.log('QR CID:', cid);
-  dbg('validateQR → '+(cid||'null')+' | raw: '+raw.slice(0,50));
-  if(!cid){
-    if(raw!==lastDecodeRaw){
-      lastDecodeRaw=raw;
-      setScanMsg('❌ Not an AMINA MILK QR code','err');
-      setTimeout(function(){if(SCAN_ACTIVE)setScanMsg('📷 Ready – point at QR code','sc');},2500);
-    }
-    return;
-  }
-  // Same customer within 5s → skip (already processing)
-  if(cid===lastValidCid&&Date.now()-lastScanMs<5000)return;
-  lastValidCid=cid;lastScanMs=Date.now();
-  scanCooldown=true;
-  setScanMsg('✅ QR recognised! Loading…','ok');
-  if(navigator.vibrate)navigator.vibrate([80,40,80]);
-  fetchAndShowCustomer(cid);
-}
-
-async function fetchAndShowCustomer(cid){
-  try{
-    // 1. Check in-memory cache first (fastest)
-    var cust=CUSTS.find(function(c){return(c.customerId||c.id)===cid;});
-
-    if(!cust){
-      setScanMsg('🔄 Fetching from server…','sc');
-
-      // 2. Try direct doc lookup first (works when doc ID === customerId)
-      var directSnap=await db.collection('customers').doc(cid).get();
-      if(directSnap.exists){
-        cust=Object.assign({id:directSnap.id},directSnap.data());
-        CUSTS.push(cust);
-      }
-
-      // 3. If not found by doc ID, query by the customerId field
-      //    (handles cases where Firestore auto-generated the doc ID)
-      if(!cust){
-        var qSnap=await db.collection('customers')
-          .where('customerId','==',cid)
-          .where('active','==',true)
-          .limit(1)
-          .get();
-        if(!qSnap.empty){
-          cust=Object.assign({id:qSnap.docs[0].id},qSnap.docs[0].data());
-          CUSTS.push(cust);
+      if(code && code.data){
+        console.log('Photo QR decoded:', code.data);
+        var cid = safeValidateQR(code.data);
+        if(cid){
+          setScanStatus('✅ QR recognised! Loading customer…', 'ok');
+          if(navigator.vibrate) navigator.vibrate([80, 40, 80]);
+          fetchAndShowScanResult(cid);
+        } else {
+          setScanStatus('❌ Not an AMINA MILK QR code', 'err');
+          setTimeout(function(){ setScanStatus('📷 Ready – tap the button below to scan', 'sc'); }, 3000);
         }
+      } else {
+        setScanStatus('⚠️ No QR code found – try again closer / better light', 'err');
+        setTimeout(function(){ setScanStatus('📷 Ready – tap the button below to scan', 'sc'); }, 3500);
       }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Manual ID / mobile lookup
+async function doManualLookup(){
+  var raw = (document.getElementById('manualIdInp').value || '').trim().toUpperCase();
+  if(!raw){ toast('Enter a customer ID or mobile number', 'err'); return; }
+  setScanStatus('🔄 Looking up…', 'sc');
+  await fetchAndShowScanResult(raw, true);
+}
+
+// Unified fetch + show, used by both photo decode and manual entry
+async function fetchAndShowScanResult(cid, isManual){
+  try{
+    document.getElementById('scanResult').style.display = 'none';
+
+    // 1. In-memory cache
+    var cust = CUSTS.find(function(c){ return (c.customerId||c.id) === cid || c.mobile === cid; });
+
+    if(!cust){
+      // 2. Direct doc ID lookup
+      try{
+        var d = await db.collection('customers').doc(cid).get();
+        if(d.exists) cust = Object.assign({id: d.id}, d.data());
+      }catch(e){}
     }
 
     if(!cust){
-      setScanMsg('⚠️ Customer not found (ID: '+cid+')','err');
-      console.warn('fetchAndShowCustomer: no customer found for cid=',cid);
-      setTimeout(function(){if(SCAN_ACTIVE)setScanMsg('📷 Ready – point at QR code','sc');scanCooldown=false;},3000);
+      // 3. Query by customerId field
+      try{
+        var q = await db.collection('customers').where('customerId','==',cid).where('active','==',true).limit(1).get();
+        if(!q.empty) cust = Object.assign({id: q.docs[0].id}, q.docs[0].data());
+      }catch(e){}
+    }
+
+    if(!cust && isManual){
+      // 4. Manual: also search by mobile number
+      try{
+        var qm = await db.collection('customers').where('mobile','==',cid).where('active','==',true).limit(1).get();
+        if(!qm.empty) cust = Object.assign({id: qm.docs[0].id}, qm.docs[0].data());
+      }catch(e){}
+    }
+
+    if(!cust){
+      setScanStatus('⚠️ Customer not found for: ' + cid, 'err');
+      setTimeout(function(){ setScanStatus('📷 Ready – tap the button below to scan', 'sc'); }, 3500);
       return;
     }
+
+    // Add to local cache if missing
+    if(!CUSTS.find(function(c){ return (c.customerId||c.id) === (cust.customerId||cust.id); })){
+      CUSTS.push(cust);
+    }
+
     showScanResult(cust);
-    setTimeout(function(){scanCooldown=false;},3000);
+    setScanStatus('✅ ' + cust.name + ' – choose quantity below', 'ok');
+
   }catch(e){
-    console.error('fetchAndShowCustomer error:',e);
-    setScanMsg('⚠️ Network error – check connection','err');
-    setTimeout(function(){if(SCAN_ACTIVE)setScanMsg('📷 Ready – point at QR code','sc');scanCooldown=false;},3000);
+    console.error('fetchAndShowScanResult:', e);
+    setScanStatus('⚠️ Network error – check connection', 'err');
+    setTimeout(function(){ setScanStatus('📷 Ready – tap the button below to scan', 'sc'); }, 3000);
   }
 }
 
-function stopScanner(){
-  SCAN_ACTIVE=false;
-  if(loopTimer){clearTimeout(loopTimer);loopTimer=null;}
-  if(loopRaf){cancelAnimationFrame(loopRaf);loopRaf=null;}
-  if(scanStream){scanStream.getTracks().forEach(function(t){t.stop();});scanStream=null;}
-  var v=document.getElementById('sv');if(v)v.srcObject=null;
-  torchTrack=null;torchOn=false;
-  document.getElementById('torchBtn').textContent='🔦';
-  document.getElementById('scanSubtitle').textContent='Point camera at AMINA MILK QR code';
+// QR token validation (unchanged, robust)
+function safeValidateQR(raw){
+  try{
+    if(!raw || typeof raw !== 'string') return null;
+    var prefix = 'AMINAMILK://';
+    var token  = 'AMINA_MILK_SECURE_v1_2025';
+    if(!raw.startsWith(prefix)) return null;
+    var b64 = raw.slice(prefix.length).replace(/-/g,'+').replace(/_/g,'/');
+    while(b64.length % 4 !== 0) b64 += '=';
+    var binary = atob(b64);
+    var jsonStr;
+    try{
+      var bytes = new Uint8Array(binary.length);
+      for(var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      jsonStr = new TextDecoder('utf-8').decode(bytes);
+    }catch(e){
+      jsonStr = decodeURIComponent(escape(binary));
+    }
+    var p = JSON.parse(jsonStr);
+    if(p && p.t === token && p.id) return p.id;
+    return null;
+  }catch(e){ return null; }
 }
-function retryCamera(){stopScanner();setTimeout(startScanner,500);}
-async function toggleTorch(){
-  if(!torchTrack){toast('Torch not available','inf');return;}
-  try{torchOn=!torchOn;await torchTrack.applyConstraints({advanced:[{torch:torchOn}]});document.getElementById('torchBtn').textContent=torchOn?'💡':'🔦';}
-  catch(e){toast('Torch not supported on this device','inf');}
-}
-function flipCam(){
-  facingMode=facingMode==='environment'?'user':'environment';
-  stopScanner();
-  document.getElementById('scanResult').style.display='none';
-  document.getElementById('scanPlaceholder').style.display='block';
-  setTimeout(startScanner,500);
+
+// No-op stubs so nav() doesn't break (old scanner calls)
+function startScanner(){}
+function stopScanner(){}
+
+// Called when nav leaves the Scan tab – just reset UI
+function resetScanPage(){
+  setScanStatus('📷 Ready – tap the button below to scan', 'sc');
+  document.getElementById('scanResult').style.display = 'none';
+  document.getElementById('photoPreview').style.display = 'none';
+  document.getElementById('photoPreview').innerHTML = '';
+  document.getElementById('manualIdInp').value = '';
 }
 
 // ── SCAN RESULT ──
@@ -876,15 +806,14 @@ function showScanResult(cust){
   var done=todayIds.has(cid);
   var dq=parseFloat(cust.defaultQty)||1;
   window._sc=cust;window._sq=dq;
-  document.getElementById('scanPlaceholder').style.display='none';
-  var res=document.getElementById('scanResult');res.style.display='block';
+  var res=document.getElementById('scanResult');
+  res.style.display='block';
   var presets=[.25,.5,1,1.5,2];
   var pi=presets.indexOf(dq);
   var presetsHtml=presets.map(function(v,i){return'<div class="qbtn'+(i===pi?' active':'')+'" onclick="setSQ('+v+',this)">'+fmtQ(v)+'</div>';}).join('');
   presetsHtml+='<div class="qbtn" onclick="setSQ(-1,this)">Custom</div>';
   res.innerHTML='<div class="srcHead"><div><div class="nm">'+esc(cust.name)+'</div><div class="cid">'+cid+'</div><div class="m">📱 '+(cust.mobile||'—')+'</div><div class="m">📍 '+(cust.address||'—')+'</div></div><span class="sbadge '+(done?'done':'pend')+'">'+(done?'✓ Done':'⏳ Pending')+'</span></div><div class="card" style="margin-bottom:0">'+(done?'<div class="dupwarn">⚠️ Already delivered today – tap below to update</div>':'')+'<div style="font-size:.75rem;color:var(--txt2);margin-bottom:8px;font-weight:600">SELECT QUANTITY</div><div class="qpresets" id="sqPresets">'+presetsHtml+'</div><input class="custinp" id="sqCustom" type="number" min="0.1" step="0.25" placeholder="Enter litres…" oninput="window._sq=parseFloat(this.value)||0;document.getElementById(\'sqDisp\').textContent=window._sq>0?fmtQ(window._sq):\'— L\'"><div class="selqty" id="sqDisp">'+fmtQ(dq)+'</div><button class="sbtn '+(done?'bacc':'bgrn')+'" id="sqBtn" onclick="submitScanDel(\''+cid+'\',\''+esc(cust.name)+'\')">✓ Submit Delivery</button></div>';
-  setScanMsg('✅ '+cust.name+' – choose quantity below','ok');
-  res.scrollIntoView({behavior:'smooth',block:'start'});
+  res.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function setSQ(v,btn){
   document.querySelectorAll('#sqPresets .qbtn').forEach(function(b){b.classList.remove('active');});
@@ -907,12 +836,11 @@ async function submitScanDel(cid,custName){
     await submitDelivery(d);todayIds.add(cid);
     toast(fmtQ(dq)+' → '+custName+' ✓');
     btn.innerHTML='✅ Delivered!';btn.style.background='var(--grn)';btn.style.color='#fff';
-    refreshHomeStats();setScanMsg('✅ Done! Scan next customer','ok');
-    lastValidCid='';// allow re-scan same customer
+    refreshHomeStats();setScanStatus('✅ Done! Tap camera button for next customer','ok');
+    lastValidCid='';
     setTimeout(function(){
       document.getElementById('scanResult').style.display='none';
-      document.getElementById('scanPlaceholder').style.display='block';
-      if(SCAN_ACTIVE)setScanMsg('📷 Ready – point at QR code','sc');
+      setScanStatus('📷 Ready – tap the button below to scan','sc');
       btn.innerHTML='✓ Submit Delivery';btn.disabled=false;
     },2200);
   }catch(e){
