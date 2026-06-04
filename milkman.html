@@ -11,36 +11,32 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://unpkg.com/@zxing/library@0.18.6/umd/index.min.js"></script>
+<!-- ZXing from jsDelivr CDN – more reliable than unpkg -->
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.19.1/umd/index.min.js"></script>
 <script src="firebase.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{--bg:#060d1a;--bg2:#0f1a2e;--bg3:#162236;--bg4:#1c2b42;--acc:#f59e0b;--acc2:#fbbf24;--grn:#10b981;--red:#ef4444;--blu:#3b82f6;--pur:#8b5cf6;--txt:#f1f5f9;--txt2:#94a3b8;--txt3:#64748b;--bdr:rgba(245,158,11,.18);--bdr2:rgba(255,255,255,.07);--sh:0 4px 24px rgba(0,0,0,.5);--rnd:14px}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;max-width:100vw}
 h1,h2,h3,.brand{font-family:'Syne',sans-serif}
-/* AUTH GUARD */
 #guard{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:12px}
 #guard .spin{width:36px;height:36px;border:3px solid var(--bdr2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite}
 #guard p{color:var(--txt2);font-size:.85rem}
 #app{display:none;padding-bottom:80px}
-/* TOPBAR */
 .topbar{background:var(--bg2);border-bottom:1px solid var(--bdr2);padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:10px}
 .topbar .brand{font-size:1.1rem;color:var(--acc);font-weight:800;display:flex;align-items:center;gap:8px;white-space:nowrap}
 .topbar .brand .pill{background:rgba(16,185,129,.15);color:var(--grn);font-size:.65rem;padding:2px 7px;border-radius:20px;font-weight:700;letter-spacing:.5px}
 .staffInfo{font-size:.75rem;color:var(--txt2);text-align:right;line-height:1.3;cursor:pointer}
 .staffInfo strong{color:var(--txt);font-size:.82rem}
-/* BOTTOM NAV */
 .bottomNav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--bdr2);display:flex;z-index:100;padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
 .bnBtn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;cursor:pointer;border:none;background:none;color:var(--txt3);font-size:.65rem;font-family:'DM Sans',sans-serif;font-weight:600;letter-spacing:.3px;transition:.18s}
 .bnBtn .ico{font-size:1.3rem}
 .bnBtn.active{color:var(--acc)}
 .bnBtn.active .ico{transform:scale(1.15)}
 .bnBtn.scan .ico-wrap{width:52px;height:52px;background:linear-gradient(135deg,var(--acc),#f97316);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin-top:-22px;box-shadow:0 4px 20px rgba(245,158,11,.5)}
-/* PAGES */
 .page{display:none;padding:16px;animation:fadeIn .2s ease}
 .page.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-/* STATS */
 .statsGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
 .statCard{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--rnd);padding:14px;position:relative;overflow:hidden}
 .statCard::after{content:'';position:absolute;top:-16px;right:-16px;width:60px;height:60px;border-radius:50%;opacity:.1}
@@ -48,11 +44,9 @@ h1,h2,h3,.brand{font-family:'Syne',sans-serif}
 .statCard .ico{font-size:1.2rem;margin-bottom:6px}
 .statCard .val{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;line-height:1}
 .statCard .lbl{font-size:.68rem;color:var(--txt2);margin-top:4px;text-transform:uppercase;letter-spacing:.4px}
-/* CARD */
 .card{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--rnd);padding:16px;box-shadow:var(--sh)}
 .cardHd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .cardHd h3{font-size:.95rem;font-weight:700}
-/* SEARCH */
 .searchWrap{position:relative;margin-bottom:14px}
 .searchWrap .sIco{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--txt3)}
 .searchInp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:12px 14px 12px 40px;color:var(--txt);font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:.2s}
@@ -67,7 +61,6 @@ h1,h2,h3,.brand{font-family:'Syne',sans-serif}
 .sugItem .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sugItem .sub{font-size:.72rem;color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sugLabel{padding:6px 14px;font-size:.68rem;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;background:var(--bg3)}
-/* CUSTOMER PANEL */
 #custPanel{display:none;margin-top:14px}
 .custHead{background:linear-gradient(135deg,var(--bg3),var(--bg4));border:1px solid var(--bdr);border-radius:14px;padding:16px;margin-bottom:12px}
 .custHead .topRow{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
@@ -92,34 +85,56 @@ h1,h2,h3,.brand{font-family:'Syne',sans-serif}
 .custActions .btn{flex:1;min-width:80px}
 .submitBtn{width:100%;padding:14px;font-size:1rem;border-radius:12px;margin-top:4px}
 .dupWarn{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--acc2);padding:10px 14px;border-radius:10px;font-size:.83rem;text-align:center;margin-top:8px}
-/* SCANNER */
-#pgScan{display:none;padding:0}
-.scanHeader{padding:16px;background:var(--bg2);border-bottom:1px solid var(--bdr2);display:flex;align-items:center;gap:12px}
+
+/* ── SCANNER PAGE ── */
+#pgScan{display:none;padding:0;flex-direction:column}
+#pgScan.active{display:flex}
+.scanHeader{padding:14px 16px;background:var(--bg2);border-bottom:1px solid var(--bdr2);display:flex;align-items:center;gap:12px;flex-shrink:0}
 .scanHeader h2{font-size:1rem;font-weight:700}
-#scannerBox{position:relative;background:#000;overflow:hidden}
-#scannerBox video{width:100%;display:block;max-height:60vw;object-fit:cover}
+.scanHeader .subTxt{font-size:.72rem;color:var(--txt2)}
+
+/* Camera viewport – fixed aspect ratio */
+#scannerBox{position:relative;background:#000;overflow:hidden;width:100%;flex-shrink:0}
+#scannerBox video{width:100%;height:100%;object-fit:cover;display:block}
+#scannerBox canvas{display:none}/* hidden canvas for manual decode */
 #scannerBox .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
-.scanFrame{width:200px;height:200px;position:relative}
-.scanFrame::before,.scanFrame::after{content:'';position:absolute;width:40px;height:40px;border-color:var(--acc);border-style:solid}
+.scanFrame{width:220px;height:220px;position:relative}
+.scanFrame::before,.scanFrame::after{content:'';position:absolute;width:44px;height:44px;border-color:var(--acc);border-style:solid}
 .scanFrame::before{top:0;left:0;border-width:3px 0 0 3px;border-radius:4px 0 0 0}
 .scanFrame::after{bottom:0;right:0;border-width:0 3px 3px 0;border-radius:0 0 4px 0}
-.sfTR{position:absolute;top:0;right:0;width:40px;height:40px;border-top:3px solid var(--acc);border-right:3px solid var(--acc);border-radius:0 4px 0 0}
-.sfBL{position:absolute;bottom:0;left:0;width:40px;height:40px;border-bottom:3px solid var(--acc);border-left:3px solid var(--acc);border-radius:0 0 0 4px}
-.scanLine{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:scanAnim 2s ease-in-out infinite}
-@keyframes scanAnim{0%,100%{top:0}50%{top:calc(100% - 2px)}}
-.scanStatus{padding:14px 16px;text-align:center}
-.scanStatus .msg{font-size:.9rem;color:var(--txt2)}
-.scanStatus .msg.ok{color:var(--grn)}
+.sfTR{position:absolute;top:0;right:0;width:44px;height:44px;border-top:3px solid var(--acc);border-right:3px solid var(--acc);border-radius:0 4px 0 0}
+.sfBL{position:absolute;bottom:0;left:0;width:44px;height:44px;border-bottom:3px solid var(--acc);border-left:3px solid var(--acc);border-radius:0 0 0 4px}
+.scanLine{position:absolute;left:10px;right:10px;height:2px;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:scanAnim 2s ease-in-out infinite}
+@keyframes scanAnim{0%,100%{top:10px}50%{top:calc(100% - 12px)}}
+
+.scanControls{display:flex;gap:8px;padding:12px 16px;background:var(--bg2);border-bottom:1px solid var(--bdr2);flex-shrink:0}
+.scanCtrlBtn{flex:1;padding:10px 8px;border-radius:10px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--txt2);font-size:.8rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;transition:.18s}
+.scanCtrlBtn:active{transform:scale(.97)}
+.scanCtrlBtn.active{border-color:var(--acc);color:var(--acc);background:rgba(245,158,11,.1)}
+
+.scanStatus{padding:12px 16px;flex-shrink:0}
+.scanMsg{font-size:.88rem;color:var(--txt2);text-align:center;padding:6px;border-radius:8px}
+.scanMsg.ok{color:var(--grn);background:rgba(16,185,129,.1)}
+.scanMsg.err{color:var(--red);background:rgba(239,68,68,.1)}
+.scanMsg.scanning{color:var(--acc)}
+
+/* Camera permission states */
+.camState{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;gap:16px;background:var(--bg3);min-height:260px}
+.camState .ico{font-size:3rem}
+.camState h3{font-size:1rem;font-weight:700;text-align:center}
+.camState p{font-size:.82rem;color:var(--txt2);text-align:center;max-width:280px;line-height:1.6}
+.camState .btn{padding:12px 24px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--acc),#f97316);color:#000;font-weight:600;font-size:.9rem;cursor:pointer;font-family:'DM Sans',sans-serif}
+
+#scanResult{padding:16px;overflow-y:auto}
+
 /* HISTORY */
 .histItem{background:var(--bg2);border:1px solid var(--bdr2);border-radius:12px;padding:12px 14px;margin-bottom:8px}
 .histItem .row{display:flex;justify-content:space-between;align-items:center}
 .histItem .dt{font-weight:600;font-size:.88rem}
 .histItem .qty{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--acc)}
 .histItem .sub{font-size:.75rem;color:var(--txt2);margin-top:2px}
-/* REPORTS */
 .filterGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 .exportRow{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-/* MODAL */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:flex-end;justify-content:center}
 .overlay.open{display:flex}
 .modal{background:var(--bg2);border:1px solid var(--bdr2);border-radius:20px 20px 0 0;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.7)}
@@ -129,12 +144,10 @@ h1,h2,h3,.brand{font-family:'Syne',sans-serif}
 .modalBody{padding:16px 20px}
 .modalFt{padding:12px 20px;border-top:1px solid var(--bdr2);display:flex;gap:8px}
 .modalFt .btn{flex:1}
-/* TOAST */
 #toast{position:fixed;top:70px;right:12px;z-index:500;display:flex;flex-direction:column;gap:6px;max-width:300px}
 .toastItem{background:var(--bg2);border:1px solid var(--bdr2);border-radius:10px;padding:10px 14px;font-size:.82rem;box-shadow:var(--sh);animation:tIn .25s ease;display:flex;align-items:center;gap:8px}
 .toastItem.ok{border-left:3px solid var(--grn)}.toastItem.err{border-left:3px solid var(--red)}.toastItem.inf{border-left:3px solid var(--blu)}
 @keyframes tIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-/* MISC */
 .secHd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
 .secHd h2{font-size:1.15rem;font-weight:700}
 .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.7rem;font-weight:600}
@@ -172,6 +185,7 @@ tr:last-child td{border-bottom:none}
     <div class="staffInfo" id="staffBar" onclick="doLogout()"></div>
   </div>
 
+  <!-- HOME -->
   <div class="page active" id="pgHome">
     <div class="statsGrid">
       <div class="statCard gold"><div class="ico">✅</div><div class="val" id="hs1">—</div><div class="lbl">Served Today</div></div>
@@ -217,22 +231,55 @@ tr:last-child td{border-bottom:none}
     </div>
   </div>
 
+  <!-- SCANNER PAGE -->
   <div class="page" id="pgScan">
     <div class="scanHeader">
       <span style="font-size:1.4rem">📷</span>
-      <div><h2>Scan Customer QR</h2><div style="font-size:.72rem;color:var(--txt2)">Point camera at AMINA MILK QR code</div></div>
-      <button class="btn btnSm btnGhost" style="margin-left:auto" onclick="toggleTorch()" id="torchBtn">🔦</button>
-    </div>
-    <div id="scannerBox">
-      <video id="scannerVideo" playsinline autoplay muted></video>
-      <div class="overlay">
-        <div class="scanFrame"><div class="sfTR"></div><div class="sfBL"></div><div class="scanLine"></div></div>
+      <div>
+        <h2>Scan Customer QR</h2>
+        <div class="subTxt">Point camera at AMINA MILK QR code</div>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="scanCtrlBtn" id="torchBtn" onclick="toggleTorch()" style="flex:0;padding:8px 12px">🔦</button>
+        <button class="scanCtrlBtn" id="flipBtn" onclick="flipCamera()" style="flex:0;padding:8px 12px">🔄</button>
       </div>
     </div>
-    <div class="scanStatus"><div class="msg" id="scanMsg">📷 Scanner active – hold steady</div></div>
-    <div id="scanResult" style="padding:16px;display:none"></div>
+
+    <!-- camera viewport -->
+    <div id="scannerBox" style="height:65vw;max-height:340px">
+      <video id="scannerVideo" playsinline autoplay muted></video>
+      <canvas id="scanCanvas"></canvas>
+      <div class="overlay">
+        <div class="scanFrame">
+          <div class="sfTR"></div>
+          <div class="sfBL"></div>
+          <div class="scanLine"></div>
+        </div>
+      </div>
+      <!-- permission / loading states shown here -->
+      <div id="camState" class="camState" style="display:none;position:absolute;inset:0">
+        <div class="ico" id="camIco">📷</div>
+        <h3 id="camTitle">Starting camera…</h3>
+        <p id="camDesc">Please allow camera access when prompted.</p>
+        <button class="btn" id="camBtn" onclick="retryCamera()" style="display:none">Try Again</button>
+      </div>
+    </div>
+
+    <div class="scanControls">
+      <div class="scanCtrlBtn active" id="statusIndicator">
+        <span id="statusDot" style="width:8px;height:8px;border-radius:50%;background:var(--acc);display:inline-block;animation:pulse 1.5s ease infinite"></span>
+        <span id="statusText">Starting…</span>
+      </div>
+    </div>
+
+    <div class="scanStatus">
+      <div class="scanMsg scanning" id="scanMsg">📷 Initialising scanner…</div>
+    </div>
+
+    <div id="scanResult" style="display:none"></div>
   </div>
 
+  <!-- HISTORY -->
   <div class="page" id="pgHistory">
     <div class="secHd"><h2>My Delivery History</h2></div>
     <div class="card" style="margin-bottom:14px">
@@ -245,6 +292,7 @@ tr:last-child td{border-bottom:none}
     <div id="historyList"><div class="spin"></div></div>
   </div>
 
+  <!-- STATS -->
   <div class="page" id="pgStats">
     <div class="secHd"><h2>Statistics</h2><span id="statsDateLbl" style="font-size:.75rem;color:var(--txt2)"></span></div>
     <div class="statsGrid" style="grid-template-columns:1fr 1fr 1fr">
@@ -266,6 +314,7 @@ tr:last-child td{border-bottom:none}
     </div>
   </div>
 
+  <!-- REPORTS -->
   <div class="page" id="pgReports">
     <div class="secHd"><h2>Reports</h2></div>
     <div class="card" style="margin-bottom:14px">
@@ -311,12 +360,37 @@ tr:last-child td{border-bottom:none}
 </div>
 <div id="toast"></div>
 
+<style>
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+</style>
+
 <script>
 // ── STATE ──
 var CU=null,CUR=null,CUSTS=[],activeCust=null,deliveryQty=1,deliveryMode='normal',defaultQty=1;
 var searchTO=null,recentSearches=[],freqSearches=[],reportData=[],todayDeliveredIds=new Set();
-var SCAN_ACTIVE=false,scanner=null,stream=null,torchOn=false,torchTrack=null,lastScanned='',lastScanTime=0;
 var activePageName='Home';
+var myReportData=[];
+
+// ── SCANNER STATE ──
+var SCAN_ACTIVE   = false;
+var scanStream    = null;
+var zxingReader   = null;
+var torchOn       = false;
+var torchTrack    = null;
+var facingMode    = 'environment'; // start with rear camera
+var lastScanned   = '';
+var lastScanTime  = 0;
+var scanAnimFrame = null;
+var manualCanvas  = null;
+var manualCtx     = null;
+var manualVideo   = null;
+var zxingAvail    = false;
+
+// Check ZXing availability after load
+window.addEventListener('load', function(){
+  zxingAvail = !!(window.ZXing && window.ZXing.BrowserMultiFormatReader);
+  console.log('ZXing available:', zxingAvail);
+});
 
 // ── AUTH GUARD ──
 auth.onAuthStateChanged(async function(u){
@@ -339,32 +413,427 @@ auth.onAuthStateChanged(async function(u){
   refreshStats();
 });
 
-function doLogout(){if(SCAN_ACTIVE)stopScanner();signOut().then(()=>window.location.replace('index.html'));}
+function doLogout(){
+  stopScanner();
+  signOut().then(()=>window.location.replace('index.html'));
+}
 
 // ── NAV ──
 function showPage(name,idx){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('pg'+name).classList.add('active');
   document.querySelectorAll('.bnBtn').forEach(b=>b.classList.remove('active'));
-  if(idx===99)document.getElementById('bnScan').classList.add('active');
-  else if(idx>=0)document.getElementById('bn'+idx).classList.add('active');
-  if(activePageName==='Scan'&&name!=='Scan')stopScanner();
-  activePageName=name;
-  if(name==='Scan')startScanner();
-  else if(name==='Stats')loadStats();
-  else if(name==='History')loadMyHistory();
+  if(idx===99) document.getElementById('bnScan').classList.add('active');
+  else if(idx>=0) document.getElementById('bn'+idx).classList.add('active');
+
+  // Stop scanner when leaving scan page
+  if(activePageName==='Scan' && name!=='Scan') stopScanner();
+  activePageName = name;
+
+  if(name==='Scan')    startScanner();
+  else if(name==='Stats')   loadStats();
+  else if(name==='History') loadMyHistory();
 }
 
 // ── TOAST ──
 function toast(msg,type){
   type=type||'ok';
-  var d=document.createElement('div');d.className='toastItem '+type;
+  var d=document.createElement('div');
+  d.className='toastItem '+type;
   d.innerHTML=(type==='ok'?'✅':type==='err'?'❌':'ℹ️')+' '+msg;
   document.getElementById('toast').appendChild(d);
   setTimeout(()=>d.remove(),3200);
 }
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ═══════════════════════════════════════════
+//  SCANNER  – fully rewritten
+// ═══════════════════════════════════════════
+
+function setScanMsg(msg, type){
+  var el = document.getElementById('scanMsg');
+  el.textContent = msg;
+  el.className   = 'scanMsg ' + (type||'scanning');
+}
+function setScanStatus(msg){
+  document.getElementById('statusText').textContent = msg;
+}
+function showCamState(ico, title, desc, showBtn){
+  var cs = document.getElementById('camState');
+  document.getElementById('camIco').textContent   = ico;
+  document.getElementById('camTitle').textContent  = title;
+  document.getElementById('camDesc').textContent   = desc;
+  document.getElementById('camBtn').style.display  = showBtn ? 'block' : 'none';
+  cs.style.display = 'flex';
+  document.getElementById('scannerVideo').style.display = 'none';
+}
+function hideCamState(){
+  document.getElementById('camState').style.display = 'none';
+  document.getElementById('scannerVideo').style.display = 'block';
+}
+
+async function startScanner(){
+  if(SCAN_ACTIVE) return;
+
+  document.getElementById('scanResult').style.display = 'none';
+  setScanMsg('📷 Starting camera…');
+  setScanStatus('Starting…');
+  showCamState('📷','Starting camera…','Please allow camera access when prompted.', false);
+
+  // Check if getUserMedia is supported
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    showCamState('🚫','Camera not supported',
+      'Your browser does not support camera access. Try Chrome or Safari.', false);
+    setScanMsg('Camera not supported on this browser','err');
+    return;
+  }
+
+  // Check permission state if API available
+  if(navigator.permissions){
+    try{
+      var perm = await navigator.permissions.query({name:'camera'});
+      if(perm.state === 'denied'){
+        showCamState('🚫','Camera permission denied',
+          'Go to your browser Settings → Site permissions → Camera, and allow access for this site. Then tap Try Again.', true);
+        setScanMsg('Camera permission denied – check browser settings','err');
+        return;
+      }
+    }catch(e){ /* permissions API not available, continue */ }
+  }
+
+  try{
+    var constraints = {
+      video: {
+        facingMode: { ideal: facingMode },
+        width:  { ideal: 1280 },
+        height: { ideal: 720 }
+      },
+      audio: false
+    };
+
+    scanStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+    var video = document.getElementById('scannerVideo');
+    video.srcObject = scanStream;
+
+    // Wait for video to be ready
+    await new Promise(function(resolve, reject){
+      video.onloadedmetadata = function(){
+        video.play().then(resolve).catch(reject);
+      };
+      video.onerror = reject;
+      setTimeout(reject, 8000); // 8s timeout
+    });
+
+    hideCamState();
+    SCAN_ACTIVE = true;
+
+    // Store torch track
+    var tracks = scanStream.getVideoTracks();
+    if(tracks.length) torchTrack = tracks[0];
+
+    setScanMsg('📷 Scanner active – hold QR code steady', 'scanning');
+    setScanStatus('Scanning…');
+
+    // Start decoding
+    if(zxingAvail){
+      startZXingDecode(video);
+    } else {
+      // Fallback: manual canvas decode loop
+      startManualDecode(video);
+    }
+
+  }catch(e){
+    console.error('Camera error:', e);
+    var title='Camera error', desc='', showBtn=true;
+
+    if(e.name==='NotAllowedError' || e.name==='PermissionDeniedError'){
+      title = 'Camera permission denied';
+      desc  = 'Tap "Try Again" and allow camera access when the browser asks. Or go to browser Settings → Camera.';
+    } else if(e.name==='NotFoundError' || e.name==='DevicesNotFoundError'){
+      title = 'No camera found';
+      desc  = 'This device has no accessible camera.';
+      showBtn = false;
+    } else if(e.name==='NotReadableError' || e.name==='TrackStartError'){
+      title = 'Camera in use';
+      desc  = 'Another app is using the camera. Close it and tap Try Again.';
+    } else if(e.name==='OverconstrainedError'){
+      // Retry without facingMode constraint
+      facingMode = 'user';
+      desc = 'Retrying with front camera…';
+      setTimeout(startScanner, 500);
+      return;
+    } else {
+      title = 'Could not open camera';
+      desc  = e.message || 'Unknown error. Make sure you are on HTTPS.';
+    }
+
+    showCamState('🚫', title, desc, showBtn);
+    setScanMsg('❌ ' + title, 'err');
+    setScanStatus('Error');
+  }
+}
+
+function startZXingDecode(video){
+  try{
+    var hints = new Map();
+    hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+    zxingReader = new ZXing.BrowserMultiFormatReader(hints, 300);
+    zxingReader.decodeFromVideoElement(video, function(result, err){
+      if(!SCAN_ACTIVE) return;
+      if(result){
+        onQRScanned(result.getText());
+      }
+    });
+  }catch(e){
+    console.warn('ZXing decode error, falling back to manual:', e);
+    startManualDecode(video);
+  }
+}
+
+function startManualDecode(video){
+  // Canvas-based decode loop using ZXing if available, else jsQR fallback
+  manualVideo = video;
+  manualCanvas = document.getElementById('scanCanvas');
+  manualCtx    = manualCanvas.getContext('2d');
+  decodeLoop();
+}
+
+function decodeLoop(){
+  if(!SCAN_ACTIVE) return;
+  if(!manualVideo || manualVideo.readyState < 2){
+    scanAnimFrame = requestAnimationFrame(decodeLoop);
+    return;
+  }
+
+  manualCanvas.width  = manualVideo.videoWidth  || 640;
+  manualCanvas.height = manualVideo.videoHeight || 480;
+  manualCtx.drawImage(manualVideo, 0, 0, manualCanvas.width, manualCanvas.height);
+
+  try{
+    if(zxingAvail){
+      var luminanceSource = new ZXing.HTMLCanvasElementLuminanceSource(manualCanvas);
+      var binaryBitmap    = new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(luminanceSource));
+      var reader          = new ZXing.MultiFormatReader();
+      var result          = reader.decode(binaryBitmap);
+      if(result) onQRScanned(result.getText());
+    }
+  }catch(e){
+    // No QR found this frame – normal
+  }
+
+  setTimeout(function(){
+    scanAnimFrame = requestAnimationFrame(decodeLoop);
+  }, 300); // scan every 300ms
+}
+
+function stopScanner(){
+  SCAN_ACTIVE = false;
+
+  if(zxingReader){
+    try{ zxingReader.reset(); }catch(e){}
+    zxingReader = null;
+  }
+
+  if(scanAnimFrame){
+    cancelAnimationFrame(scanAnimFrame);
+    scanAnimFrame = null;
+  }
+
+  if(scanStream){
+    scanStream.getTracks().forEach(function(t){ t.stop(); });
+    scanStream = null;
+  }
+
+  var video = document.getElementById('scannerVideo');
+  video.srcObject = null;
+  torchTrack = null;
+  torchOn    = false;
+  document.getElementById('torchBtn').textContent = '🔦';
+  setScanStatus('Stopped');
+}
+
+function retryCamera(){
+  stopScanner();
+  setTimeout(startScanner, 400);
+}
+
+async function toggleTorch(){
+  if(!torchTrack){ toast('Torch not available','inf'); return; }
+  try{
+    torchOn = !torchOn;
+    await torchTrack.applyConstraints({ advanced:[{ torch: torchOn }] });
+    document.getElementById('torchBtn').textContent = torchOn ? '💡' : '🔦';
+  }catch(e){
+    toast('Torch not supported on this device','inf');
+  }
+}
+
+async function flipCamera(){
+  facingMode = facingMode === 'environment' ? 'user' : 'environment';
+  stopScanner();
+  document.getElementById('scanResult').style.display = 'none';
+  setTimeout(startScanner, 400);
+}
+
+// ── QR RESULT HANDLER ──
+async function onQRScanned(raw){
+  var now = Date.now();
+  if(raw === lastScanned && now - lastScanTime < 4000) return;
+  lastScanned  = raw;
+  lastScanTime = now;
+
+  var cid = validateQR(raw);
+  if(!cid){
+    setScanMsg('❌ Invalid QR – use AMINA MILK QR only','err');
+    setTimeout(function(){
+      if(SCAN_ACTIVE) setScanMsg('📷 Scanner active – hold QR code steady','scanning');
+    }, 2500);
+    return;
+  }
+
+  setScanMsg('✅ QR Validated – loading customer…','ok');
+  setScanStatus('Found!');
+
+  var cust = CUSTS.find(function(c){ return (c.customerId||c.id) === cid; });
+  if(!cust){
+    try{
+      var d = await db.collection('customers').doc(cid).get();
+      if(d.exists) cust = Object.assign({id:d.id}, d.data());
+    }catch(e){}
+  }
+
+  if(!cust){
+    setScanMsg('⚠️ Customer not found in system','err');
+    setScanStatus('Not found');
+    return;
+  }
+
+  var delivered = todayDeliveredIds.has(cid);
+  var dq        = parseFloat(cust.defaultQty) || 1;
+
+  window._sc = cust;
+  window._sq = dq;
+  window._sm = 'normal';
+
+  var res = document.getElementById('scanResult');
+  res.style.display = 'block';
+  res.innerHTML = `
+    <div class="custHead" style="margin-bottom:12px">
+      <div class="topRow">
+        <div>
+          <div class="nm">${cust.name}</div>
+          <div class="cid">${cid}</div>
+          <div class="meta">📱 ${cust.mobile||'—'}</div>
+          <div class="meta">📍 ${cust.address||'—'}</div>
+          <div class="meta">🥛 Default: ${dq}L ${cust.milkType||''}</div>
+        </div>
+        <span class="statusBadge ${delivered?'delivered':'pending'}">${delivered?'✓ Done':'⏳ Pending'}</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="modeRow">
+        <div class="modeBtn normal active" onclick="setScanMode('normal',0)">🥛 Normal</div>
+        <div class="modeBtn extra"          onclick="setScanMode('extra',1)">➕ Extra</div>
+        <div class="modeBtn less"           onclick="setScanMode('less',2)">➖ Less</div>
+      </div>
+      <div class="qtyRow">
+        <div class="lbl">
+          <div style="font-weight:600;font-size:.88rem">Quantity</div>
+          <div style="font-size:.7rem;color:var(--txt3)" id="scanQtyNote">Normal</div>
+        </div>
+        <div class="qtyCtrl">
+          <button onclick="adjScanQty(-0.5)">−</button>
+          <span class="qval" id="scanQtyDisp">${dq.toFixed(1)}</span>
+          <button onclick="adjScanQty(0.5)">+</button>
+        </div>
+      </div>
+      ${delivered ? '<div class="dupWarn">⚠️ Already delivered today – submitting will overwrite</div>' : ''}
+      <button class="btn btnGrn submitBtn" id="scanSubmitBtn" onclick="submitScanDel('${cid}','${cust.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">
+        ✓ Submit Delivery
+      </button>
+    </div>`;
+
+  res.scrollIntoView({behavior:'smooth', block:'start'});
+  setScanMsg('✅ Customer loaded – confirm delivery below','ok');
+  setScanStatus('Ready');
+}
+
+function setScanMode(mode, idx){
+  window._sm = mode;
+  document.querySelectorAll('#scanResult .modeBtn').forEach(function(b,i){
+    b.classList.toggle('active', i===idx);
+  });
+  var c = window._sc, dq = c ? (parseFloat(c.defaultQty)||1) : 1;
+  window._sq = mode==='normal' ? dq : mode==='extra' ? dq+0.5 : Math.max(0.5, dq-0.5);
+  document.getElementById('scanQtyDisp').textContent = window._sq.toFixed(1);
+  document.getElementById('scanQtyNote').textContent =
+    mode==='normal' ? 'Normal delivery' : mode==='extra' ? 'Extra milk' : 'Less milk';
+}
+
+function adjScanQty(d){
+  window._sq = Math.max(0.5, parseFloat((window._sq + d).toFixed(1)));
+  document.getElementById('scanQtyDisp').textContent = window._sq.toFixed(1);
+}
+
+async function submitScanDel(cid, custName){
+  var btn = document.getElementById('scanSubmitBtn');
+  btn.textContent = 'Submitting…'; btn.disabled = true;
+
+  var c        = window._sc || {};
+  var normalQty = parseFloat(c.defaultQty) || 1;
+  var dq        = window._sq || normalQty;
+  var mode      = window._sm || 'normal';
+  var extraQty  = mode==='extra' ? Math.max(0, dq - normalQty) : 0;
+
+  var sd        = await db.collection('users').doc(CU.uid).get();
+  var staffName = sd.exists ? sd.data().name : CU.email;
+
+  var d = {
+    customerId:      cid,
+    customerName:    custName,
+    customerAddress: c.address||'',
+    staffId:         CU.uid,
+    staffName,
+    normalQty,
+    deliveredQty:    dq,
+    extraQty,
+    lessQty:         mode==='less' ? Math.max(0, normalQty-dq) : 0,
+    mode,
+    status:          'delivered'
+  };
+
+  try{
+    await submitDelivery(d);
+    todayDeliveredIds.add(cid);
+    toast('Delivered '+dq+'L to '+custName+' ✓');
+    btn.textContent = '✅ Delivered!';
+    loadTodayDeliveries();
+    setScanMsg('✅ Delivery submitted – scan next customer','ok');
+    lastScanned = ''; // allow re-scan of same QR
+    setTimeout(function(){
+      document.getElementById('scanResult').style.display = 'none';
+      if(SCAN_ACTIVE) setScanMsg('📷 Scanner active – hold QR code steady','scanning');
+      btn.textContent = '✓ Submit Delivery'; btn.disabled = false;
+      setScanStatus('Scanning…');
+    }, 3000);
+  }catch(e){
+    if(e.message==='DUPLICATE'){
+      try{
+        var ex = await getTodayDeliveryForCustomer(cid);
+        if(ex) await updateDelivery(ex.id,{deliveredQty:dq,extraQty,mode,
+          updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+        toast('Updated existing delivery ✓');
+        btn.textContent = '✅ Updated!';
+        setTimeout(function(){ btn.textContent='✓ Submit Delivery'; btn.disabled=false; }, 2000);
+      }catch(e2){ toast('Error: '+e2.message,'err'); btn.textContent='✓ Submit'; btn.disabled=false; }
+    } else {
+      toast('Error: '+e.message,'err');
+      btn.textContent = '✓ Submit Delivery'; btn.disabled = false;
+    }
+  }
+}
 
 // ── CUSTOMERS ──
 async function loadCustomersCache(){
@@ -383,7 +852,15 @@ async function loadTodayDeliveries(){
     document.getElementById('hs2').textContent=Math.max(0,CUSTS.length-dels.length);
   }catch{['hs1','hs2','hs3','hs4'].forEach(id=>document.getElementById(id).textContent='?');}
 }
-async function refreshStats(){try{var st=await getStats();document.getElementById('hs1').textContent=st.todayServed;document.getElementById('hs2').textContent=st.totalPending;document.getElementById('hs3').textContent=st.totalMilk+'L';document.getElementById('hs4').textContent=st.extraMilk+'L';}catch{}}
+async function refreshStats(){
+  try{
+    var st=await getStats();
+    document.getElementById('hs1').textContent=st.todayServed;
+    document.getElementById('hs2').textContent=st.totalPending;
+    document.getElementById('hs3').textContent=st.totalMilk+'L';
+    document.getElementById('hs4').textContent=st.extraMilk+'L';
+  }catch{}
+}
 
 // ── SEARCH ──
 async function loadHomeSuggestions(){
@@ -422,7 +899,7 @@ async function selectCustomer(cid){
 }
 function showCustPanel(c){
   var cid=c.customerId||c.id,delivered=todayDeliveredIds.has(cid);
-  defaultQty=c.defaultQty||1;deliveryQty=defaultQty;deliveryMode='normal';
+  defaultQty=parseFloat(c.defaultQty)||1;deliveryQty=defaultQty;deliveryMode='normal';
   document.getElementById('qtyDisplay').textContent=deliveryQty.toFixed(1);
   document.getElementById('qtyNote').textContent='Normal delivery';
   document.querySelectorAll('.modeBtn').forEach(b=>b.classList.remove('active'));
@@ -437,7 +914,7 @@ function showCustPanel(c){
 }
 function setMode(mode,btn){
   deliveryMode=mode;
-  document.querySelectorAll('.modeBtn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#pgHome .modeBtn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   if(mode==='normal'){deliveryQty=defaultQty;document.getElementById('qtyNote').textContent='Normal delivery';}
   else if(mode==='extra'){deliveryQty=defaultQty+0.5;document.getElementById('qtyNote').textContent='Extra milk requested';}
@@ -451,7 +928,7 @@ async function submitDeliveryAction(){
   if(!activeCust){toast('Select a customer first','err');return;}
   var cid=activeCust.customerId||activeCust.id;
   var btn=document.getElementById('submitBtn');btn.textContent='Submitting…';btn.disabled=true;
-  var normalQty=activeCust.defaultQty||1;
+  var normalQty=parseFloat(activeCust.defaultQty)||1;
   var extraQty=deliveryMode==='extra'?Math.max(0,deliveryQty-normalQty):0;
   var sd=await db.collection('users').doc(CU.uid).get();
   var staffName=sd.exists?sd.data().name:CU.email;
@@ -459,11 +936,9 @@ async function submitDeliveryAction(){
   try{
     await submitDelivery(d);
     todayDeliveredIds.add(cid);
-    toast(`Delivered ${deliveryQty}L to ${activeCust.name} ✓`);
+    toast('Delivered '+deliveryQty+'L to '+activeCust.name+' ✓');
     document.getElementById('dupWarn').style.display='block';
     btn.textContent='✓ Delivered!';btn.style.background='var(--grn)';
-    document.getElementById('custHead').querySelector('.statusBadge').textContent='✓ Done';
-    document.getElementById('custHead').querySelector('.statusBadge').className='statusBadge delivered';
     loadTodayDeliveries();
     setTimeout(()=>{btn.textContent='✓ Re-Submit Delivery';btn.disabled=false;},2000);
   }catch(e){
@@ -500,96 +975,6 @@ async function viewCustHistory(){
   }catch{document.getElementById('histModalBody').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Error loading</p></div>';}
 }
 
-// ── SCANNER ──
-async function startScanner(){
-  if(SCAN_ACTIVE)return;
-  document.getElementById('scanMsg').textContent='📷 Starting camera…';
-  document.getElementById('scanResult').style.display='none';
-  try{
-    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}});
-    var video=document.getElementById('scannerVideo');
-    video.srcObject=stream;
-    var tracks=stream.getVideoTracks();
-    if(tracks.length)torchTrack=tracks[0];
-    SCAN_ACTIVE=true;
-    document.getElementById('scanMsg').textContent='📷 Scanner active – hold steady';
-    if(window.ZXing){
-      var hints=new Map();hints.set(ZXing.DecodeHintType.TRY_HARDER,true);
-      scanner=new ZXing.BrowserMultiFormatReader(hints);
-      scanner.decodeFromVideoElement(video,(result,err)=>{if(result)onQRScanned(result.getText());});
-    }
-  }catch(e){document.getElementById('scanMsg').textContent='⚠️ Camera access denied – grant permission';}
-}
-function stopScanner(){
-  SCAN_ACTIVE=false;
-  if(scanner){try{scanner.reset();}catch{}}
-  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
-  torchTrack=null;torchOn=false;
-}
-async function toggleTorch(){
-  if(!torchTrack)return;
-  try{torchOn=!torchOn;await torchTrack.applyConstraints({advanced:[{torch:torchOn}]});document.getElementById('torchBtn').textContent=torchOn?'💡':'🔦';}
-  catch{toast('Torch not supported','inf');}
-}
-async function onQRScanned(raw){
-  var now=Date.now();
-  if(raw===lastScanned&&now-lastScanTime<5000)return;
-  lastScanned=raw;lastScanTime=now;
-  var cid=validateQR(raw);
-  if(!cid){
-    var msg=document.getElementById('scanMsg');
-    msg.textContent='❌ Invalid QR – use AMINA MILK QR only';msg.style.color='var(--red)';
-    setTimeout(()=>{msg.textContent='📷 Scanner active – hold steady';msg.style.color='';},2500);
-    return;
-  }
-  document.getElementById('scanMsg').textContent='✅ QR Validated – loading customer…';
-  var cust=CUSTS.find(c=>(c.customerId||c.id)===cid);
-  if(!cust){try{var d=await db.collection('customers').doc(cid).get();if(d.exists)cust={id:d.id,...d.data()};}catch{}}
-  if(!cust){document.getElementById('scanMsg').textContent='⚠️ Customer not found';return;}
-  var delivered=todayDeliveredIds.has(cid);
-  var dq=cust.defaultQty||1;
-  window._sc=cust;window._sq=dq;window._sm='normal';
-  var res=document.getElementById('scanResult');
-  res.style.display='block';
-  res.innerHTML=`<div class="custHead" style="margin-bottom:10px"><div class="topRow"><div><div class="nm">${cust.name}</div><div class="cid">${cid}</div><div class="meta">📱 ${cust.mobile||'—'} • 📍 ${cust.address||'—'}</div><div class="meta">🥛 ${dq}L ${cust.milkType||''}</div></div><span class="statusBadge ${delivered?'delivered':'pending'}">${delivered?'✓ Done':'⏳ Pending'}</span></div></div>
-  <div class="card"><div class="modeRow"><div class="modeBtn normal active" onclick="setScanMode('normal',0)">🥛 Normal</div><div class="modeBtn extra" onclick="setScanMode('extra',1)">➕ Extra</div><div class="modeBtn less" onclick="setScanMode('less',2)">➖ Less</div></div>
-  <div class="qtyRow"><div class="lbl"><div style="font-weight:600;font-size:.88rem">Quantity</div><div style="font-size:.7rem;color:var(--txt3)" id="scanQtyNote">Normal</div></div><div class="qtyCtrl"><button onclick="adjScanQty(-0.5)">−</button><span class="qval" id="scanQtyDisp">${dq.toFixed(1)}</span><button onclick="adjScanQty(0.5)">+</button></div></div>
-  ${delivered?'<div class="dupWarn">⚠️ Already delivered today</div>':''}
-  <button class="btn btnGrn submitBtn" onclick="submitScanDel('${cid}','${cust.name.replace(/'/g,"\\'")}')">✓ Submit Delivery</button></div>`;
-  res.scrollIntoView({behavior:'smooth',block:'start'});
-}
-function setScanMode(mode,idx){
-  window._sm=mode;
-  document.querySelectorAll('#scanResult .modeBtn').forEach((b,i)=>b.classList.toggle('active',i===idx));
-  var c=window._sc,dq=c?c.defaultQty||1:1;
-  window._sq=mode==='normal'?dq:mode==='extra'?dq+0.5:Math.max(0.5,dq-0.5);
-  document.getElementById('scanQtyDisp').textContent=window._sq.toFixed(1);
-  document.getElementById('scanQtyNote').textContent=mode==='normal'?'Normal':mode==='extra'?'Extra milk':'Less milk';
-}
-function adjScanQty(d){window._sq=Math.max(0.5,parseFloat((window._sq+d).toFixed(1)));document.getElementById('scanQtyDisp').textContent=window._sq.toFixed(1);}
-async function submitScanDel(cid,custName){
-  var btn=event.currentTarget||event.target;btn.textContent='Submitting…';btn.disabled=true;
-  var c=window._sc||{},normalQty=c.defaultQty||1,dq=window._sq||normalQty,mode=window._sm||'normal';
-  var extraQty=mode==='extra'?Math.max(0,dq-normalQty):0;
-  var sd=await db.collection('users').doc(CU.uid).get();
-  var staffName=sd.exists?sd.data().name:CU.email;
-  var d={customerId:cid,customerName:custName,customerAddress:c.address||'',staffId:CU.uid,staffName,normalQty,deliveredQty:dq,extraQty,lessQty:mode==='less'?Math.max(0,normalQty-dq):0,mode,status:'delivered'};
-  try{
-    await submitDelivery(d);todayDeliveredIds.add(cid);
-    toast(`Delivered ${dq}L to ${custName} ✓`);
-    btn.textContent='✅ Delivered!';loadTodayDeliveries();
-    document.getElementById('scanMsg').textContent='✅ Delivery submitted – scan next';
-    lastScanned='';
-    setTimeout(()=>{document.getElementById('scanResult').style.display='none';btn.textContent='✓ Submit';btn.disabled=false;},3000);
-  }catch(e){
-    if(e.message==='DUPLICATE'){
-      try{var ex=await getTodayDeliveryForCustomer(cid);if(ex)await updateDelivery(ex.id,{deliveredQty:dq,extraQty,mode,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});toast('Updated ✓');btn.textContent='✅ Updated';}
-      catch(e2){toast('Error: '+e2.message,'err');}
-    }else toast('Error: '+e.message,'err');
-    btn.textContent='✓ Submit';btn.disabled=false;
-  }
-}
-
 // ── MY HISTORY ──
 async function loadMyHistory(){
   document.getElementById('historyList').innerHTML='<div class="spin"></div>';
@@ -624,7 +1009,6 @@ async function loadStats(){
 }
 
 // ── REPORTS ──
-var myReportData=[];
 async function loadReport(){
   document.getElementById('reportList').innerHTML='<div class="spin"></div>';
   var f={};
@@ -663,20 +1047,23 @@ function exportRep(fmt){
   }
 }
 
-// ── DISMISS SUGGESTIONS ──
-document.addEventListener('click',e=>{
-  if(!document.getElementById('mainSearch').contains(e.target)&&!document.getElementById('suggestions').contains(e.target))
+// ── SEARCH SUGGESTIONS DISMISS ──
+document.addEventListener('click', function(e){
+  if(!document.getElementById('mainSearch').contains(e.target) &&
+     !document.getElementById('suggestions').contains(e.target))
     document.getElementById('suggestions').classList.remove('show');
 });
-document.getElementById('mainSearch').addEventListener('focus',async()=>{
-  if(document.getElementById('mainSearch').value.length>1)return;
-  var sug=document.getElementById('suggestions');var html='';
+document.getElementById('mainSearch').addEventListener('focus', async function(){
+  if(document.getElementById('mainSearch').value.length > 1) return;
+  var sug=document.getElementById('suggestions'); var html='';
   if(recentSearches.length){html+='<div class="sugLabel">Recent</div>'+recentSearches.slice(0,4).map(s=>`<div class="sugItem" onclick="selectCustomer('${s.customerId||''}')"><span class="icon">🕐</span><div class="inf"><div class="nm">${s.query||s.customerId}</div></div></div>`).join('');}
   if(freqSearches.length){html+='<div class="sugLabel">Frequent</div>'+freqSearches.slice(0,3).map(s=>`<div class="sugItem" onclick="selectCustomer('${s.customerId}')"><span class="icon">⭐</span><div class="inf"><div class="nm">${s.query||s.customerId}</div><div class="sub">${s.count} deliveries</div></div></div>`).join('');}
   if(html){sug.innerHTML=html;sug.classList.add('show');}
 });
 
-setInterval(()=>{if(activePageName==='Home')loadTodayDeliveries();},60000);
+setInterval(function(){
+  if(activePageName==='Home') loadTodayDeliveries();
+}, 60000);
 </script>
 </body>
 </html>
