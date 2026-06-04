@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<title>AMINA MILK – Admin Setup</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#060d1a;--bg2:#0f1a2e;--bg3:#162236;--acc:#f59e0b;--grn:#10b981;--red:#ef4444;--txt:#f1f5f9;--txt2:#94a3b8;--bdr:rgba(245,158,11,.18);--bdr2:rgba(255,255,255,.07)}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 20% 10%,rgba(245,158,11,.1),transparent 55%),radial-gradient(ellipse at 85% 85%,rgba(16,185,129,.07),transparent 55%),var(--bg)}
+.box{background:var(--bg2);border:1px solid var(--bdr);border-radius:22px;padding:36px 28px;width:100%;max-width:420px;box-shadow:0 24px 80px rgba(0,0,0,.7)}
+.warn{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:12px;padding:12px 16px;margin-bottom:22px;font-size:.82rem;color:#fca5a5;display:flex;gap:10px;align-items:flex-start;line-height:1.5}
+.warn .ico{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+.drop{width:64px;height:64px;background:linear-gradient(135deg,var(--acc),#f97316);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 10px;box-shadow:0 8px 28px rgba(245,158,11,.35)}
+h1{font-family:'Syne',sans-serif;color:var(--acc);font-size:1.6rem;text-align:center;margin-bottom:4px}
+.sub{text-align:center;color:var(--txt2);font-size:.82rem;margin-bottom:22px}
+.inpG{margin-bottom:14px}
+.inpG label{display:block;font-size:.78rem;color:var(--txt2);margin-bottom:5px;font-weight:500}
+.inp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:12px 15px;color:var(--txt);font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:.2s}
+.inp:focus{border-color:var(--acc)}
+.btn{width:100%;padding:13px;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.95rem;background:linear-gradient(135deg,var(--acc),#f97316);color:#000;transition:.18s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:hover{opacity:.9}.btn:active{transform:scale(.98)}.btn:disabled{opacity:.6;cursor:not-allowed}
+.err{background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.28);color:#fca5a5;padding:9px 13px;border-radius:8px;font-size:.83rem;margin-bottom:12px;display:none}
+.ok{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#34d399;padding:14px 16px;border-radius:10px;font-size:.85rem;margin-bottom:12px;display:none;line-height:1.6}
+.spin{width:18px;height:18px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:sp .6s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.divider{height:1px;background:var(--bdr2);margin:18px 0}
+.step{display:flex;gap:10px;align-items:flex-start;font-size:.8rem;color:var(--txt2);margin-bottom:8px;line-height:1.5}
+.step .num{background:rgba(245,158,11,.15);color:var(--acc);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;flex-shrink:0;margin-top:1px}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="drop">🥛</div>
+  <h1>Admin Setup</h1>
+  <p class="sub">Create your first admin account</p>
+
+  <div class="warn">
+    <span class="ico">⚠️</span>
+    <span>This page is for <strong>first-time setup only</strong>. Delete <code>setup.html</code> from your server after creating your admin account.</span>
+  </div>
+
+  <div class="err" id="err"></div>
+  <div class="ok" id="okMsg"></div>
+
+  <div class="inpG"><label>Admin Name</label><input class="inp" id="aName" placeholder="Your full name"></div>
+  <div class="inpG"><label>Admin Email</label><input class="inp" id="aEmail" type="email" inputmode="email" placeholder="admin@aminamilk.com"></div>
+  <div class="inpG"><label>Password</label><input class="inp" id="aPwd" type="password" placeholder="Min 6 characters"></div>
+  <div class="inpG"><label>Confirm Password</label><input class="inp" id="aPwd2" type="password" placeholder="Repeat password"></div>
+
+  <button class="btn" id="btn" onclick="createAdmin()">🚀 Create Admin Account</button>
+
+  <div class="divider"></div>
+  <div style="font-size:.75rem;color:var(--txt2);margin-bottom:8px;font-weight:600">After setup:</div>
+  <div class="step"><div class="num">1</div><span>Delete or rename <code>setup.html</code> from your server</span></div>
+  <div class="step"><div class="num">2</div><span>Go to <a href="index.html" style="color:var(--acc)">index.html</a> and sign in with your new admin credentials</span></div>
+  <div class="step"><div class="num">3</div><span>Add customers and staff from the admin panel</span></div>
+</div>
+
+<script>
+async function createAdmin(){
+  var name=document.getElementById('aName').value.trim();
+  var email=document.getElementById('aEmail').value.trim();
+  var pwd=document.getElementById('aPwd').value;
+  var pwd2=document.getElementById('aPwd2').value;
+  var btn=document.getElementById('btn');
+  var errEl=document.getElementById('err');
+  var okEl=document.getElementById('okMsg');
+  errEl.style.display='none';okEl.style.display='none';
+
+  if(!name){showErr('Enter your name.');return;}
+  if(!email){showErr('Enter an email address.');return;}
+  if(!pwd||pwd.length<6){showErr('Password must be at least 6 characters.');return;}
+  if(pwd!==pwd2){showErr('Passwords do not match.');return;}
+
+  btn.innerHTML='<div class="spin"></div> Creating…';btn.disabled=true;
+
+  try{
+    // Check if any admin already exists
+    var existCheck=await db.collection('users').where('role','==','admin').limit(1).get();
+    if(!existCheck.empty){
+      showErr('An admin account already exists. Use the login page instead.');
+      btn.innerHTML='🚀 Create Admin Account';btn.disabled=false;return;
+    }
+
+    // Create Firebase Auth user
+    var cred=await auth.createUserWithEmailAndPassword(email,pwd);
+    var uid=cred.user.uid;
+
+    // Write admin doc to Firestore
+    await db.collection('users').doc(uid).set({
+      name:name,
+      email:email,
+      role:'admin',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      active:true
+    });
+
+    // Bootstrap system settings
+    await bootstrapSystem(uid,'admin');
+
+    okEl.innerHTML='✅ <strong>Admin account created!</strong><br>Email: '+email+'<br><br>⚠️ Please delete <code>setup.html</code> from your server now, then <a href="index.html" style="color:#34d399">sign in here</a>.';
+    okEl.style.display='block';
+    btn.innerHTML='✓ Done – go to login';
+    btn.onclick=function(){window.location.href='index.html';};
+    btn.disabled=false;
+
+  }catch(e){
+    var msg=e.code==='auth/email-already-in-use'
+      ?'This email is already registered. Try logging in at index.html.'
+      :e.code==='auth/invalid-email'
+      ?'Invalid email address.'
+      :e.code==='auth/weak-password'
+      ?'Password is too weak.'
+      :e.message||'Setup failed.';
+    showErr(msg);
+    btn.innerHTML='🚀 Create Admin Account';btn.disabled=false;
+  }
+}
+
+function showErr(m){var e=document.getElementById('err');e.textContent=m;e.style.display='block';}
+document.getElementById('aPwd2').addEventListener('keydown',function(e){if(e.key==='Enter')createAdmin();});
+</script>
+</body>
+</html>
