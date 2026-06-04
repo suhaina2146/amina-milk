@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>AMINA MILK – Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -13,222 +13,239 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="firebase.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
 :root{--bg:#0a0e1a;--bg2:#111827;--bg3:#1a2234;--bg4:#1e2a40;--acc:#f59e0b;--grn:#10b981;--red:#ef4444;--blu:#3b82f6;--txt:#f1f5f9;--txt2:#94a3b8;--txt3:#64748b;--bdr:rgba(245,158,11,.15);--bdr2:rgba(255,255,255,.07);--sh:0 4px 24px rgba(0,0,0,.4);--rnd:14px}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
-h1,h2,h3,.brand{font-family:'Syne',sans-serif}
+.syne{font-family:'Syne',sans-serif}
 #guard{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:14px}
-#guard .spin{width:40px;height:40px;border:3px solid var(--bdr2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite}
-#guard p{color:var(--txt2);font-size:.88rem}
-#app{display:none}
-.topbar{background:var(--bg2);border-bottom:1px solid var(--bdr2);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.topbar .brand{font-size:1.2rem;color:var(--acc);font-weight:800;display:flex;align-items:center;gap:10px}
-.topbar .brand span{background:linear-gradient(135deg,var(--acc),#f97316);color:#000;padding:3px 8px;border-radius:6px;font-size:.75rem}
-.topNav{display:flex;gap:4px;align-items:center;overflow-x:auto;flex:1;margin:0 16px;padding:4px 0}
-.topNav::-webkit-scrollbar{height:0}
-.navBtn{background:none;border:none;color:var(--txt2);padding:8px 14px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;white-space:nowrap;transition:.2s;display:flex;align-items:center;gap:6px}
-.navBtn:hover{background:var(--bg3);color:var(--txt)}.navBtn.active{background:rgba(245,158,11,.15);color:var(--acc)}
-.topRight{display:flex;align-items:center;gap:8px}
-.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--acc),#f97316);display:flex;align-items:center;justify-content:center;font-weight:700;color:#000;font-size:.85rem}
-.mobileMenu{display:none;background:none;border:none;color:var(--txt);font-size:1.4rem;cursor:pointer}
-.page{display:none;padding:20px;max-width:1400px;margin:0 auto}
-.page.active{display:block}
-.statsGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
-.statCard{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--rnd);padding:18px 16px;position:relative;overflow:hidden}
-.statCard::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.08}
-.statCard.gold::before{background:var(--acc)}.statCard.grn::before{background:var(--grn)}.statCard.red::before{background:var(--red)}.statCard.blu::before{background:var(--blu)}
-.statCard .val{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;line-height:1}
-.statCard .lbl{font-size:.75rem;color:var(--txt2);margin-top:6px;text-transform:uppercase;letter-spacing:.5px}
-.statCard .ico{font-size:1.5rem;margin-bottom:8px}
-.card{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--rnd);padding:20px;box-shadow:var(--sh)}
-.cardHd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.cardHd h3{font-size:1rem;font-weight:700}
-.tblWrap{overflow-x:auto;border-radius:10px}
-table{width:100%;border-collapse:collapse;font-size:.85rem}
-th{background:var(--bg3);color:var(--txt2);padding:10px 12px;text-align:left;font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
-td{padding:10px 12px;border-bottom:1px solid var(--bdr2);vertical-align:middle}
-tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.02)}
-.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600}
-.badge.grn{background:rgba(16,185,129,.15);color:#34d399}.badge.red{background:rgba(239,68,68,.15);color:#fca5a5}
-.badge.yel{background:rgba(245,158,11,.15);color:var(--acc)}.badge.blu{background:rgba(59,130,246,.15);color:#93c5fd}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;padding:20px}
-.overlay.open{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--bdr2);border-radius:20px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.7)}
-.modalHd{padding:20px 24px 16px;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;justify-content:space-between}
-.modalHd h3{font-size:1.05rem;font-weight:700}
-.modalClose{background:none;border:none;color:var(--txt2);font-size:1.3rem;cursor:pointer;padding:4px 8px;border-radius:6px}
-.modalClose:hover{background:var(--bg3);color:var(--txt)}
-.modalBody{padding:20px 24px}.modalFt{padding:16px 24px;border-top:1px solid var(--bdr2);display:flex;gap:10px;justify-content:flex-end}
-.inp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:12px 16px;color:var(--txt);font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:.2s}
-.inp:focus{border-color:var(--acc);background:var(--bg4)}
-.inpG{margin-bottom:16px}.inpG label{display:block;font-size:.8rem;color:var(--txt2);margin-bottom:6px;font-weight:500}
-.btn{padding:12px 20px;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.95rem;transition:.2s}
-.btnSm{padding:7px 14px;font-size:.8rem;border-radius:8px}
-.btnGhost{background:transparent;border:1px solid var(--bdr2);color:var(--txt2)}.btnGhost:hover{border-color:var(--acc);color:var(--acc)}
-.btnGrn{background:var(--grn);color:#fff}.btnRed{background:var(--red);color:#fff}
-.btnBlu{background:var(--blu);color:#fff}.btnAcc{background:var(--acc);color:#000}
-.searchWrap{position:relative;margin-bottom:20px}
-.searchWrap .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--txt3)}
-.searchInp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:11px 16px 11px 42px;color:var(--txt);font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:.2s}
-.searchInp:focus{border-color:var(--acc)}
-.filtersRow{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;align-items:center}
-.filtersRow .inp{width:auto;flex:1;min-width:140px}
-.select{appearance:none;background:var(--bg3) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' fill='none' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;border:1px solid var(--bdr2);border-radius:10px;padding:11px 36px 11px 14px;color:var(--txt);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer}
-.qrBox{display:flex;flex-direction:column;align-items:center;gap:12px}
-.qrBox canvas,.qrBox img{border:4px solid var(--bg4);border-radius:12px}
-#toast{position:fixed;bottom:24px;right:24px;z-index:500;display:flex;flex-direction:column;gap:8px}
-.toastItem{background:var(--bg2);border:1px solid var(--bdr2);border-radius:10px;padding:12px 18px;font-size:.85rem;box-shadow:var(--sh);animation:sIn .3s ease;display:flex;align-items:center;gap:10px;max-width:320px}
-.toastItem.ok{border-left:3px solid var(--grn)}.toastItem.err{border-left:3px solid var(--red)}.toastItem.inf{border-left:3px solid var(--blu)}
-@keyframes sIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-#confirmBox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;align-items:center;justify-content:center}
-#confirmBox.open{display:flex}
-.confirmCard{background:var(--bg2);border:1px solid var(--bdr2);border-radius:16px;padding:28px;max-width:360px;width:100%;text-align:center;margin:20px}
-.confirmCard h3{font-size:1.05rem;margin-bottom:8px}.confirmCard p{color:var(--txt2);font-size:.88rem;margin-bottom:20px}
-.confirmBtns{display:flex;gap:10px;justify-content:center}
-.exportPanel{background:var(--bg3);border-radius:10px;padding:14px;margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.secHd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
-.secHd h2{font-size:1.3rem;font-weight:700}
-.spin{width:36px;height:36px;border:3px solid var(--bdr2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;margin:40px auto}
+.spin{width:38px;height:38px;border:3px solid var(--bdr2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.custCard{display:grid;grid-template-columns:1fr auto;gap:10px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:12px;padding:14px 16px;margin-bottom:8px;transition:.2s}
-.custCard:hover{border-color:rgba(245,158,11,.3);background:var(--bg4)}
-.custCard .nm{font-weight:600;font-size:.95rem}.custCard .meta{font-size:.78rem;color:var(--txt2);margin-top:3px}
-.custCard .acts{display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap}
-.chartBar{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin:4px 0}
-.chartBar .fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--acc),#f97316);transition:.6s}
-.empty{text-align:center;padding:40px 20px;color:var(--txt3)}.empty .ico{font-size:2.5rem;margin-bottom:12px}
-.delRow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr2);font-size:.85rem}
-.delRow:last-child{border-bottom:none}
-#mobileNav{display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.6)}
-#mobileNav.open{display:block}
-.mobileNavPanel{position:absolute;right:0;top:0;bottom:0;width:240px;background:var(--bg2);border-left:1px solid var(--bdr2);padding:20px;display:flex;flex-direction:column;gap:4px}
-.mobileNavPanel .navBtn{text-align:left;font-size:.92rem;padding:10px 14px}
-@media(max-width:600px){.topNav{display:none}.mobileMenu{display:flex}.statsGrid{grid-template-columns:repeat(2,1fr)}.filtersRow .inp,.filtersRow .select{flex:1 1 100%}.modal{max-width:100%;margin:0;border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0;max-height:85vh}.overlay{align-items:flex-end;padding:0}table{font-size:.78rem}td,th{padding:8px}.page{padding:14px}}
+#app{display:none}
+/* TOPBAR */
+.tb{background:var(--bg2);border-bottom:1px solid var(--bdr2);padding:0 18px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:10px}
+.brand{font-family:'Syne',sans-serif;font-size:1.15rem;color:var(--acc);font-weight:800;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.brand span{background:linear-gradient(135deg,var(--acc),#f97316);color:#000;padding:2px 8px;border-radius:5px;font-size:.72rem}
+.tnav{display:flex;gap:2px;align-items:center;overflow-x:auto;flex:1;margin:0 12px;padding:3px 0;scrollbar-width:none}
+.tnav::-webkit-scrollbar{display:none}
+.nb{background:none;border:none;color:var(--txt2);padding:7px 12px;border-radius:7px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.83rem;font-weight:500;white-space:nowrap;transition:.15s}
+.nb:hover{background:var(--bg3);color:var(--txt)}.nb.active{background:rgba(245,158,11,.13);color:var(--acc)}
+.tr{display:flex;align-items:center;gap:8px}
+.av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--acc),#f97316);display:flex;align-items:center;justify-content:center;font-weight:700;color:#000;font-size:.85rem;font-family:'Syne',sans-serif}
+.mmBtn{display:none;background:none;border:none;color:var(--txt);font-size:1.3rem;cursor:pointer}
+/* CLOCK */
+.clockBadge{font-size:.72rem;color:var(--txt2);text-align:right;line-height:1.4;display:none}
+.clockBadge strong{color:var(--txt);font-size:.8rem;display:block}
+/* PAGES */
+.page{display:none;padding:18px;max-width:1380px;margin:0 auto}
+.page.active{display:block}
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--rnd);padding:18px;box-shadow:var(--sh)}
+.cHd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cHd h3{font-size:.95rem;font-weight:700}
+/* STATS */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:20px}
+.sc{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--rnd);padding:16px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:-18px;right:-18px;width:72px;height:72px;border-radius:50%;opacity:.07}
+.sc.g::before{background:var(--acc)}.sc.gr::before{background:var(--grn)}.sc.r::before{background:var(--red)}.sc.b::before{background:var(--blu)}
+.sc .v{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;line-height:1}.sc .l{font-size:.72rem;color:var(--txt2);margin-top:5px;text-transform:uppercase;letter-spacing:.4px}.sc .ei{font-size:1.4rem;margin-bottom:6px}
+/* TABLE */
+.tw{overflow-x:auto;border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+th{background:var(--bg3);color:var(--txt2);padding:9px 11px;text-align:left;font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+td{padding:9px 11px;border-bottom:1px solid var(--bdr2);vertical-align:middle}
+tr:last-child td{border:none}tr:hover td{background:rgba(255,255,255,.015)}
+/* BADGE */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.7rem;font-weight:600}
+.badge.g{background:rgba(16,185,129,.15);color:#34d399}.badge.r{background:rgba(239,68,68,.15);color:#fca5a5}.badge.y{background:rgba(245,158,11,.15);color:var(--acc)}.badge.b{background:rgba(59,130,246,.15);color:#93c5fd}
+/* BUTTONS */
+.btn{padding:10px 18px;border-radius:9px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.88rem;transition:all .15s;display:inline-flex;align-items:center;justify-content:center;gap:5px}
+.btn:active{transform:scale(.97)}
+.bsm{padding:6px 12px;font-size:.76rem;border-radius:7px}
+.bgh{background:transparent;border:1px solid var(--bdr2);color:var(--txt2)}.bgh:hover{border-color:var(--acc);color:var(--acc)}
+.bgrn{background:var(--grn);color:#fff}.bred{background:var(--red);color:#fff}.bacc{background:var(--acc);color:#000}.bblu{background:var(--blu);color:#fff}
+/* INPUTS */
+.inp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:9px;padding:11px 14px;color:var(--txt);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s}
+.inp:focus{border-color:var(--acc);background:var(--bg4)}
+.inpG{margin-bottom:14px}.inpG label{display:block;font-size:.78rem;color:var(--txt2);margin-bottom:5px;font-weight:500}
+.sel{appearance:none;background:var(--bg3) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%2394a3b8' fill='none' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 11px center;border:1px solid var(--bdr2);border-radius:9px;padding:10px 34px 10px 13px;color:var(--txt);font-size:.88rem;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;width:100%}
+/* SEARCH */
+.sw{position:relative;margin-bottom:16px}
+.sw .si{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--txt3)}
+.sinp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:9px;padding:10px 14px 10px 40px;color:var(--txt);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s}
+.sinp:focus{border-color:var(--acc)}
+/* MODAL */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;padding:16px}
+.ov.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--bdr2);border-radius:18px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.7)}
+.mhd{padding:18px 22px 14px;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;justify-content:space-between}
+.mhd h3{font-size:1rem;font-weight:700}.mc{background:none;border:none;color:var(--txt2);font-size:1.2rem;cursor:pointer;padding:4px 8px;border-radius:6px}
+.mc:hover{background:var(--bg3);color:var(--txt)}
+.mbd{padding:18px 22px}.mft{padding:14px 22px;border-top:1px solid var(--bdr2);display:flex;gap:8px;justify-content:flex-end}
+/* CUSTOMER CARD */
+.ccard{background:var(--bg3);border:1px solid var(--bdr2);border-radius:12px;padding:13px 15px;margin-bottom:8px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;transition:.15s}
+.ccard:hover{border-color:rgba(245,158,11,.25);background:var(--bg4)}
+.ccard .nm{font-weight:600;font-size:.92rem}.ccard .meta{font-size:.76rem;color:var(--txt2);margin-top:2px}
+.ccard .acts{display:flex;gap:5px;flex-wrap:wrap;flex-shrink:0;align-items:flex-start}
+/* QR */
+.qrBox{display:flex;flex-direction:column;align-items:center;gap:10px}
+.qrBox canvas{border:4px solid #fff;border-radius:10px}
+/* TOAST */
+#toast{position:fixed;bottom:20px;right:20px;z-index:500;display:flex;flex-direction:column;gap:7px}
+.ti{background:var(--bg2);border:1px solid var(--bdr2);border-radius:9px;padding:11px 16px;font-size:.83rem;box-shadow:var(--sh);animation:sIn .25s ease;display:flex;align-items:center;gap:8px;max-width:310px}
+.ti.ok{border-left:3px solid var(--grn)}.ti.err{border-left:3px solid var(--red)}.ti.inf{border-left:3px solid var(--blu)}
+@keyframes sIn{from{transform:translateX(110%);opacity:0}to{transform:none;opacity:1}}
+/* CONFIRM */
+#confBox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;align-items:center;justify-content:center}
+#confBox.open{display:flex}
+.confCard{background:var(--bg2);border:1px solid var(--bdr2);border-radius:16px;padding:26px;max-width:340px;width:100%;text-align:center;margin:16px}
+.confCard h3{font-size:1rem;margin-bottom:6px}.confCard p{color:var(--txt2);font-size:.85rem;margin-bottom:18px}
+/* SECHEAD */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.sh h2{font-size:1.25rem;font-weight:700;font-family:'Syne',sans-serif}
+.frow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:flex-end}
+.frow .inp,.frow .sel{width:auto;flex:1;min-width:130px}
+.empty{text-align:center;padding:36px 16px;color:var(--txt3)}.empty .ei{font-size:2.2rem;margin-bottom:10px}
+.delRow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bdr2);font-size:.83rem}
+.delRow:last-child{border:none}
+/* MOBILE NAV */
+#mNav{display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.6)}
+#mNav.open{display:block}
+.mPanel{position:absolute;right:0;top:0;bottom:0;width:230px;background:var(--bg2);border-left:1px solid var(--bdr2);padding:18px;display:flex;flex-direction:column;gap:4px}
+.mPanel .nb{text-align:left;font-size:.9rem;padding:9px 13px}
+/* CHART BAR */
+.bar{height:7px;background:var(--bg3);border-radius:4px;overflow:hidden;margin:3px 0}
+.barFill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--acc),#f97316);transition:.5s}
+/* QTY PRESETS in customer form */
+.qpreset{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.qp{padding:6px 10px;border-radius:7px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--txt2);font-size:.75rem;font-weight:600;cursor:pointer;transition:.15s}
+.qp.active{border-color:var(--acc);background:rgba(245,158,11,.12);color:var(--acc)}
+@media(max-width:640px){.tnav{display:none}.mmBtn{display:flex}.sgrid{grid-template-columns:1fr 1fr}.frow .inp,.frow .sel{flex:1 1 100%}.modal{max-width:100%;border-radius:16px 16px 0 0;position:fixed;bottom:0;left:0;right:0;max-height:88vh}.ov{align-items:flex-end;padding:0}.page{padding:13px}td,th{padding:7px}table{font-size:.76rem}.clockBadge{display:block}}
 </style>
 </head>
 <body>
-<div id="guard"><div class="spin"></div><p>Checking access…</p></div>
+<div id="guard"><div class="spin"></div><p style="color:var(--txt2);font-size:.85rem">Checking access…</p></div>
 <div id="app">
-  <div class="topbar">
+  <div class="tb">
     <div class="brand">🥛 <span>ADMIN</span> AMINA MILK</div>
-    <nav class="topNav">
-      <button class="navBtn active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
-      <button class="navBtn" onclick="showPage('customers',this)">👥 Customers</button>
-      <button class="navBtn" onclick="showPage('deliveries',this)">🚚 Deliveries</button>
-      <button class="navBtn" onclick="showPage('reports',this)">📋 Reports</button>
-      <button class="navBtn" onclick="showPage('staff',this)">👤 Staff</button>
-      <button class="navBtn" onclick="showPage('settings',this)">⚙️ Settings</button>
+    <nav class="tnav">
+      <button class="nb active" onclick="pg('dashboard',this)">📊 Dashboard</button>
+      <button class="nb" onclick="pg('customers',this)">👥 Customers</button>
+      <button class="nb" onclick="pg('deliveries',this)">🚚 Deliveries</button>
+      <button class="nb" onclick="pg('reports',this)">📋 Reports</button>
+      <button class="nb" onclick="pg('staff',this)">👤 Staff</button>
+      <button class="nb" onclick="pg('settings',this)">⚙️ Settings</button>
     </nav>
-    <div class="topRight">
-      <div class="avatar" id="adminAvatar">A</div>
-      <button class="btn btnSm btnGhost" onclick="doLogout()">Logout</button>
-      <button class="mobileMenu" onclick="document.getElementById('mobileNav').classList.add('open')">☰</button>
+    <div class="tr">
+      <div class="clockBadge" id="adminClock"><strong id="aClock">--:--</strong><span id="aDate"></span></div>
+      <div class="av" id="av">A</div>
+      <button class="btn bsm bgh" onclick="doLogout()">Logout</button>
+      <button class="mmBtn" onclick="document.getElementById('mNav').classList.add('open')">☰</button>
     </div>
   </div>
-  <div id="mobileNav" onclick="if(event.target===this)this.classList.remove('open')">
-    <div class="mobileNavPanel">
-      <div style="font-family:'Syne',sans-serif;font-size:1rem;color:var(--acc);margin-bottom:16px;font-weight:700">🥛 AMINA MILK</div>
-      <button class="navBtn" onclick="showPage('dashboard',this);document.getElementById('mobileNav').classList.remove('open')">📊 Dashboard</button>
-      <button class="navBtn" onclick="showPage('customers',this);document.getElementById('mobileNav').classList.remove('open')">👥 Customers</button>
-      <button class="navBtn" onclick="showPage('deliveries',this);document.getElementById('mobileNav').classList.remove('open')">🚚 Deliveries</button>
-      <button class="navBtn" onclick="showPage('reports',this);document.getElementById('mobileNav').classList.remove('open')">📋 Reports</button>
-      <button class="navBtn" onclick="showPage('staff',this);document.getElementById('mobileNav').classList.remove('open')">👤 Staff</button>
-      <button class="navBtn" onclick="showPage('settings',this);document.getElementById('mobileNav').classList.remove('open')">⚙️ Settings</button>
-      <button class="btn btnSm btnGhost" style="margin-top:auto" onclick="doLogout()">Logout</button>
+  <div id="mNav" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="mPanel">
+      <div style="font-family:'Syne',sans-serif;font-size:.95rem;color:var(--acc);margin-bottom:14px;font-weight:700">🥛 AMINA MILK</div>
+      <button class="nb" onclick="pg('dashboard',this);document.getElementById('mNav').classList.remove('open')">📊 Dashboard</button>
+      <button class="nb" onclick="pg('customers',this);document.getElementById('mNav').classList.remove('open')">👥 Customers</button>
+      <button class="nb" onclick="pg('deliveries',this);document.getElementById('mNav').classList.remove('open')">🚚 Deliveries</button>
+      <button class="nb" onclick="pg('reports',this);document.getElementById('mNav').classList.remove('open')">📋 Reports</button>
+      <button class="nb" onclick="pg('staff',this);document.getElementById('mNav').classList.remove('open')">👤 Staff</button>
+      <button class="nb" onclick="pg('settings',this);document.getElementById('mNav').classList.remove('open')">⚙️ Settings</button>
+      <button class="btn bsm bgh" style="margin-top:auto" onclick="doLogout()">Logout</button>
     </div>
   </div>
 
+  <!-- DASHBOARD -->
   <div class="page active" id="pgDashboard">
-    <div class="secHd"><h2>Dashboard Overview</h2><span id="dashDate" style="color:var(--txt2);font-size:.85rem"></span></div>
-    <div class="statsGrid">
-      <div class="statCard gold"><div class="ico">👥</div><div class="val" id="s1">—</div><div class="lbl">Total Customers</div></div>
-      <div class="statCard grn"><div class="ico">✅</div><div class="val" id="s2">—</div><div class="lbl">Served Today</div></div>
-      <div class="statCard red"><div class="ico">⏳</div><div class="val" id="s3">—</div><div class="lbl">Pending Today</div></div>
-      <div class="statCard blu"><div class="ico">🥛</div><div class="val" id="s4">—</div><div class="lbl">Litres Today</div></div>
-      <div class="statCard gold"><div class="ico">➕</div><div class="val" id="s5">—</div><div class="lbl">Extra Milk Today</div></div>
+    <div class="sh"><h2>Dashboard</h2><span id="dashDate" style="font-size:.82rem;color:var(--txt2)"></span></div>
+    <div class="sgrid">
+      <div class="sc g"><div class="ei">👥</div><div class="v" id="s1">—</div><div class="l">Total Customers</div></div>
+      <div class="sc gr"><div class="ei">✅</div><div class="v" id="s2">—</div><div class="l">Served Today</div></div>
+      <div class="sc r"><div class="ei">⏳</div><div class="v" id="s3">—</div><div class="l">Pending Today</div></div>
+      <div class="sc b"><div class="ei">🥛</div><div class="v" id="s4">—</div><div class="l">Litres Today</div></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="dashGrid">
-      <div class="card"><div class="cardHd"><h3>Recent Deliveries</h3><button class="btn btnSm btnGhost" onclick="showPage('deliveries',null)">View All</button></div><div id="recentDelList"><div class="spin"></div></div></div>
-      <div class="card"><div class="cardHd"><h3>Top Customers (Weekly)</h3></div><div id="topCustList"><div class="spin"></div></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px" id="dashGrid">
+      <div class="card"><div class="cHd"><h3>Today's Deliveries</h3><button class="btn bsm bgh" onclick="pg('deliveries',null)">View All →</button></div><div id="rDelList"><div class="spin" style="margin:20px auto"></div></div></div>
+      <div class="card"><div class="cHd"><h3>Top Customers (Week)</h3></div><div id="topList"><div class="spin" style="margin:20px auto"></div></div></div>
     </div>
   </div>
 
+  <!-- CUSTOMERS -->
   <div class="page" id="pgCustomers">
-    <div class="secHd"><h2>Customer Management</h2><button class="btn btnAcc" onclick="openAddCustomer()">+ Add Customer</button></div>
-    <div class="searchWrap"><span class="ico">🔍</span><input class="searchInp" id="custSearch" placeholder="Search name, mobile, ID, address…" oninput="filterCustomers()"></div>
-    <div id="custList"><div class="spin"></div></div>
+    <div class="sh"><h2>Customers</h2><button class="btn bacc" onclick="openAddCust()">+ Add Customer</button></div>
+    <div class="sw"><span class="si">🔍</span><input class="sinp" id="cSearch" placeholder="Search name, mobile, ID, address…" oninput="filterCusts()"></div>
+    <div id="custList"><div class="spin" style="margin:30px auto"></div></div>
   </div>
 
+  <!-- DELIVERIES -->
   <div class="page" id="pgDeliveries">
-    <div class="secHd"><h2>Delivery Records</h2></div>
-    <div class="filtersRow">
-      <input class="inp" id="fCust" placeholder="Customer name/ID" style="flex:1;min-width:130px">
-      <input class="inp" type="date" id="fFrom" style="flex:1;min-width:130px">
-      <input class="inp" type="date" id="fTo" style="flex:1;min-width:130px">
-      <button class="btn btnAcc btnSm" onclick="loadDeliveries()">Filter</button>
-      <button class="btn btnGhost btnSm" onclick="clearDelFilters()">Clear</button>
+    <div class="sh"><h2>Delivery Records</h2></div>
+    <div class="frow">
+      <input class="inp" id="fC" placeholder="Customer name/ID">
+      <input class="inp" type="date" id="fF">
+      <input class="inp" type="date" id="fT">
+      <button class="btn bacc bsm" onclick="loadDels()">Filter</button>
+      <button class="btn bgh bsm" onclick="clearF()">Clear</button>
     </div>
-    <div id="delList"><div class="spin"></div></div>
+    <div id="delList"><div class="spin" style="margin:30px auto"></div></div>
   </div>
 
+  <!-- REPORTS -->
   <div class="page" id="pgReports">
-    <div class="secHd"><h2>Reports & Exports</h2></div>
-    <div class="card" style="margin-bottom:16px">
-      <h3 style="margin-bottom:14px;font-size:.95rem">Filter & Export</h3>
-      <div class="filtersRow">
-        <input class="inp" id="rCust" placeholder="Customer" style="flex:1;min-width:120px">
-        <input class="inp" id="rStaff" placeholder="Staff" style="flex:1;min-width:120px">
-        <input class="inp" type="date" id="rFrom" style="flex:1;min-width:120px">
-        <input class="inp" type="date" id="rTo" style="flex:1;min-width:120px">
-        <select class="select" id="rStatus"><option value="">All Status</option><option>delivered</option></select>
+    <div class="sh"><h2>Reports & Exports</h2></div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="frow">
+        <input class="inp" id="rC" placeholder="Customer"><input class="inp" id="rS" placeholder="Staff">
+        <input class="inp" type="date" id="rF"><input class="inp" type="date" id="rT">
       </div>
-      <div class="exportPanel">
-        <span style="font-size:.82rem;color:var(--txt2);margin-right:6px">Export:</span>
-        <button class="btn btnSm btnAcc" onclick="exportReport('pdf')">📄 PDF</button>
-        <button class="btn btnSm btnGrn" onclick="exportReport('csv')">📊 CSV</button>
-        <button class="btn btnSm btnBlu" onclick="exportReport('excel')">📗 Excel</button>
-        <button class="btn btnSm btnGhost" onclick="exportReport('json')">{ } JSON</button>
-        <button class="btn btnSm btnGhost" onclick="loadReport()">🔍 Preview</button>
+      <div style="display:flex;flex-wrap:wrap;gap:7px">
+        <button class="btn bsm bacc" onclick="exportRep('pdf')">📄 PDF</button>
+        <button class="btn bsm bgrn" onclick="exportRep('csv')">📊 CSV</button>
+        <button class="btn bsm bblu" onclick="exportRep('excel')">📗 Excel</button>
+        <button class="btn bsm bgh" onclick="exportRep('json')">{ } JSON</button>
+        <button class="btn bsm bgh" onclick="loadReport()">🔍 Preview</button>
       </div>
     </div>
-    <div id="reportList"><div class="empty"><div class="ico">📋</div><p>Apply filters and click Preview</p></div></div>
+    <div id="repList"><div class="empty"><div class="ei">📋</div><p>Apply filters and click Preview</p></div></div>
   </div>
 
+  <!-- STAFF -->
   <div class="page" id="pgStaff">
-    <div class="secHd"><h2>Staff Management</h2><button class="btn btnAcc" onclick="openAddStaff()">+ Add Staff</button></div>
-    <div id="staffList"><div class="spin"></div></div>
+    <div class="sh"><h2>Staff</h2><button class="btn bacc" onclick="openAddStaff()">+ Add Staff</button></div>
+    <div id="staffList"><div class="spin" style="margin:30px auto"></div></div>
   </div>
 
+  <!-- SETTINGS -->
   <div class="page" id="pgSettings">
-    <div class="secHd"><h2>Settings</h2></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:800px" id="settingsGrid">
+    <div class="sh"><h2>Settings</h2></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:780px" id="settGrid">
       <div class="card">
-        <h3 style="margin-bottom:14px">Business Info</h3>
-        <div class="inpG"><label>Business Name</label><input class="inp" id="bizName" placeholder="Business Name"></div>
-        <div class="inpG"><label>Phone</label><input class="inp" id="bizPhone" placeholder="+91 ..."></div>
-        <div class="inpG"><label>Address</label><input class="inp" id="bizAddr" placeholder="Address"></div>
-        <button class="btn btnAcc" onclick="saveBizSettings()">Save Info</button>
+        <div style="font-weight:700;margin-bottom:13px">Business Info</div>
+        <div class="inpG"><label>Business Name</label><input class="inp" id="bName" placeholder="Amina Milk"></div>
+        <div class="inpG"><label>Phone</label><input class="inp" id="bPhone" placeholder="+91 …"></div>
+        <div class="inpG"><label>Address</label><input class="inp" id="bAddr" placeholder="Business address"></div>
+        <button class="btn bacc" onclick="saveBiz()">Save Info</button>
       </div>
       <div class="card">
-        <h3 style="margin-bottom:14px">Delivery Defaults</h3>
-        <div class="inpG"><label>Default Milk Qty (L)</label><input class="inp" type="number" id="defQty" value="1" min="0.5" step="0.5"></div>
-        <div class="inpG"><label>Delivery Start</label><input class="inp" type="time" id="delStart" value="06:00"></div>
-        <div class="inpG"><label>Delivery End</label><input class="inp" type="time" id="delEnd" value="10:00"></div>
-        <button class="btn btnAcc" onclick="saveDelSettings()">Save Defaults</button>
+        <div style="font-weight:700;margin-bottom:13px">Delivery Defaults</div>
+        <div class="inpG"><label>Default Qty (L)</label><input class="inp" type="number" id="dQty" value="1" min="0.25" step="0.25"></div>
+        <div class="inpG"><label>Delivery Start</label><input class="inp" type="time" id="dStart" value="06:00"></div>
+        <div class="inpG"><label>Delivery End</label><input class="inp" type="time" id="dEnd" value="10:00"></div>
+        <button class="btn bacc" onclick="saveDelSett()">Save Defaults</button>
       </div>
       <div class="card">
-        <h3 style="margin-bottom:14px">Security</h3>
-        <div class="inpG"><label>Admin Email</label><input class="inp" id="adminEmail" type="email" readonly style="opacity:.6"></div>
-        <div class="inpG"><label>New Password</label><input class="inp" id="newPwd" type="password" placeholder="Leave blank to keep"></div>
-        <button class="btn btnAcc" onclick="updateAdminPwd()">Update Password</button>
+        <div style="font-weight:700;margin-bottom:13px">Admin Security</div>
+        <div class="inpG"><label>Admin Email</label><input class="inp" id="aEmail" readonly style="opacity:.55"></div>
+        <div class="inpG"><label>New Password</label><input class="inp" id="aPwd" type="password" placeholder="Leave blank to keep"></div>
+        <button class="btn bacc" onclick="updatePwd()">Update Password</button>
       </div>
       <div class="card">
-        <h3 style="margin-bottom:14px;color:var(--red)">⚠ Danger Zone</h3>
-        <p style="font-size:.82rem;color:var(--txt2);margin-bottom:14px">These actions cannot be undone.</p>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <button class="btn btnSm btnRed" onclick="confirmAction('Delete ALL delivery records?','deleteAllDeliveries')">🗑 Delete All Deliveries</button>
-          <button class="btn btnSm btnRed" onclick="confirmAction('Delete ALL customers?','deleteAllCustomers')">🗑 Delete All Customers</button>
-          <button class="btn btnSm btnRed" onclick="confirmAction('Clear search history?','resetSearchHistory')">🗑 Clear Search History</button>
+        <div style="font-weight:700;margin-bottom:11px;color:var(--red)">⚠ Danger Zone</div>
+        <p style="font-size:.8rem;color:var(--txt2);margin-bottom:13px">Irreversible actions.</p>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <button class="btn bsm bred" onclick="conf('Delete ALL deliveries?','deleteAllDels')">🗑 Delete All Deliveries</button>
+          <button class="btn bsm bred" onclick="conf('Delete ALL customers?','deleteAllCusts')">🗑 Delete All Customers</button>
+          <button class="btn bsm bred" onclick="conf('Clear search history?','clearHistory')">🗑 Clear Search History</button>
         </div>
       </div>
     </div>
@@ -236,273 +253,321 @@ tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.02)
 </div>
 
 <!-- MODALS -->
-<div class="overlay" id="custModal">
+<!-- Customer Modal -->
+<div class="ov" id="custModal">
   <div class="modal">
-    <div class="modalHd"><h3 id="custModalTitle">Add Customer</h3><button class="modalClose" onclick="closeModal('custModal')">✕</button></div>
-    <div class="modalBody">
-      <input type="hidden" id="editCustId">
-      <div class="inpG"><label>Full Name *</label><input class="inp" id="cName" placeholder="Customer full name"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="inpG"><label>Mobile *</label><input class="inp" id="cMobile" type="tel" placeholder="+91 ..."></div>
-        <div class="inpG"><label>Alt Mobile</label><input class="inp" id="cMobile2" type="tel" placeholder="Optional"></div>
+    <div class="mhd"><h3 id="cModalT">Add Customer</h3><button class="mc" onclick="closeM('custModal')">✕</button></div>
+    <div class="mbd">
+      <input type="hidden" id="eCid">
+      <div class="inpG"><label>Full Name *</label><input class="inp" id="cN" placeholder="Customer full name"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="inpG"><label>Mobile *</label><input class="inp" id="cM" type="tel" placeholder="+91 …"></div>
+        <div class="inpG"><label>Alt Mobile</label><input class="inp" id="cM2" type="tel" placeholder="Optional"></div>
       </div>
-      <div class="inpG"><label>Address *</label><input class="inp" id="cAddress" placeholder="Delivery address"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="inpG"><label>Default Qty (L)</label><input class="inp" type="number" id="cQty" value="1" min="0.5" step="0.5"></div>
-        <div class="inpG"><label>Milk Type</label><select class="select" id="cMilkType" style="width:100%"><option>Full Cream</option><option>Toned</option><option>Skim</option><option>Buffalo</option></select></div>
+      <div class="inpG"><label>Address *</label><input class="inp" id="cA" placeholder="Delivery address"></div>
+      <div class="inpG">
+        <label>Default Quantity</label>
+        <div class="qpreset">
+          <div class="qp" onclick="setQP(.25,this)">250ml</div>
+          <div class="qp" onclick="setQP(.5,this)">500ml</div>
+          <div class="qp active" onclick="setQP(1,this)">1L</div>
+          <div class="qp" onclick="setQP(1.5,this)">1.5L</div>
+          <div class="qp" onclick="setQP(2,this)">2L</div>
+          <div class="qp" onclick="setQP(-1,this)">Custom</div>
+        </div>
+        <input class="inp" type="number" id="cQ" value="1" min="0.25" step="0.25" style="margin-top:8px;display:none" placeholder="Enter litres…">
+        <div id="qShow" style="margin-top:6px;font-size:.82rem;color:var(--acc);font-weight:600">Default: 1L / day</div>
       </div>
-      <div class="inpG"><label>Notes</label><input class="inp" id="cNotes" placeholder="Special instructions..."></div>
+      <div class="inpG"><label>Notes</label><input class="inp" id="cNo" placeholder="Special instructions…"></div>
     </div>
-    <div class="modalFt">
-      <button class="btn btnGhost" onclick="closeModal('custModal')">Cancel</button>
-      <button class="btn btnAcc" id="saveCustBtn" onclick="saveCustomer()">Save Customer</button>
+    <div class="mft">
+      <button class="btn bgh" onclick="closeM('custModal')">Cancel</button>
+      <button class="btn bacc" id="saveCBtn" onclick="saveCust()">Save Customer</button>
     </div>
   </div>
 </div>
-<div class="overlay" id="staffModal">
+<!-- Staff Modal -->
+<div class="ov" id="staffModal">
   <div class="modal">
-    <div class="modalHd"><h3>Add Staff Member</h3><button class="modalClose" onclick="closeModal('staffModal')">✕</button></div>
-    <div class="modalBody">
-      <div class="inpG"><label>Full Name *</label><input class="inp" id="sName" placeholder="Staff full name"></div>
-      <div class="inpG"><label>Email *</label><input class="inp" id="sEmail" type="email" placeholder="staff@aminamilk.com"></div>
-      <div class="inpG"><label>Password *</label><input class="inp" id="sPwd" type="password" placeholder="Min 6 characters"></div>
-      <div class="inpG"><label>Phone</label><input class="inp" id="sPhone" type="tel" placeholder="+91 ..."></div>
+    <div class="mhd"><h3>Add Staff</h3><button class="mc" onclick="closeM('staffModal')">✕</button></div>
+    <div class="mbd">
+      <div class="inpG"><label>Full Name *</label><input class="inp" id="sN" placeholder="Staff full name"></div>
+      <div class="inpG"><label>Email *</label><input class="inp" id="sE" type="email" placeholder="staff@aminamilk.com"></div>
+      <div class="inpG"><label>Password *</label><input class="inp" id="sP" type="password" placeholder="Min 6 characters"></div>
+      <div class="inpG"><label>Phone</label><input class="inp" id="sPh" type="tel" placeholder="+91 …"></div>
     </div>
-    <div class="modalFt">
-      <button class="btn btnGhost" onclick="closeModal('staffModal')">Cancel</button>
-      <button class="btn btnAcc" onclick="saveStaff()">Add Staff</button>
+    <div class="mft">
+      <button class="btn bgh" onclick="closeM('staffModal')">Cancel</button>
+      <button class="btn bacc" onclick="saveStaffForm()">Add Staff</button>
     </div>
   </div>
 </div>
-<div class="overlay" id="qrModal">
-  <div class="modal" style="max-width:360px">
-    <div class="modalHd"><h3 id="qrModalTitle">Customer QR Code</h3><button class="modalClose" onclick="closeModal('qrModal')">✕</button></div>
-    <div class="modalBody"><div class="qrBox" id="qrDisplay"></div><div id="qrCustInfo" style="text-align:center;margin-top:12px;font-size:.85rem;color:var(--txt2)"></div></div>
-    <div class="modalFt" id="qrModalFt"></div>
+<!-- QR / ID Card Modal -->
+<div class="ov" id="qrModal">
+  <div class="modal" style="max-width:400px">
+    <div class="mhd"><h3 id="qrT">Customer QR</h3><button class="mc" onclick="closeM('qrModal')">✕</button></div>
+    <div class="mbd"><div class="qrBox" id="qrDisp"></div><div id="qrInf" style="text-align:center;margin-top:10px;font-size:.83rem;color:var(--txt2)"></div></div>
+    <div class="mft" id="qrFt"></div>
   </div>
 </div>
-<div class="overlay" id="histModal">
+<!-- History Modal -->
+<div class="ov" id="histModal">
   <div class="modal">
-    <div class="modalHd"><h3 id="histTitle">Delivery History</h3><button class="modalClose" onclick="closeModal('histModal')">✕</button></div>
-    <div class="modalBody" id="histBody"></div>
+    <div class="mhd"><h3 id="hT">History</h3><button class="mc" onclick="closeM('histModal')">✕</button></div>
+    <div class="mbd" id="hBody"></div>
   </div>
 </div>
-<div id="confirmBox">
-  <div class="confirmCard">
-    <h3 id="confirmQ">Are you sure?</h3><p id="confirmD">This cannot be undone.</p>
-    <div class="confirmBtns">
-      <button class="btn btnGhost" onclick="closeConfirm()">Cancel</button>
-      <button class="btn btnRed" onclick="runConfirm()">Confirm</button>
+<div id="confBox">
+  <div class="confCard">
+    <h3 id="confQ">Are you sure?</h3><p id="confD">This cannot be undone.</p>
+    <div style="display:flex;gap:9px;justify-content:center">
+      <button class="btn bgh" onclick="closeConf()">Cancel</button>
+      <button class="btn bred" onclick="runConf()">Confirm</button>
     </div>
   </div>
 </div>
 <div id="toast"></div>
 
 <script>
-var CU=null,CUR=null,CUSTS=[],DELS=[],STAFF=[],pendingConfirm=null,reportData=[];
+var CU=null,CUSTS=[],DELS=[],reportData=[],pendingConf=null,formQty=1;
 
-// ── AUTH GUARD ──
+// ── CLOCK ──
+function tickClock(){
+  var n=new Date();
+  document.getElementById('aClock').textContent=n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('aDate').textContent=n.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+}
+setInterval(tickClock,1000);tickClock();
+
+// ── AUTH ──
 auth.onAuthStateChanged(async function(u){
-  if(!u){window.location.replace('index.html');return;}
+  if(!u){location.replace('index.html');return;}
   var role=await getUserRole(u.uid);
   if(role==='admin'){
-    CU=u;CUR=role;
+    CU=u;
     await bootstrapSystem(u.uid,role);
     document.getElementById('guard').style.display='none';
     document.getElementById('app').style.display='block';
-    document.getElementById('adminAvatar').textContent=(u.email||'A')[0].toUpperCase();
-    document.getElementById('adminEmail').value=u.email||'';
+    document.getElementById('av').textContent=(u.email||'A')[0].toUpperCase();
+    document.getElementById('aEmail').value=u.email||'';
     document.getElementById('dashDate').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-    fixGrid();loadDashboard();loadCustomers();
-  }else if(role==='staff'){
-    window.location.replace('milkman.html');
-  }else{
-    await signOut();window.location.replace('index.html');
-  }
+    fixGrid();loadDash();loadCusts();
+  }else if(role==='staff'){location.replace('milkman.html');}
+  else{await signOut();location.replace('index.html');}
 });
+function doLogout(){signOut().then(()=>location.replace('index.html'));}
 
-function doLogout(){signOut().then(()=>window.location.replace('index.html'));}
-
-function showPage(p,btn){
-  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
-  var id='pg'+p.charAt(0).toUpperCase()+p.slice(1);
-  if(document.getElementById(id))document.getElementById(id).classList.add('active');
-  document.querySelectorAll('.topNav .navBtn,.mobileNavPanel .navBtn').forEach(b=>b.classList.remove('active'));
+function pg(name,btn){
+  document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
+  var el=document.getElementById('pg'+name.charAt(0).toUpperCase()+name.slice(1));
+  if(el)el.classList.add('active');
+  document.querySelectorAll('.tnav .nb,.mPanel .nb').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
-  if(p==='dashboard')loadDashboard();
-  else if(p==='customers')loadCustomers();
-  else if(p==='deliveries')loadDeliveries();
-  else if(p==='staff')loadStaff();
-  else if(p==='settings')loadSettings();
+  if(name==='dashboard')loadDash();
+  else if(name==='customers')loadCusts();
+  else if(name==='deliveries')loadDels();
+  else if(name==='staff')loadStaff();
+  else if(name==='settings')loadSett();
 }
 
 function toast(msg,type){
   type=type||'ok';
-  var d=document.createElement('div');d.className='toastItem '+type;
-  d.innerHTML=(type==='ok'?'✅':type==='err'?'❌':'ℹ️')+' '+msg;
-  document.getElementById('toast').appendChild(d);
-  setTimeout(()=>d.remove(),3500);
+  var d=document.createElement('div');d.className='ti '+type;
+  d.textContent=(type==='ok'?'✅ ':type==='err'?'❌ ':'ℹ️ ')+msg;
+  document.getElementById('toast').appendChild(d);setTimeout(()=>d.remove(),3500);
 }
-function confirmAction(q,fn,data){pendingConfirm={fn,data};document.getElementById('confirmQ').textContent=q||'Confirm?';document.getElementById('confirmBox').classList.add('open');}
-function closeConfirm(){document.getElementById('confirmBox').classList.remove('open');pendingConfirm=null;}
-function runConfirm(){if(pendingConfirm){var{fn,data}=pendingConfirm;closeConfirm();if(typeof window[fn]==='function')window[fn](data);}}
-function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
+function conf(q,fn,data){pendingConf={fn,data};document.getElementById('confQ').textContent=q||'Confirm?';document.getElementById('confBox').classList.add('open');}
+function closeConf(){document.getElementById('confBox').classList.remove('open');pendingConf=null;}
+function runConf(){if(pendingConf){var{fn,data}=pendingConf;closeConf();if(typeof window[fn]==='function')window[fn](data);}}
+function openM(id){document.getElementById(id).classList.add('open');}
+function closeM(id){document.getElementById(id).classList.remove('open');}
 
 // ── DASHBOARD ──
-async function loadDashboard(){
+async function loadDash(){
   try{
     var st=await getStats();
-    ['s1','s2','s3','s4','s5'].forEach((id,i)=>{document.getElementById(id).textContent=[st.totalCustomers,st.todayServed,st.totalPending,st.totalMilk+'L',st.extraMilk+'L'][i];});
+    document.getElementById('s1').textContent=st.totalCustomers;
+    document.getElementById('s2').textContent=st.todayServed;
+    document.getElementById('s3').textContent=st.totalPending;
+    document.getElementById('s4').textContent=st.totalMilk+'L';
     var dels=await getTodayDeliveries();
-    var rl=document.getElementById('recentDelList');
-    if(!dels.length){rl.innerHTML='<div class="empty"><div class="ico">🚚</div><p>No deliveries today yet</p></div>';return;}
-    rl.innerHTML=dels.slice(0,6).map(d=>`<div class="delRow"><div><div style="font-weight:600;font-size:.88rem">${d.customerName||d.customerId}</div><div style="font-size:.75rem;color:var(--txt2)">${d.time||''} • ${d.staffName||'Staff'}</div></div><span class="badge grn">${d.deliveredQty||0}L</span></div>`).join('');
-    var weekAgo=new Date();weekAgo.setDate(weekAgo.getDate()-7);
-    var wDels=await getDeliveries({dateFrom:weekAgo.toISOString().slice(0,10)});
-    var freq={};wDels.forEach(d=>{if(d.customerId){freq[d.customerId]=freq[d.customerId]||{nm:d.customerName||d.customerId,cnt:0,ml:0};freq[d.customerId].cnt++;freq[d.customerId].ml+=(d.deliveredQty||0);}});
-    var top=Object.values(freq).sort((a,b)=>b.cnt-a.cnt).slice(0,5),mx=top[0]?.cnt||1;
-    document.getElementById('topCustList').innerHTML=top.length?top.map(t=>`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:.83rem"><span>${t.nm}</span><span style="color:var(--acc)">${t.cnt} del • ${t.ml}L</span></div><div class="chartBar"><div class="fill" style="width:${(t.cnt/mx)*100}%"></div></div></div>`).join(''):'<div class="empty"><div class="ico">📊</div><p>No data this week</p></div>';
-  }catch(e){console.error('Dashboard:',e);}
+    var rl=document.getElementById('rDelList');
+    if(!dels.length){rl.innerHTML='<div class="empty" style="padding:20px"><div class="ei">🚚</div><p>No deliveries today</p></div>';return;}
+    rl.innerHTML=dels.slice(0,7).map(d=>`<div class="delRow"><div><div style="font-weight:600;font-size:.85rem">${d.customerName||d.customerId}</div><div style="font-size:.72rem;color:var(--txt2)">${d.time||''} • ${d.staffName||'Staff'}</div></div><span class="badge g">${d.deliveredQty||0}L</span></div>`).join('');
+    var wa=new Date();wa.setDate(wa.getDate()-7);
+    var wD=await getDeliveries({dateFrom:wa.toISOString().slice(0,10)});
+    var freq={};wD.forEach(d=>{if(d.customerId){freq[d.customerId]=freq[d.customerId]||{nm:d.customerName||d.customerId,c:0,ml:0};freq[d.customerId].c++;freq[d.customerId].ml+=(d.deliveredQty||0);}});
+    var top=Object.values(freq).sort((a,b)=>b.c-a.c).slice(0,5),mx=top[0]?.c||1;
+    document.getElementById('topList').innerHTML=top.length?top.map(t=>`<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:.8rem"><span>${t.nm}</span><span style="color:var(--acc)">${t.c}× • ${t.ml}L</span></div><div class="bar"><div class="barFill" style="width:${(t.c/mx)*100}%"></div></div></div>`).join(''):'<div class="empty" style="padding:20px"><div class="ei">📊</div><p>No data</p></div>';
+  }catch(e){console.error('Dash:',e);}
 }
 
 // ── CUSTOMERS ──
-async function loadCustomers(){
-  document.getElementById('custList').innerHTML='<div class="spin"></div>';
-  try{CUSTS=await getCustomers();renderCustomers(CUSTS);}
-  catch(e){var cached=CACHE.get('customers',600000);if(cached){CUSTS=cached;renderCustomers(CUSTS);toast('Offline – cached data','inf');}else document.getElementById('custList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Failed to load</p></div>';}
+async function loadCusts(){
+  document.getElementById('custList').innerHTML='<div class="spin" style="margin:30px auto"></div>';
+  try{CUSTS=await getCustomers();renderCusts(CUSTS);}
+  catch(e){var c=CACHE.get('customers',600000);if(c){CUSTS=c;renderCusts(c);toast('Offline – cached data','inf');}else document.getElementById('custList').innerHTML='<div class="empty"><div class="ei">⚠️</div><p>Failed to load</p></div>';}
 }
-function renderCustomers(list){
+function renderCusts(list){
   var el=document.getElementById('custList');
-  if(!list.length){el.innerHTML='<div class="empty"><div class="ico">👥</div><p>No customers yet. Add one!</p></div>';return;}
+  if(!list.length){el.innerHTML='<div class="empty"><div class="ei">👥</div><p>No customers yet. Add one!</p></div>';return;}
   el.innerHTML=list.map(c=>{
-    var dt=c.createdAt&&c.createdAt.toDate?c.createdAt.toDate().toLocaleDateString('en-IN'):'';
-    var n=c.name.replace(/'/g,"\\'"),cid=c.customerId||c.id,qr=c.qrData||'';
-    return`<div class="custCard"><div><div class="nm">${c.name} <span class="badge grn" style="font-size:.65rem">${cid}</span></div><div class="meta">📱 ${c.mobile||'—'} • 📍 ${c.address||'—'} • 🥛 ${c.defaultQty||1}L ${c.milkType||''}</div>${dt?`<div class="meta" style="margin-top:4px">Added: ${dt}</div>`:''}</div><div class="acts"><button class="btn btnSm btnAcc" onclick="showQR('${cid}','${qr}','${n}')">QR</button><button class="btn btnSm btnGhost" onclick="showCustHistory('${cid}','${n}')">History</button><button class="btn btnSm btnBlu" onclick="openEditCustomer('${cid}')">Edit</button><button class="btn btnSm btnRed" onclick="confirmAction('Delete ${n}?','doDeleteCustomer','${cid}')">Del</button></div></div>`;
+    var dt=c.createdAt?.toDate?c.createdAt.toDate().toLocaleDateString('en-IN'):'';
+    var nm=c.name.replace(/'/g,"\\'"),cid=c.customerId||c.id;
+    return`<div class="ccard"><div style="min-width:0"><div class="nm">${c.name} <span class="badge y" style="font-size:.62rem">${cid}</span></div><div class="meta">📱 ${c.mobile||'—'} • 📍 ${(c.address||'—').slice(0,40)}</div><div class="meta">🥛 Default: ${c.defaultQty||1}L/day${dt?' • Added: '+dt:''}</div></div><div class="acts"><button class="btn bsm bacc" onclick="showQR('${cid}')">QR+Card</button><button class="btn bsm bgh" onclick="showHist('${cid}','${nm}')">History</button><button class="btn bsm bblu" onclick="openEditCust('${cid}')">Edit</button><button class="btn bsm bred" onclick="conf('Delete ${nm}?','deleteCust','${cid}')">Del</button></div></div>`;
   }).join('');
 }
-function filterCustomers(){
-  var q=document.getElementById('custSearch').value.toLowerCase();
-  renderCustomers(CUSTS.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.mobile||'').includes(q)||(c.customerId||'').toLowerCase().includes(q)||(c.address||'').toLowerCase().includes(q)));
+function filterCusts(){
+  var q=document.getElementById('cSearch').value.toLowerCase();
+  renderCusts(CUSTS.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.mobile||'').includes(q)||(c.customerId||'').toLowerCase().includes(q)||(c.address||'').toLowerCase().includes(q)));
 }
-function openAddCustomer(){
-  document.getElementById('custModalTitle').textContent='Add Customer';
-  document.getElementById('saveCustBtn').textContent='Save Customer';
-  ['editCustId','cName','cMobile','cMobile2','cAddress','cNotes'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('cQty').value=1;openModal('custModal');
+// Quantity preset in form
+var formQtyVal=1;
+function setQP(v,btn){
+  document.querySelectorAll('.qpreset .qp').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  var ci=document.getElementById('cQ');
+  if(v===-1){ci.style.display='block';ci.focus();document.getElementById('qShow').style.display='none';return;}
+  ci.style.display='none';formQtyVal=v;
+  document.getElementById('qShow').style.display='block';
+  document.getElementById('qShow').textContent='Default: '+(v<1?(v*1000)+'ml':v+'L')+' / day';
 }
-function openEditCustomer(cid){
+document.getElementById('cQ').addEventListener('input',function(){
+  formQtyVal=parseFloat(this.value)||0;
+  document.getElementById('qShow').style.display='block';
+  document.getElementById('qShow').textContent=formQtyVal>0?'Default: '+formQtyVal+'L / day':'';
+});
+
+function openAddCust(){
+  document.getElementById('cModalT').textContent='Add Customer';
+  document.getElementById('saveCBtn').textContent='Save Customer';
+  ['eCid','cN','cM','cM2','cA','cNo'].forEach(id=>document.getElementById(id).value='');
+  formQtyVal=1;document.getElementById('cQ').value='';document.getElementById('cQ').style.display='none';
+  document.querySelectorAll('.qpreset .qp').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.qpreset .qp')[2].classList.add('active'); // 1L default
+  document.getElementById('qShow').textContent='Default: 1L / day';document.getElementById('qShow').style.display='block';
+  openM('custModal');
+}
+function openEditCust(cid){
   var c=CUSTS.find(x=>(x.customerId||x.id)===cid);if(!c)return;
-  document.getElementById('custModalTitle').textContent='Edit Customer';
-  document.getElementById('saveCustBtn').textContent='Update Customer';
-  document.getElementById('editCustId').value=c.customerId||c.id;
-  ['cName','cMobile','cMobile2','cAddress','cNotes'].forEach(id=>document.getElementById(id).value=c[{cName:'name',cMobile:'mobile',cMobile2:'mobile2',cAddress:'address',cNotes:'notes'}[id]]||'');
-  document.getElementById('cQty').value=c.defaultQty||1;
-  openModal('custModal');
+  document.getElementById('cModalT').textContent='Edit Customer';
+  document.getElementById('saveCBtn').textContent='Update Customer';
+  document.getElementById('eCid').value=c.customerId||c.id;
+  document.getElementById('cN').value=c.name||'';
+  document.getElementById('cM').value=c.mobile||'';
+  document.getElementById('cM2').value=c.mobile2||'';
+  document.getElementById('cA').value=c.address||'';
+  document.getElementById('cNo').value=c.notes||'';
+  formQtyVal=parseFloat(c.defaultQty)||1;
+  var presets=[.25,.5,1,1.5,2],pi=presets.indexOf(formQtyVal);
+  document.querySelectorAll('.qpreset .qp').forEach(b=>b.classList.remove('active'));
+  if(pi>=0){document.querySelectorAll('.qpreset .qp')[pi].classList.add('active');document.getElementById('cQ').style.display='none';}
+  else{document.querySelectorAll('.qpreset .qp')[5].classList.add('active');document.getElementById('cQ').style.display='block';document.getElementById('cQ').value=formQtyVal;}
+  document.getElementById('qShow').textContent='Default: '+formQtyVal+'L / day';document.getElementById('qShow').style.display='block';
+  openM('custModal');
 }
-async function saveCustomer(){
-  var eid=document.getElementById('editCustId').value;
-  var name=document.getElementById('cName').value.trim(),mobile=document.getElementById('cMobile').value.trim(),address=document.getElementById('cAddress').value.trim();
+async function saveCust(){
+  var eid=document.getElementById('eCid').value;
+  var name=document.getElementById('cN').value.trim(),mobile=document.getElementById('cM').value.trim(),address=document.getElementById('cA').value.trim();
   if(!name||!mobile||!address){toast('Fill required fields','err');return;}
-  var data={name,mobile,mobile2:document.getElementById('cMobile2').value.trim(),address,defaultQty:parseFloat(document.getElementById('cQty').value)||1,milkType:document.getElementById('cMilkType').value,notes:document.getElementById('cNotes').value.trim()};
+  var dq=document.getElementById('cQ').style.display!=='none'?parseFloat(document.getElementById('cQ').value)||1:formQtyVal;
+  var data={name,mobile,mobile2:document.getElementById('cM2').value.trim(),address,defaultQty:dq,notes:document.getElementById('cNo').value.trim()};
   try{
-    if(eid){await updateCustomer(eid,data);toast('Customer updated ✓');closeModal('custModal');loadCustomers();}
-    else{var res=await addCustomer(data,CU.uid);closeModal('custModal');showNewQR(res);toast('Customer added ✓');}
+    if(eid){await updateCustomer(eid,data);toast('Customer updated ✓');closeM('custModal');loadCusts();}
+    else{var res=await addCustomer(data,CU.uid);closeM('custModal');toast('Customer added ✓');showQRResult(res);loadCusts();}
   }catch(e){toast('Error: '+e.message,'err');}
 }
-function showNewQR(res){
-  document.getElementById('qrModalTitle').textContent='New Customer QR';
-  var el=document.getElementById('qrDisplay');el.innerHTML='';
-  renderQR(res.qrData,el,200);
-  document.getElementById('qrCustInfo').innerHTML=`<strong>${res.doc.name}</strong><br>ID: ${res.cid}<br><small style="color:var(--txt3)">Save this QR</small>`;
-  document.getElementById('qrModalFt').innerHTML=`<button class="btn btnGhost" onclick="closeModal('qrModal')">Close</button><button class="btn btnAcc" onclick="downloadQR('${res.qrData}','${res.cid}_QR')">Download QR</button>`;
-  openModal('qrModal');loadCustomers();
+function showQRResult(res){
+  document.getElementById('qrT').textContent='New Customer – ID Card';
+  var el=document.getElementById('qrDisp');el.innerHTML='';
+  var d=document.createElement('div');el.appendChild(d);
+  renderQR(res.qrData,d,190);
+  document.getElementById('qrInf').innerHTML=`<strong>${res.doc.name}</strong><br>${res.cid}<br><small style="color:var(--txt3)">Download the ID card to print & give to customer</small>`;
+  document.getElementById('qrFt').innerHTML=`<button class="btn bgh" onclick="closeM('qrModal')">Close</button><button class="btn bacc" onclick="downloadIDCard(${JSON.stringify(res.doc).replace(/"/g,'&quot;')})">⬇ Download ID Card</button>`;
+  openM('qrModal');
 }
-async function doDeleteCustomer(cid){try{await deleteCustomer(cid);toast('Customer deleted');loadCustomers();}catch(e){toast('Error: '+e.message,'err');}}
-async function showQR(cid,qrData,name){
-  if(!qrData){var c=CUSTS.find(x=>x.customerId===cid);qrData=c?c.qrData:'';}
-  if(!qrData){toast('No QR data','err');return;}
-  document.getElementById('qrModalTitle').textContent='QR – '+name;
-  var el=document.getElementById('qrDisplay');el.innerHTML='';
-  renderQR(qrData,el,200);
-  document.getElementById('qrCustInfo').innerHTML=`<strong>${name}</strong><br>ID: ${cid}`;
-  document.getElementById('qrModalFt').innerHTML=`<button class="btn btnGhost" onclick="closeModal('qrModal')">Close</button><button class="btn btnAcc" onclick="downloadQR('${qrData}','${cid}_QR')">⬇ Download</button><button class="btn btnGhost" onclick="regenQR('${cid}')">🔄 Regen</button>`;
-  openModal('qrModal');
+async function showQR(cid){
+  var c=CUSTS.find(x=>(x.customerId||x.id)===cid);
+  if(!c||!c.qrData){toast('No QR data','err');return;}
+  document.getElementById('qrT').textContent='ID Card – '+c.name;
+  var el=document.getElementById('qrDisp');el.innerHTML='';
+  var d=document.createElement('div');el.appendChild(d);
+  renderQR(c.qrData,d,190);
+  document.getElementById('qrInf').innerHTML=`<strong>${c.name}</strong><br>${c.customerId||c.id}<br><small style="color:var(--txt3)">📱 ${c.mobile||'—'} • 📍 ${c.address||'—'}</small>`;
+  document.getElementById('qrFt').innerHTML=`<button class="btn bgh" onclick="closeM('qrModal')">Close</button><button class="btn bacc" onclick="downloadIDCard(${JSON.stringify(c).replace(/"/g,'&quot;')})">⬇ Download ID Card</button><button class="btn bgh bsm" onclick="regenQR('${cid}')">🔄 Regen</button>`;
+  openM('qrModal');
 }
 async function regenQR(cid){
-  try{
-    var newQ=genQR(cid);await updateCustomer(cid,{qrData:newQ});toast('QR regenerated ✓');
-    var idx=CUSTS.findIndex(c=>(c.customerId||c.id)===cid);
-    if(idx>-1)CUSTS[idx].qrData=newQ;
-    showQR(cid,newQ,CUSTS[idx]?CUSTS[idx].name:cid);
-  }catch(e){toast('Error: '+e.message,'err');}
+  try{var nq=genQR(cid);await updateCustomer(cid,{qrData:nq});toast('QR regenerated ✓');var i=CUSTS.findIndex(c=>(c.customerId||c.id)===cid);if(i>-1)CUSTS[i].qrData=nq;showQR(cid);}
+  catch(e){toast('Error: '+e.message,'err');}
 }
-async function showCustHistory(cid,name){
-  document.getElementById('histTitle').textContent='History – '+name;
-  document.getElementById('histBody').innerHTML='<div class="spin"></div>';
-  openModal('histModal');
+async function deleteCust(cid){try{await deleteCustomer(cid);toast('Customer deleted');loadCusts();}catch(e){toast('Error: '+e.message,'err');}}
+async function showHist(cid,name){
+  document.getElementById('hT').textContent='History – '+name;
+  document.getElementById('hBody').innerHTML='<div class="spin" style="margin:20px auto"></div>';
+  openM('histModal');
   try{
     var dels=await getDeliveries({customerId:cid});
-    var el=document.getElementById('histBody');
-    if(!dels.length){el.innerHTML='<div class="empty"><div class="ico">📦</div><p>No deliveries yet</p></div>';return;}
-    el.innerHTML=dels.slice(0,30).map(d=>`<div class="delRow"><div><div style="font-weight:600;font-size:.88rem">${d.date}</div><div style="font-size:.75rem;color:var(--txt2)">${d.time||''} • ${d.staffName||'Staff'}</div></div><div style="text-align:right"><div style="font-size:.9rem;font-weight:600">${d.deliveredQty||0}L</div>${d.extraQty?`<div style="font-size:.72rem;color:var(--acc)">+${d.extraQty}L extra</div>`:''}</div></div>`).join('');
-  }catch{document.getElementById('histBody').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Error</p></div>';}
+    var el=document.getElementById('hBody');
+    if(!dels.length){el.innerHTML='<div class="empty" style="padding:20px"><div class="ei">📦</div><p>No deliveries yet</p></div>';return;}
+    el.innerHTML=dels.slice(0,30).map(d=>`<div class="delRow"><div><div style="font-weight:600">${d.date}</div><div style="font-size:.72rem;color:var(--txt2)">${d.time||''} • ${d.staffName||'Staff'}</div></div><div style="font-weight:700;color:var(--acc)">${d.deliveredQty||0}L</div></div>`).join('');
+  }catch{document.getElementById('hBody').innerHTML='<div class="empty" style="padding:20px"><div class="ei">⚠️</div><p>Error</p></div>';}
 }
 
 // ── DELIVERIES ──
-async function loadDeliveries(){
-  document.getElementById('delList').innerHTML='<div class="spin"></div>';
-  var f={};var fc=document.getElementById('fCust').value.trim(),ff=document.getElementById('fFrom').value,ft=document.getElementById('fTo').value;
+async function loadDels(){
+  document.getElementById('delList').innerHTML='<div class="spin" style="margin:30px auto"></div>';
+  var f={},fc=document.getElementById('fC').value.trim(),ff=document.getElementById('fF').value,ft=document.getElementById('fT').value;
   if(ff)f.dateFrom=ff;if(ft)f.dateTo=ft;
   try{
     var dels=await getDeliveries(f);
     if(fc)dels=dels.filter(d=>(d.customerName||'').toLowerCase().includes(fc.toLowerCase())||(d.customerId||'').toLowerCase().includes(fc.toLowerCase()));
     DELS=dels;
-    if(!dels.length){document.getElementById('delList').innerHTML='<div class="empty"><div class="ico">🚚</div><p>No deliveries found</p></div>';return;}
-    document.getElementById('delList').innerHTML='<div class="tblWrap"><table><thead><tr><th>Customer</th><th>Date</th><th>Time</th><th>Qty</th><th>Extra</th><th>Staff</th></tr></thead><tbody>'+dels.map(d=>`<tr><td><div style="font-weight:600">${d.customerName||d.customerId}</div><div style="font-size:.73rem;color:var(--txt3)">${d.customerId}</div></td><td>${d.date}</td><td>${d.time||'—'}</td><td>${d.deliveredQty||0}L</td><td>${d.extraQty?`<span style="color:var(--acc)">+${d.extraQty}L</span>`:'—'}</td><td>${d.staffName||'—'}</td></tr>`).join('')+'</tbody></table></div>';
-  }catch{document.getElementById('delList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Failed to load</p></div>';}
+    if(!dels.length){document.getElementById('delList').innerHTML='<div class="empty"><div class="ei">🚚</div><p>No deliveries found</p></div>';return;}
+    document.getElementById('delList').innerHTML='<div class="tw"><table><thead><tr><th>Customer</th><th>Date</th><th>Time</th><th>Qty</th><th>Staff</th></tr></thead><tbody>'+dels.map(d=>`<tr><td><div style="font-weight:600">${d.customerName||d.customerId}</div><div style="font-size:.7rem;color:var(--txt3)">${d.customerId}</div></td><td>${d.date}</td><td>${d.time||'—'}</td><td>${d.deliveredQty||0}L</td><td>${d.staffName||'—'}</td></tr>`).join('')+'</tbody></table></div>';
+  }catch{document.getElementById('delList').innerHTML='<div class="empty"><div class="ei">⚠️</div><p>Failed to load</p></div>';}
 }
-function clearDelFilters(){['fCust','fFrom','fTo'].forEach(id=>document.getElementById(id).value='');loadDeliveries();}
+function clearF(){['fC','fF','fT'].forEach(id=>document.getElementById(id).value='');loadDels();}
 
 // ── REPORTS ──
 async function loadReport(){
-  document.getElementById('reportList').innerHTML='<div class="spin"></div>';
-  var f={};var rf=document.getElementById('rFrom').value,rt=document.getElementById('rTo').value;
+  document.getElementById('repList').innerHTML='<div class="spin" style="margin:30px auto"></div>';
+  var f={},rf=document.getElementById('rF').value,rt=document.getElementById('rT').value;
   if(rf)f.dateFrom=rf;if(rt)f.dateTo=rt;
   try{
     var data=await getDeliveries(f);
-    var rc=document.getElementById('rCust').value.trim().toLowerCase(),rs=document.getElementById('rStaff').value.trim().toLowerCase();
+    var rc=document.getElementById('rC').value.trim().toLowerCase(),rs=document.getElementById('rS').value.trim().toLowerCase();
     if(rc)data=data.filter(d=>(d.customerName||'').toLowerCase().includes(rc)||(d.customerId||'').toLowerCase().includes(rc));
     if(rs)data=data.filter(d=>(d.staffName||'').toLowerCase().includes(rs));
     reportData=data;
-    if(!data.length){document.getElementById('reportList').innerHTML='<div class="empty"><div class="ico">📊</div><p>No records match</p></div>';return;}
-    document.getElementById('reportList').innerHTML=`<div style="margin-bottom:10px;font-size:.85rem;color:var(--txt2)">${data.length} records</div><div class="tblWrap"><table><thead><tr><th>Customer</th><th>Date</th><th>Time</th><th>Qty</th><th>Extra</th><th>Staff</th></tr></thead><tbody>${data.map(d=>`<tr><td>${d.customerName||d.customerId}</td><td>${d.date}</td><td>${d.time||'—'}</td><td>${d.deliveredQty||0}L</td><td>${d.extraQty||0}L</td><td>${d.staffName||'—'}</td></tr>`).join('')}</tbody></table></div>`;
-  }catch{document.getElementById('reportList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Error</p></div>';}
+    if(!data.length){document.getElementById('repList').innerHTML='<div class="empty"><div class="ei">📊</div><p>No records match</p></div>';return;}
+    document.getElementById('repList').innerHTML=`<div style="margin-bottom:8px;font-size:.83rem;color:var(--txt2)">${data.length} records found</div><div class="tw"><table><thead><tr><th>Customer</th><th>Date</th><th>Time</th><th>Qty</th><th>Staff</th></tr></thead><tbody>${data.map(d=>`<tr><td>${d.customerName||d.customerId}</td><td>${d.date}</td><td>${d.time||'—'}</td><td>${d.deliveredQty||0}L</td><td>${d.staffName||'—'}</td></tr>`).join('')}</tbody></table></div>`;
+  }catch{document.getElementById('repList').innerHTML='<div class="empty"><div class="ei">⚠️</div><p>Error</p></div>';}
 }
-async function exportReport(fmt){
-  if(!reportData.length){await loadReport();}
+async function exportRep(fmt){
+  if(!reportData.length)await loadReport();
   if(!reportData.length){toast('No data to export','err');return;}
   var data=reportData;
   if(fmt==='pdf'){
     var{jsPDF}=window.jspdf;var doc=new jsPDF();
     doc.setFontSize(22);doc.setTextColor(245,158,11);doc.text('AMINA MILK',105,18,{align:'center'});
-    doc.setFontSize(10);doc.setTextColor(148,163,184);doc.text('Delivery Report – '+new Date().toLocaleString('en-IN'),105,26,{align:'center'});
-    doc.setDrawColor(245,158,11,0.3);doc.line(14,30,196,30);
-    var y=40,cols=[52,22,20,16,16,30];
-    doc.setFontSize(8);doc.setTextColor(245,158,11);
-    ['Customer','Date','Time','Qty','Extra','Staff'].forEach((h,i)=>{var x=14;for(var j=0;j<i;j++)x+=cols[j];doc.text(h,x,y);});
+    doc.setFontSize(9);doc.setTextColor(148,163,184);doc.text('Delivery Report – '+new Date().toLocaleString('en-IN'),105,26,{align:'center'});
+    doc.setDrawColor(245,158,11,.3);doc.line(14,30,196,30);
+    var y=40;doc.setFontSize(8);doc.setTextColor(245,158,11);
+    var cols=[52,22,20,16,30],hdrs=['Customer','Date','Time','Qty','Staff'];
+    hdrs.forEach((h,i)=>{var x=14;for(var j=0;j<i;j++)x+=cols[j];doc.text(h,x,y);});
     y+=6;doc.setTextColor(241,245,249);
     data.forEach((d,idx)=>{
       if(y>270){doc.addPage();y=20;}
       if(idx%2===0){doc.setFillColor(26,34,52);doc.rect(14,y-4,182,8,'F');}
-      [d.customerName||d.customerId,d.date,d.time||'—',(d.deliveredQty||0)+'L',(d.extraQty||0)+'L',d.staffName||'—'].forEach((v,i)=>{var x=14;for(var j=0;j<i;j++)x+=cols[j];doc.text(String(v).slice(0,16),x,y);});y+=8;
+      [d.customerName||d.customerId,d.date,d.time||'—',(d.deliveredQty||0)+'L',d.staffName||'—'].forEach((v,i)=>{var x=14;for(var j=0;j<i;j++)x+=cols[j];doc.text(String(v).slice(0,16),x,y);});y+=8;
     });
     doc.save('aminamilk_report.pdf');toast('PDF exported ✓');
   }else if(fmt==='csv'){
-    var rows=data.map(d=>`${d.customerName||''},${d.customerId||''},${d.date},${d.time||''},${d.deliveredQty||0},${d.extraQty||0},${d.staffName||''}`);
-    var b=new Blob(['Customer,ID,Date,Time,Qty,Extra,Staff\n'+rows.join('\n')],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='aminamilk.csv';a.click();toast('CSV exported ✓');
+    var rows=data.map(d=>`"${d.customerName||''}","${d.customerId||''}","${d.date}","${d.time||''}",${d.deliveredQty||0},"${d.staffName||''}"`);
+    var b=new Blob(['Customer,ID,Date,Time,Qty,Staff\n'+rows.join('\n')],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='aminamilk.csv';a.click();toast('CSV exported ✓');
   }else if(fmt==='excel'){
-    var ws=XLSX.utils.json_to_sheet(data.map(d=>({'Customer':d.customerName,'ID':d.customerId,'Date':d.date,'Time':d.time||'','Qty(L)':d.deliveredQty||0,'Extra(L)':d.extraQty||0,'Staff':d.staffName||''})));
+    var ws=XLSX.utils.json_to_sheet(data.map(d=>({'Customer':d.customerName,'ID':d.customerId,'Date':d.date,'Time':d.time||'','Qty(L)':d.deliveredQty||0,'Staff':d.staffName||''})));
     var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Report');XLSX.writeFile(wb,'aminamilk.xlsx');toast('Excel exported ✓');
   }else{
     var b2=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});var a2=document.createElement('a');a2.href=URL.createObjectURL(b2);a2.download='aminamilk.json';a2.click();toast('JSON exported ✓');
@@ -511,59 +576,60 @@ async function exportReport(fmt){
 
 // ── STAFF ──
 async function loadStaff(){
-  document.getElementById('staffList').innerHTML='<div class="spin"></div>';
+  document.getElementById('staffList').innerHTML='<div class="spin" style="margin:30px auto"></div>';
   try{
-    STAFF=await getStaff();
-    if(!STAFF.length){document.getElementById('staffList').innerHTML='<div class="empty"><div class="ico">👤</div><p>No staff added yet</p></div>';return;}
-    document.getElementById('staffList').innerHTML='<div class="tblWrap"><table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Actions</th></tr></thead><tbody>'+STAFF.map(s=>`<tr><td><div style="font-weight:600">${s.name}</div></td><td>${s.email}</td><td>${s.phone||'—'}</td><td><span class="badge blu">Staff</span></td><td><button class="btn btnSm btnRed" onclick="confirmAction('Remove ${s.name.replace(/'/g,"\\'")}?','doRemoveStaff','${s.id}')">Remove</button></td></tr>`).join('')+'</tbody></table></div>';
-  }catch{document.getElementById('staffList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Error loading staff</p></div>';}
+    var staff=await getStaff();
+    if(!staff.length){document.getElementById('staffList').innerHTML='<div class="empty"><div class="ei">👤</div><p>No staff yet</p></div>';return;}
+    document.getElementById('staffList').innerHTML='<div class="tw"><table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th></th></tr></thead><tbody>'+staff.map(s=>`<tr><td style="font-weight:600">${s.name}</td><td>${s.email}</td><td>${s.phone||'—'}</td><td><span class="badge b">Staff</span></td><td><button class="btn bsm bred" onclick="conf('Remove ${s.name.replace(/'/g,"\\'")}?','removeStaff','${s.id}')">Remove</button></td></tr>`).join('')+'</tbody></table></div>';
+  }catch{document.getElementById('staffList').innerHTML='<div class="empty"><div class="ei">⚠️</div><p>Error</p></div>';}
 }
-function openAddStaff(){['sName','sEmail','sPwd','sPhone'].forEach(id=>document.getElementById(id).value='');openModal('staffModal');}
-async function saveStaff(){
-  var name=document.getElementById('sName').value.trim(),email=document.getElementById('sEmail').value.trim(),pwd=document.getElementById('sPwd').value,phone=document.getElementById('sPhone').value.trim();
-  if(!name||!email||!pwd){toast('Fill all required fields','err');return;}
+function openAddStaff(){['sN','sE','sP','sPh'].forEach(id=>document.getElementById(id).value='');openM('staffModal');}
+async function saveStaffForm(){
+  var name=document.getElementById('sN').value.trim(),email=document.getElementById('sE').value.trim(),pwd=document.getElementById('sP').value,phone=document.getElementById('sPh').value.trim();
+  if(!name||!email||!pwd){toast('Fill required fields','err');return;}
   if(pwd.length<6){toast('Password min 6 characters','err');return;}
-  try{await createStaffUser(email,pwd,name,phone);toast('Staff account created ✓');closeModal('staffModal');loadStaff();}
+  try{await createStaffUser(email,pwd,name,phone);toast('Staff account created ✓');closeM('staffModal');loadStaff();}
   catch(e){toast('Error: '+e.message,'err');}
 }
-async function doRemoveStaff(uid){try{await deactivateStaff(uid);toast('Staff removed');loadStaff();}catch(e){toast('Error: '+e.message,'err');}}
+async function removeStaff(uid){try{await deactivateStaff(uid);toast('Staff removed');loadStaff();}catch(e){toast('Error: '+e.message,'err');}}
 
 // ── SETTINGS ──
-async function loadSettings(){
+async function loadSett(){
   var s=await getSettings();
-  var map={bizName:'bizName',bizPhone:'bizPhone',bizAddr:'bizAddress',defQty:'defaultQty',delStart:'deliveryStart',delEnd:'deliveryEnd'};
-  Object.entries(map).forEach(([elId,key])=>{if(s[key]!==undefined&&document.getElementById(elId))document.getElementById(elId).value=s[key];});
+  if(s.bizName)document.getElementById('bName').value=s.bizName;
+  if(s.bizPhone)document.getElementById('bPhone').value=s.bizPhone;
+  if(s.bizAddress)document.getElementById('bAddr').value=s.bizAddress;
+  if(s.defaultQty)document.getElementById('dQty').value=s.defaultQty;
+  if(s.deliveryStart)document.getElementById('dStart').value=s.deliveryStart;
+  if(s.deliveryEnd)document.getElementById('dEnd').value=s.deliveryEnd;
 }
-async function saveBizSettings(){await saveSettings({bizName:document.getElementById('bizName').value,bizPhone:document.getElementById('bizPhone').value,bizAddress:document.getElementById('bizAddr').value});toast('Business info saved ✓');}
-async function saveDelSettings(){await saveSettings({defaultQty:parseFloat(document.getElementById('defQty').value)||1,deliveryStart:document.getElementById('delStart').value,deliveryEnd:document.getElementById('delEnd').value});toast('Delivery settings saved ✓');}
-async function updateAdminPwd(){
-  var p=document.getElementById('newPwd').value;
-  if(!p||p.length<6){toast('Enter 6+ character password','err');return;}
-  try{await CU.updatePassword(p);toast('Password updated ✓');document.getElementById('newPwd').value='';}
+async function saveBiz(){await saveSettings({bizName:document.getElementById('bName').value,bizPhone:document.getElementById('bPhone').value,bizAddress:document.getElementById('bAddr').value});toast('Business info saved ✓');}
+async function saveDelSett(){await saveSettings({defaultQty:parseFloat(document.getElementById('dQty').value)||1,deliveryStart:document.getElementById('dStart').value,deliveryEnd:document.getElementById('dEnd').value});toast('Delivery defaults saved ✓');}
+async function updatePwd(){
+  var p=document.getElementById('aPwd').value;
+  if(!p||p.length<6){toast('Enter 6+ char password','err');return;}
+  try{await CU.updatePassword(p);toast('Password updated ✓');document.getElementById('aPwd').value='';}
   catch(e){toast('Error: '+e.message,'err');}
 }
-async function deleteAllDeliveries(){
+async function deleteAllDels(){
   toast('Deleting…','inf');
   var snap=await db.collection('deliveries').get();
-  var batch=db.batch();snap.docs.forEach(d=>batch.delete(d.ref));
-  await batch.commit();toast('All deliveries deleted ✓');
+  var b=db.batch();snap.docs.forEach(d=>b.delete(d.ref));await b.commit();toast('All deliveries deleted ✓');
 }
-async function deleteAllCustomers(){
+async function deleteAllCusts(){
   toast('Removing…','inf');
   var snap=await db.collection('customers').get();
-  var batch=db.batch();snap.docs.forEach(d=>batch.update(d.ref,{active:false}));
-  await batch.commit();CUSTS=[];loadCustomers();toast('All customers removed ✓');
+  var b=db.batch();snap.docs.forEach(d=>b.update(d.ref,{active:false}));await b.commit();CUSTS=[];loadCusts();toast('All customers removed ✓');
 }
-async function resetSearchHistory(){
+async function clearHistory(){
   var snap=await db.collection('searchHistory').get();
-  var batch=db.batch();snap.docs.forEach(d=>batch.delete(d.ref));
-  await batch.commit();toast('Search history cleared ✓');
+  var b=db.batch();snap.docs.forEach(d=>b.delete(d.ref));await b.commit();toast('History cleared ✓');
 }
 
 function fixGrid(){
   var w=window.innerWidth;
   var g=document.getElementById('dashGrid');if(g)g.style.gridTemplateColumns=w<700?'1fr':'1fr 1fr';
-  var sg=document.getElementById('settingsGrid');if(sg)sg.style.gridTemplateColumns=w<700?'1fr':'1fr 1fr';
+  var sg=document.getElementById('settGrid');if(sg)sg.style.gridTemplateColumns=w<700?'1fr':'1fr 1fr';
 }
 window.addEventListener('resize',fixGrid);
 </script>
