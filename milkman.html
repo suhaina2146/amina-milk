@@ -10,20 +10,16 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<!-- jsQR – fast, lightweight, reliable QR decoder -->
+<!-- jsQR – fast, reliable QR decoder -->
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 <script src="firebase.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{--bg:#060d1a;--bg2:#0f1a2e;--bg3:#162236;--bg4:#1c2b42;--acc:#f59e0b;--grn:#10b981;--red:#ef4444;--blu:#3b82f6;--txt:#f1f5f9;--txt2:#94a3b8;--txt3:#64748b;--bdr:rgba(245,158,11,.18);--bdr2:rgba(255,255,255,.07);--sh:0 4px 20px rgba(0,0,0,.5);--rnd:14px}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
-.syne{font-family:'Syne',sans-serif}
-/* GUARD */
 #guard{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:12px}
 .spin{width:34px;height:34px;border:3px solid var(--bdr2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-/* APP */
 #app{display:none;padding-bottom:76px}
 /* TOPBAR */
 .topbar{background:var(--bg2);border-bottom:1px solid var(--bdr2);padding:0 14px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:10px}
@@ -106,7 +102,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 .scanMsg.ok{color:var(--grn);background:rgba(16,185,129,.1)}.scanMsg.err{color:var(--red);background:rgba(239,68,68,.1)}.scanMsg.sc{color:var(--acc)}
 .scBtn{padding:7px 12px;border-radius:8px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--txt2);font-size:.78rem;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap}
 #scanResult{padding:14px;overflow-y:auto;flex:1}
-/* SCAN RESULT CUSTOMER CARD */
+/* SCAN RESULT */
 .srcHead{background:linear-gradient(135deg,var(--bg3),var(--bg4));border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .srcHead .nm{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800}
 .srcHead .cid{font-size:.68rem;color:var(--acc);background:rgba(245,158,11,.12);padding:2px 8px;border-radius:20px;display:inline-block;margin:3px 0}
@@ -125,11 +121,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 .btn:active{transform:scale(.97)}
 .bsm{padding:6px 12px;font-size:.75rem;border-radius:7px}
 .bgh{background:transparent;border:1px solid var(--bdr2);color:var(--txt2)}.bgh:hover{border-color:var(--acc);color:var(--acc)}
-.bgrn{background:var(--grn);color:#fff}.bred{background:var(--red);color:#fff}.bacc{background:var(--acc);color:#000}.bblu{background:var(--blu);color:#fff}
+.bgrn{background:var(--grn);color:#fff}.bred{background:var(--red);color:#fff}.bacc{background:var(--acc);color:#000}.bblu{background:#3b82f6;color:#fff}
 /* MODAL */
 .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:flex-end;justify-content:center}
 .ov.open{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--bdr2);border-radius:20px 20px 0 0;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.7)}
+.modal{background:var(--bg2);border:1px solid var(--bdr2);border-radius:20px 20px 0 0;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,.7)}
 .mhd{padding:14px 18px 10px;border-bottom:1px solid var(--bdr2);display:flex;align-items:center;justify-content:space-between}
 .mhd h3{font-size:.95rem;font-weight:700}.mc{background:none;border:none;color:var(--txt2);font-size:1.2rem;cursor:pointer;padding:4px 8px}
 .mbd{padding:14px 18px}.mft{padding:10px 18px;border-top:1px solid var(--bdr2);display:flex;gap:8px}
@@ -137,23 +133,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 /* TOAST */
 #toast{position:fixed;top:62px;right:10px;z-index:500;display:flex;flex-direction:column;gap:5px;max-width:290px}
 .ti{background:var(--bg2);border:1px solid var(--bdr2);border-radius:9px;padding:9px 13px;font-size:.8rem;box-shadow:var(--sh);animation:tIn .22s ease;display:flex;align-items:center;gap:7px}
-.ti.ok{border-left:3px solid var(--grn)}.ti.err{border-left:3px solid var(--red)}.ti.inf{border-left:3px solid var(--blu)}
+.ti.ok{border-left:3px solid var(--grn)}.ti.err{border-left:3px solid var(--red)}.ti.inf{border-left:3px solid #3b82f6}
 @keyframes tIn{from{transform:translateX(110%);opacity:0}to{transform:none;opacity:1}}
 /* BADGE */
 .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.68rem;font-weight:600}
 .badge.g{background:rgba(16,185,129,.15);color:#34d399}.badge.r{background:rgba(239,68,68,.15);color:#fca5a5}.badge.y{background:rgba(245,158,11,.15);color:var(--acc)}
-/* SETTINGS */
+/* QTY PRESETS in add-customer modal */
+.qpreset{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.qp{padding:7px 11px;border-radius:7px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--txt2);font-size:.76rem;font-weight:600;cursor:pointer;transition:.15s}
+.qp.active{border-color:var(--acc);background:rgba(245,158,11,.12);color:var(--acc)}
 .settRow{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--bdr2);font-size:.88rem}
 .settRow:last-child{border:none}.settRow .lbl{color:var(--txt2);font-size:.8rem}
-/* TABLE */
-.tw{overflow-x:auto;border-radius:9px}table{width:100%;border-collapse:collapse;font-size:.78rem}
-th{background:var(--bg3);color:var(--txt2);padding:8px 10px;text-align:left;font-weight:600;font-size:.65rem;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
-td{padding:8px 10px;border-bottom:1px solid var(--bdr2);vertical-align:middle}tr:last-child td{border:none}
 .empty{text-align:center;padding:28px 14px;color:var(--txt3)}.empty .ei{font-size:2rem;margin-bottom:8px}
-/* SECHEAD */
 .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .sh h2{font-size:1.1rem;font-weight:700;font-family:'Syne',sans-serif}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+/* NEW CUSTOMER RESULT PANEL */
+.newCustResult{background:linear-gradient(135deg,var(--bg3),var(--bg4));border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px;text-align:center}
+.newCustResult .qrWrap{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px}
 </style>
 </head>
 <body>
@@ -177,7 +174,10 @@ td{padding:8px 10px;border-bottom:1px solid var(--bdr2);vertical-align:middle}tr
       <div class="sc n"><div class="ei">📦</div><div class="v" id="hs4">—</div><div class="l">Total Customers</div></div>
     </div>
     <div class="card">
-      <div class="cardHd"><h3>🔍 Find Customer</h3></div>
+      <div class="cardHd">
+        <h3>🔍 Find Customer</h3>
+        <button class="btn bsm bacc" onclick="openAddCust()">+ Add Customer</button>
+      </div>
       <div class="swrap">
         <span class="si">🔍</span>
         <input class="sinp" id="mainSearch" placeholder="Name, mobile, ID, address…" oninput="handleSearch(this.value)" autocomplete="off">
@@ -222,7 +222,7 @@ td{padding:8px 10px;border-bottom:1px solid var(--bdr2);vertical-align:middle}tr
       <video id="sv" playsinline autoplay muted></video>
       <canvas id="scanCv"></canvas>
       <div class="scanOverlay"><div class="frame"><div class="tr"></div><div class="bl"></div><div class="scanLine"></div></div></div>
-      <div id="camState">
+      <div id="camState" style="display:none">
         <div style="font-size:2.5rem" id="camIco">📷</div>
         <h3 id="camTitle">Starting camera…</h3>
         <p id="camDesc">Please allow camera access when prompted.</p>
@@ -233,13 +233,11 @@ td{padding:8px 10px;border-bottom:1px solid var(--bdr2);vertical-align:middle}tr
       <div class="scanMsg sc" id="scanMsg">📷 Initialising…</div>
       <span id="scanDot" style="width:8px;height:8px;border-radius:50%;background:var(--acc);display:inline-block;animation:pulse 1.5s ease infinite;flex-shrink:0"></span>
     </div>
-    <div id="scanResult" style="display:none">
-      <!-- populated on scan -->
-    </div>
-    <!-- Placeholder shown while scanner is ready but no result yet -->
-    <div id="scanPlaceholder" style="padding:20px;text-align:center;color:var(--txt3)">
+    <div id="scanResult" style="display:none;padding:14px;overflow-y:auto;flex:1"></div>
+    <div id="scanPlaceholder" style="padding:20px;text-align:center;color:var(--txt3);flex:1">
       <div style="font-size:2.5rem;margin-bottom:8px">📲</div>
       <div style="font-size:.85rem">Hold the QR card steady inside the frame</div>
+      <div style="font-size:.75rem;color:var(--txt3);margin-top:8px">Make sure the QR code is well-lit and fills the frame</div>
     </div>
   </div>
 
@@ -276,12 +274,10 @@ td{padding:8px 10px;border-bottom:1px solid var(--bdr2);vertical-align:middle}tr
     </div>
     <div class="card">
       <div style="font-size:.85rem;font-weight:700;margin-bottom:12px">App Info</div>
-      <div class="settRow"><div>Version</div><div style="color:var(--txt2)">2.0</div></div>
+      <div class="settRow"><div>Version</div><div style="color:var(--txt2)">2.1</div></div>
       <div class="settRow"><div>Role</div><div class="badge y">MILKMAN</div></div>
       <div class="settRow"><div>Cache</div><button class="btn bsm bgh" onclick="clearCache()">Clear</button></div>
-      <div style="margin-top:14px">
-        <button class="btn bred" style="width:100%" onclick="doLogout()">🚪 Sign Out</button>
-      </div>
+      <div style="margin-top:14px"><button class="btn bred" style="width:100%" onclick="doLogout()">🚪 Sign Out</button></div>
     </div>
   </div>
 
@@ -300,6 +296,7 @@ td{padding:8px 10px;border-bottom:1px solid var(--bdr2);vertical-align:middle}tr
     <div class="mbd" id="histBody"></div>
   </div>
 </div>
+
 <div class="ov" id="qrModal">
   <div class="modal">
     <div class="mhd"><h3 id="qrTitle">ID Card</h3><button class="mc" onclick="closeM('qrModal')">✕</button></div>
@@ -309,16 +306,72 @@ td{padding:8px 10px;border-bottom:1px solid var(--bdr2);vertical-align:middle}tr
     <div class="mft" id="qrFt"></div>
   </div>
 </div>
+
+<!-- ADD CUSTOMER MODAL -->
+<div class="ov" id="addCustModal">
+  <div class="modal">
+    <div class="mhd"><h3>Add New Customer</h3><button class="mc" onclick="closeM('addCustModal')">✕</button></div>
+    <div class="mbd">
+      <div class="inpG"><label>Full Name *</label><input class="inp" id="acN" placeholder="Customer full name"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="inpG"><label>Mobile *</label><input class="inp" id="acM" type="tel" placeholder="+91 …"></div>
+        <div class="inpG"><label>Alt Mobile</label><input class="inp" id="acM2" type="tel" placeholder="Optional"></div>
+      </div>
+      <div class="inpG"><label>Address *</label><input class="inp" id="acA" placeholder="Delivery address"></div>
+      <div class="inpG">
+        <label>Default Quantity</label>
+        <div class="qpreset" id="acQPreset">
+          <div class="qp" onclick="setAcQP(.25,this)">250ml</div>
+          <div class="qp" onclick="setAcQP(.5,this)">500ml</div>
+          <div class="qp active" onclick="setAcQP(1,this)">1L</div>
+          <div class="qp" onclick="setAcQP(1.5,this)">1.5L</div>
+          <div class="qp" onclick="setAcQP(2,this)">2L</div>
+          <div class="qp" onclick="setAcQP(-1,this)">Custom</div>
+        </div>
+        <input class="inp" type="number" id="acQCustom" value="" min="0.25" step="0.25" style="margin-top:8px;display:none" placeholder="Enter litres…">
+        <div id="acQShow" style="margin-top:6px;font-size:.82rem;color:var(--acc);font-weight:600">Default: 1L / day</div>
+      </div>
+      <div class="inpG"><label>Notes</label><input class="inp" id="acNotes" placeholder="Special instructions…"></div>
+    </div>
+    <div class="mft">
+      <button class="btn bgh" onclick="closeM('addCustModal')">Cancel</button>
+      <button class="btn bacc" id="acSaveBtn" onclick="saveNewCustomer()">Save Customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW CUSTOMER QR MODAL -->
+<div class="ov" id="newCustQrModal">
+  <div class="modal">
+    <div class="mhd"><h3 id="ncqTitle">Customer Added!</h3><button class="mc" onclick="closeM('newCustQrModal')">✕</button></div>
+    <div class="mbd">
+      <div class="newCustResult">
+        <div style="font-size:.78rem;color:var(--grn);font-weight:700;margin-bottom:8px">✅ Customer created successfully</div>
+        <div id="ncqName" style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:4px"></div>
+        <div id="ncqId" style="font-size:.7rem;color:var(--acc);background:rgba(245,158,11,.12);padding:2px 10px;border-radius:20px;display:inline-block;margin-bottom:10px"></div>
+        <div class="qrWrap"><div id="ncqQr"></div></div>
+        <div style="font-size:.72rem;color:var(--txt2);margin-top:6px">Scan this QR code to deliver milk to this customer</div>
+      </div>
+    </div>
+    <div class="mft">
+      <button class="btn bgh" onclick="closeM('newCustQrModal')">Close</button>
+      <button class="btn bacc" id="ncqDlBtn">⬇ Download ID Card</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
 // ── STATE ──
 var CU=null,CUSTS=[],todayIds=new Set(),activeCust=null,selQtyVal=1,activePageName='Home';
 var recentSearches=[],searchTO=null,myData={name:'',email:''};
+var acQtyVal=1;
 
 // ── SCANNER STATE ──
-var SCAN_ACTIVE=false,scanStream=null,scanRaf=null,torchTrack=null,torchOn=false;
-var facingMode='environment',lastScanned='',lastScanTime=0;
+var SCAN_ACTIVE=false,scanStream=null,scanRafId=null,scanLoopRunning=false;
+var torchTrack=null,torchOn=false,facingMode='environment';
+var lastScannedId='',lastScanTime=0,scanCooldown=false;
 
 // ── CLOCK ──
 function updateClock(){
@@ -426,7 +479,6 @@ function showCustPanel(c){
   selQtyVal=dq;
   document.getElementById('custPanel').style.display='block';
   document.getElementById('dupwarn').style.display=done?'block':'none';
-  // Set active preset or custom
   document.querySelectorAll('#qpresets .qbtn').forEach(b=>b.classList.remove('active'));
   var presets=[.25,.5,1,1.5,2];var idx=presets.indexOf(dq);
   var btns=document.querySelectorAll('#qpresets .qbtn');
@@ -452,6 +504,65 @@ function selectQty(v,btn){
 }
 function setCustomQty(v){selQtyVal=parseFloat(v)||0;document.getElementById('selQty').textContent=selQtyVal>0?formatQty(selQtyVal):'— L';}
 
+// ── ADD CUSTOMER (milkman) ──
+function openAddCust(){
+  ['acN','acM','acM2','acA','acNotes'].forEach(id=>document.getElementById(id).value='');
+  acQtyVal=1;
+  document.getElementById('acQCustom').style.display='none';
+  document.getElementById('acQCustom').value='';
+  document.querySelectorAll('#acQPreset .qp').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#acQPreset .qp')[2].classList.add('active');
+  document.getElementById('acQShow').textContent='Default: 1L / day';
+  document.getElementById('acSaveBtn').innerHTML='Save Customer';
+  document.getElementById('acSaveBtn').disabled=false;
+  openM('addCustModal');
+}
+function setAcQP(v,btn){
+  document.querySelectorAll('#acQPreset .qp').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  var ci=document.getElementById('acQCustom');
+  if(v===-1){ci.style.display='block';ci.focus();document.getElementById('acQShow').style.display='none';return;}
+  ci.style.display='none';acQtyVal=v;
+  document.getElementById('acQShow').style.display='block';
+  document.getElementById('acQShow').textContent='Default: '+(v<1?(v*1000)+'ml':v+'L')+' / day';
+}
+document.getElementById('acQCustom').addEventListener('input',function(){
+  acQtyVal=parseFloat(this.value)||0;
+  document.getElementById('acQShow').style.display='block';
+  document.getElementById('acQShow').textContent=acQtyVal>0?'Default: '+acQtyVal+'L / day':'';
+});
+
+async function saveNewCustomer(){
+  var name=document.getElementById('acN').value.trim();
+  var mobile=document.getElementById('acM').value.trim();
+  var address=document.getElementById('acA').value.trim();
+  if(!name||!mobile||!address){toast('Fill required fields (Name, Mobile, Address)','err');return;}
+  var dq=document.getElementById('acQCustom').style.display!=='none'?parseFloat(document.getElementById('acQCustom').value)||1:acQtyVal;
+  var data={name,mobile,mobile2:document.getElementById('acM2').value.trim(),address,defaultQty:dq,notes:document.getElementById('acNotes').value.trim()};
+  var btn=document.getElementById('acSaveBtn');
+  btn.innerHTML='⏳ Saving…';btn.disabled=true;
+  try{
+    var res=await addCustomer(data,CU.uid);
+    CUSTS.unshift(res.doc);
+    CACHE.del('customers');
+    closeM('addCustModal');
+    // Show QR modal for the new customer
+    document.getElementById('ncqTitle').textContent='Customer Added!';
+    document.getElementById('ncqName').textContent=res.doc.name;
+    document.getElementById('ncqId').textContent=res.cid;
+    var qrEl=document.getElementById('ncqQr');
+    qrEl.innerHTML='';
+    renderQR(res.qrData,qrEl,180);
+    document.getElementById('ncqDlBtn').onclick=function(){downloadIDCard(res.doc);};
+    openM('newCustQrModal');
+    refreshHomeStats();
+    toast('Customer added ✓');
+  }catch(e){
+    toast('Error: '+e.message,'err');
+    btn.innerHTML='Save Customer';btn.disabled=false;
+  }
+}
+
 // ── SUBMIT HOME ──
 async function doSubmit(){
   if(!activeCust){toast('Select a customer first','err');return;}
@@ -469,8 +580,11 @@ async function doSubmit(){
     setTimeout(()=>{btn.innerHTML='✓ Re-Submit';btn.disabled=false;},2000);
   }catch(e){
     if(e.message==='DUPLICATE'){
-      try{var ex=await getTodayDeliveryForCustomer(cid);if(ex)await updateDelivery(ex.id,{deliveredQty:selQtyVal,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});toast('Updated delivery ✓');}
-      catch(e2){toast('Error: '+e2.message,'err');}
+      try{
+        var ex=await getTodayDeliveryForCustomer(cid);
+        if(ex)await updateDelivery(ex.id,{deliveredQty:selQtyVal,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+        toast('Updated delivery ✓');
+      }catch(e2){toast('Error: '+e2.message,'err');}
     }else toast('Error: '+e.message,'err');
     btn.innerHTML='✓ Submit Delivery';btn.disabled=false;
   }
@@ -500,7 +614,13 @@ function viewQR(){
     inf.textContent='ID: '+(activeCust.customerId||'');
     el.appendChild(inf);
   }
-  document.getElementById('qrFt').innerHTML=`<button class="btn bgh" onclick="closeM('qrModal')">Close</button><button class="btn bacc" onclick="downloadIDCard(activeCust)">⬇ Download ID Card</button>`;
+  document.getElementById('qrFt').innerHTML='';
+  var closeBtn=document.createElement('button');closeBtn.className='btn bgh';closeBtn.textContent='Close';closeBtn.onclick=function(){closeM('qrModal');};
+  var dlBtn=document.createElement('button');dlBtn.className='btn bacc';dlBtn.textContent='⬇ Download ID Card';
+  var custCopy=Object.assign({},activeCust);
+  dlBtn.onclick=function(){downloadIDCard(custCopy);};
+  document.getElementById('qrFt').appendChild(closeBtn);
+  document.getElementById('qrFt').appendChild(dlBtn);
   openM('qrModal');
 }
 
@@ -517,104 +637,253 @@ document.getElementById('mainSearch').addEventListener('focus',function(){
   el.classList.add('show');
 });
 
-// ════════════════════════════════════════
-//  SCANNER – jsQR based (fast & reliable)
-// ════════════════════════════════════════
-function setScanMsg(msg,type){var e=document.getElementById('scanMsg');e.textContent=msg;e.className='scanMsg '+(type||'sc');}
+// ══════════════════════════════════════════════════════════
+//  SCANNER – FIXED jsQR implementation
+//  Key fixes:
+//  1. Single RAF loop – no mixed setTimeout/RAF
+//  2. Cooldown flag instead of lastScanned string comparison
+//  3. Better canvas sizing (uses devicePixelRatio)
+//  4. Proper stop/cleanup with no zombie loops
+// ══════════════════════════════════════════════════════════
+function setScanMsg(msg,type){
+  var e=document.getElementById('scanMsg');
+  e.textContent=msg;
+  e.className='scanMsg '+(type||'sc');
+}
+
 function showCamState(ico,title,desc,showBtn){
   var cs=document.getElementById('camState');
-  document.getElementById('camIco').textContent=ico;document.getElementById('camTitle').textContent=title;document.getElementById('camDesc').textContent=desc;
+  document.getElementById('camIco').textContent=ico;
+  document.getElementById('camTitle').textContent=title;
+  document.getElementById('camDesc').textContent=desc;
   document.getElementById('camBtn').style.display=showBtn?'block':'none';
-  cs.style.display='flex';document.getElementById('sv').style.display='none';
+  cs.style.display='flex';
+  document.getElementById('sv').style.display='none';
 }
-function hideCamState(){document.getElementById('camState').style.display='none';document.getElementById('sv').style.display='block';}
+
+function hideCamState(){
+  document.getElementById('camState').style.display='none';
+  document.getElementById('sv').style.display='block';
+}
 
 async function startScanner(){
   if(SCAN_ACTIVE)return;
+  // Reset result area
   document.getElementById('scanResult').style.display='none';
   document.getElementById('scanPlaceholder').style.display='block';
   setScanMsg('📷 Starting camera…');
-  showCamState('📷','Starting camera…','Please allow camera access.',false);
+  showCamState('📷','Starting camera…','Please allow camera access when prompted.',false);
+
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
-    showCamState('🚫','Not supported','Try Chrome or Safari on HTTPS.',false);return;
+    showCamState('🚫','Not supported','Use Chrome or Safari on HTTPS.',false);
+    setScanMsg('❌ Camera not supported','err');
+    return;
   }
+
+  // Try back camera first, fallback to any
+  var constraints=[
+    {video:{facingMode:{exact:facingMode},width:{ideal:1920},height:{ideal:1080}},audio:false},
+    {video:{facingMode:{ideal:facingMode},width:{ideal:1280},height:{ideal:720}},audio:false},
+    {video:true,audio:false}
+  ];
+
+  var stream=null;
+  for(var i=0;i<constraints.length;i++){
+    try{stream=await navigator.mediaDevices.getUserMedia(constraints[i]);break;}
+    catch(e){if(i===constraints.length-1)throw e;}
+  }
+
   try{
-    scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facingMode},width:{ideal:1280},height:{ideal:720}},audio:false});
     var video=document.getElementById('sv');
-    video.srcObject=scanStream;
-    await new Promise((res,rej)=>{video.onloadedmetadata=()=>video.play().then(res).catch(rej);video.onerror=rej;setTimeout(rej,8000);});
-    hideCamState();SCAN_ACTIVE=true;
-    torchTrack=scanStream.getVideoTracks()[0]||null;
+    video.srcObject=stream;
+    scanStream=stream;
+
+    // Wait for video to be ready
+    await new Promise(function(resolve,reject){
+      var timeout=setTimeout(function(){reject(new Error('Video timeout'));},8000);
+      video.onloadedmetadata=function(){
+        clearTimeout(timeout);
+        video.play().then(resolve).catch(reject);
+      };
+      video.onerror=function(){clearTimeout(timeout);reject(new Error('Video error'));};
+    });
+
+    hideCamState();
+    SCAN_ACTIVE=true;
+    scanLoopRunning=true;
+    lastScannedId='';
+    lastScanTime=0;
+    scanCooldown=false;
+    torchTrack=stream.getVideoTracks()[0]||null;
     setScanMsg('📷 Ready – hold QR code steady','sc');
-    decodeLoop();
+
+    // Start the decode loop
+    runDecodeLoop();
+
   }catch(e){
-    console.error(e);
-    var t='Camera error',desc='Unknown error. Ensure you are on HTTPS.',showBtn=true;
+    console.error('Scanner error:',e);
+    if(stream)stream.getTracks().forEach(function(t){t.stop();});
+    scanStream=null;
+    var t='Camera error',desc='An error occurred. Ensure you are on HTTPS.',showBtn=true;
     if(e.name==='NotAllowedError'){t='Permission denied';desc='Allow camera in browser settings, then tap Try Again.';}
     else if(e.name==='NotFoundError'){t='No camera found';desc='This device has no accessible camera.';showBtn=false;}
-    else if(e.name==='NotReadableError'){t='Camera in use';desc='Close other apps using the camera.';}
-    else if(e.name==='OverconstrainedError'){facingMode='user';setTimeout(startScanner,400);return;}
-    showCamState('🚫',t,desc,showBtn);setScanMsg('❌ '+t,'err');
+    else if(e.name==='NotReadableError'){t='Camera in use';desc='Close other apps using the camera, then tap Try Again.';}
+    showCamState('🚫',t,desc,showBtn);
+    setScanMsg('❌ '+t,'err');
   }
 }
 
-function decodeLoop(){
-  if(!SCAN_ACTIVE)return;
+function runDecodeLoop(){
+  if(!SCAN_ACTIVE||!scanLoopRunning){
+    scanRafId=null;
+    return;
+  }
   var video=document.getElementById('sv');
-  if(video.readyState<2){scanRaf=requestAnimationFrame(decodeLoop);return;}
+  if(!video||!video.srcObject){
+    scanRafId=null;
+    return;
+  }
+  // Only process if video has data
+  if(video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0){
+    tryDecode(video);
+  }
+  // Schedule next frame – use setTimeout for throttling (150ms = ~6fps, sufficient for QR)
+  scanRafId=setTimeout(function(){
+    scanRafId=requestAnimationFrame(runDecodeLoop);
+  },150);
+}
+
+function tryDecode(video){
   var cv=document.getElementById('scanCv');
-  cv.width=video.videoWidth;cv.height=video.videoHeight;
+  var vw=video.videoWidth,vh=video.videoHeight;
+  if(!vw||!vh)return;
+
+  // Match canvas to video resolution for best decode accuracy
+  if(cv.width!==vw||cv.height!==vh){
+    cv.width=vw;
+    cv.height=vh;
+  }
+
   var ctx=cv.getContext('2d',{willReadFrequently:true});
-  ctx.drawImage(video,0,0,cv.width,cv.height);
-  try{
-    var img=ctx.getImageData(0,0,cv.width,cv.height);
-    var code=jsQR(img.data,img.width,img.height,{inversionAttempts:'dontInvert'});
-    if(code&&code.data)onQRScanned(code.data);
-  }catch{}
-  scanRaf=setTimeout(()=>{scanRaf=requestAnimationFrame(decodeLoop);},150);
+  ctx.drawImage(video,0,0,vw,vh);
+
+  var imageData;
+  try{imageData=ctx.getImageData(0,0,vw,vh);}
+  catch(e){return;}
+
+  // Try normal orientation first, then inverted
+  var code=jsQR(imageData.data,imageData.width,imageData.height,{inversionAttempts:'attemptBoth'});
+  if(code&&code.data&&code.data.length>0){
+    handleQRResult(code.data);
+  }
+}
+
+function handleQRResult(raw){
+  if(scanCooldown)return; // Prevent double-processing
+  var cid=validateQR(raw);
+  if(!cid){
+    // Only show error once per invalid QR, not every 150ms
+    if(raw!==lastScannedId){
+      lastScannedId=raw;
+      setScanMsg('❌ Invalid QR – not an AMINA MILK code','err');
+      setTimeout(function(){
+        if(SCAN_ACTIVE)setScanMsg('📷 Ready – hold QR code steady','sc');
+      },2500);
+    }
+    return;
+  }
+
+  // Valid AMINA MILK QR found!
+  if(cid===lastScannedId&&Date.now()-lastScanTime<4000)return; // Same customer within 4s
+  lastScannedId=cid;
+  lastScanTime=Date.now();
+  scanCooldown=true;
+
+  setScanMsg('✅ QR detected! Loading customer…','ok');
+
+  // Vibrate if available
+  if(navigator.vibrate)navigator.vibrate([100,50,100]);
+
+  loadCustomerFromScan(cid).finally(function(){
+    // Release cooldown after 2s so user can re-scan same customer if needed
+    setTimeout(function(){scanCooldown=false;},2000);
+  });
+}
+
+async function loadCustomerFromScan(cid){
+  // Check local cache first (instant)
+  var cust=CUSTS.find(function(c){return(c.customerId||c.id)===cid;});
+  if(!cust){
+    try{
+      var snap=await db.collection('customers').doc(cid).get();
+      if(snap.exists)cust=Object.assign({id:snap.id},snap.data());
+    }catch(e){
+      setScanMsg('⚠️ Network error – check connection','err');
+      setTimeout(function(){if(SCAN_ACTIVE)setScanMsg('📷 Ready – hold QR code steady','sc');},3000);
+      return;
+    }
+  }
+  if(!cust){
+    setScanMsg('⚠️ Customer not found in system','err');
+    setTimeout(function(){if(SCAN_ACTIVE)setScanMsg('📷 Ready – hold QR code steady','sc');},3000);
+    return;
+  }
+  showScanResult(cust);
 }
 
 function stopScanner(){
   SCAN_ACTIVE=false;
-  if(scanRaf){cancelAnimationFrame(scanRaf);clearTimeout(scanRaf);scanRaf=null;}
-  if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}
-  document.getElementById('sv').srcObject=null;
-  torchTrack=null;torchOn=false;document.getElementById('torchBtn').textContent='🔦';
+  scanLoopRunning=false;
+  // Clear both timeout and RAF handles
+  if(scanRafId){
+    clearTimeout(scanRafId);
+    cancelAnimationFrame(scanRafId);
+    scanRafId=null;
+  }
+  if(scanStream){
+    scanStream.getTracks().forEach(function(t){t.stop();});
+    scanStream=null;
+  }
+  var video=document.getElementById('sv');
+  if(video){video.srcObject=null;}
+  torchTrack=null;
+  torchOn=false;
+  document.getElementById('torchBtn').textContent='🔦';
 }
-function retryCamera(){stopScanner();setTimeout(startScanner,400);}
+
+function retryCamera(){stopScanner();setTimeout(startScanner,500);}
+
 async function toggleTorch(){
-  if(!torchTrack){toast('Torch not available','inf');return;}
-  try{torchOn=!torchOn;await torchTrack.applyConstraints({advanced:[{torch:torchOn}]});document.getElementById('torchBtn').textContent=torchOn?'💡':'🔦';}
-  catch{toast('Torch not supported','inf');}
-}
-function flipCam(){facingMode=facingMode==='environment'?'user':'environment';stopScanner();document.getElementById('scanResult').style.display='none';setTimeout(startScanner,400);}
-
-// ── QR RESULT ──
-async function onQRScanned(raw){
-  var now=Date.now();
-  if(raw===lastScanned&&now-lastScanTime<3500)return;
-  lastScanned=raw;lastScanTime=now;
-  var cid=validateQR(raw);
-  if(!cid){setScanMsg('❌ Invalid QR – AMINA MILK only','err');setTimeout(()=>{if(SCAN_ACTIVE)setScanMsg('📷 Ready – hold QR code steady','sc');},2000);return;}
-  setScanMsg('✅ Found! Loading…','ok');
-  // Find customer in cache first (instant)
-  var cust=CUSTS.find(c=>(c.customerId||c.id)===cid);
-  if(!cust){try{var snap=await db.collection('customers').doc(cid).get();if(snap.exists)cust=Object.assign({id:snap.id},snap.data());}catch{}}
-  if(!cust){setScanMsg('⚠️ Customer not in system','err');return;}
-  showScanResult(cust);
+  if(!torchTrack){toast('Torch not available on this device','inf');return;}
+  try{
+    torchOn=!torchOn;
+    await torchTrack.applyConstraints({advanced:[{torch:torchOn}]});
+    document.getElementById('torchBtn').textContent=torchOn?'💡':'🔦';
+  }catch{toast('Torch not supported','inf');}
 }
 
+function flipCam(){
+  facingMode=facingMode==='environment'?'user':'environment';
+  stopScanner();
+  document.getElementById('scanResult').style.display='none';
+  document.getElementById('scanPlaceholder').style.display='block';
+  setTimeout(startScanner,500);
+}
+
+// ── SCAN RESULT UI ──
 function showScanResult(cust){
   var cid=cust.customerId||cust.id,done=todayIds.has(cid);
   var dq=parseFloat(cust.defaultQty)||1;
   window._sc=cust;window._sq=dq;
+
   document.getElementById('scanPlaceholder').style.display='none';
   var res=document.getElementById('scanResult');
   res.style.display='block';
+
   res.innerHTML=`
 <div class="srcHead">
   <div>
-    <div class="nm">${cust.name}</div>
+    <div class="nm">${escapeHtml(cust.name)}</div>
     <div class="cid">${cid}</div>
     <div class="m">📱 ${cust.mobile||'—'}</div>
     <div class="m">📍 ${cust.address||'—'}</div>
@@ -622,29 +891,44 @@ function showScanResult(cust){
   <span class="sbadge ${done?'done':'pend'}">${done?'✓ Done':'⏳ Pending'}</span>
 </div>
 <div class="card" style="margin-bottom:0">
-  ${done?'<div class="dupwarn">⚠️ Already delivered today – tap to update</div>':''}
+  ${done?'<div class="dupwarn">⚠️ Already delivered today – tap below to update</div>':''}
   <div style="font-size:.75rem;color:var(--txt2);margin-bottom:8px;font-weight:600">SELECT QUANTITY</div>
   <div class="qpresets" id="sqPresets">
-    <div class="qbtn" onclick="setSQ(.25,this,0)">250ml</div>
-    <div class="qbtn" onclick="setSQ(.5,this,1)">500ml</div>
-    <div class="qbtn ${dq===1?'active':''}" onclick="setSQ(1,this,2)">1L</div>
-    <div class="qbtn" onclick="setSQ(1.5,this,3)">1.5L</div>
-    <div class="qbtn" onclick="setSQ(2,this,4)">2L</div>
-    <div class="qbtn" onclick="setSQ(-1,this,5)">Custom</div>
+    <div class="qbtn" onclick="setSQ(.25,this)">250ml</div>
+    <div class="qbtn" onclick="setSQ(.5,this)">500ml</div>
+    <div class="qbtn" onclick="setSQ(1,this)">1L</div>
+    <div class="qbtn" onclick="setSQ(1.5,this)">1.5L</div>
+    <div class="qbtn" onclick="setSQ(2,this)">2L</div>
+    <div class="qbtn" onclick="setSQ(-1,this)">Custom</div>
   </div>
-  <input class="custinp" id="sqCustom" type="number" min="0.1" step="0.25" placeholder="Enter litres…" oninput="window._sq=parseFloat(this.value)||0;document.getElementById('sqDisp').textContent=window._sq>0?formatQty(window._sq):'— L'">
+  <input class="custinp" id="sqCustom" type="number" min="0.1" step="0.25" placeholder="Enter litres…"
+    oninput="window._sq=parseFloat(this.value)||0;document.getElementById('sqDisp').textContent=window._sq>0?formatQty(window._sq):'— L'">
   <div class="selqty" id="sqDisp">${formatQty(dq)}</div>
-  <button class="sbtn bgrn" id="sqBtn" onclick="submitScanDel('${cid}','${cust.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')">✓ Submit Delivery</button>
+  <button class="sbtn ${done?'bacc':'bgrn'}" id="sqBtn" onclick="submitScanDel('${cid}','${escapeHtmlAttr(cust.name)}')">
+    ${done?'↺ Update Delivery':'✓ Submit Delivery'}
+  </button>
 </div>`;
-  // Set default preset active
+
+  // Set default preset
   var presets=[.25,.5,1,1.5,2],pi=presets.indexOf(dq);
-  if(pi>=0){var btns=res.querySelectorAll('#sqPresets .qbtn');if(btns[pi])btns[pi].classList.add('active');}
-  setScanMsg('✅ '+cust.name+' – confirm below','ok');
+  if(pi>=0){
+    var btns=res.querySelectorAll('#sqPresets .qbtn');
+    if(btns[pi])btns[pi].classList.add('active');
+  } else {
+    // Custom value
+    var btns=res.querySelectorAll('#sqPresets .qbtn');
+    if(btns[5])btns[5].classList.add('active');
+  }
+
+  setScanMsg('✅ '+cust.name+' loaded – choose quantity','ok');
   res.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
-function setSQ(v,btn,idx){
-  document.querySelectorAll('#sqPresets .qbtn').forEach(b=>b.classList.remove('active'));
+function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escapeHtmlAttr(s){return String(s||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;');}
+
+function setSQ(v,btn){
+  document.querySelectorAll('#sqPresets .qbtn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
   var ci=document.getElementById('sqCustom');
   if(v===-1){ci.style.display='block';ci.focus();return;}
@@ -656,33 +940,47 @@ function setSQ(v,btn,idx){
 async function submitScanDel(cid,custName){
   var btn=document.getElementById('sqBtn');
   btn.innerHTML='⏳ Submitting…';btn.disabled=true;
-  if(!window._sq||window._sq<=0){toast('Select a quantity','err');btn.innerHTML='✓ Submit Delivery';btn.disabled=false;return;}
+  if(!window._sq||window._sq<=0){
+    toast('Select a quantity first','err');
+    btn.innerHTML='✓ Submit Delivery';btn.disabled=false;
+    return;
+  }
   var c=window._sc||{};
   var sd=await db.collection('users').doc(CU.uid).get();
   var sName=sd.exists?sd.data().name:CU.email;
   var dq=window._sq;
   var d={customerId:cid,customerName:custName,customerAddress:c.address||'',staffId:CU.uid,staffName:sName,deliveredQty:dq,normalQty:parseFloat(c.defaultQty)||1,extraQty:0,mode:'scan',status:'delivered'};
   try{
-    await submitDelivery(d);todayIds.add(cid);
+    await submitDelivery(d);
+    todayIds.add(cid);
     toast(formatQty(dq)+' → '+custName+' ✓');
-    btn.innerHTML='✅ Delivered!';btn.style.background='var(--grn)';
-    refreshHomeStats();setScanMsg('✅ Done! Scan next customer','ok');
-    lastScanned=''; // allow re-scan
-    setTimeout(()=>{
+    btn.innerHTML='✅ Delivered!';
+    btn.style.background='var(--grn)';
+    btn.style.color='#fff';
+    refreshHomeStats();
+    setScanMsg('✅ Done! Scan next customer','ok');
+    // Allow re-scanning after success
+    lastScannedId='';
+    setTimeout(function(){
       document.getElementById('scanResult').style.display='none';
       document.getElementById('scanPlaceholder').style.display='block';
       if(SCAN_ACTIVE)setScanMsg('📷 Ready – hold QR code steady','sc');
       btn.innerHTML='✓ Submit Delivery';btn.disabled=false;
-    },2000);
+    },2200);
   }catch(e){
     if(e.message==='DUPLICATE'){
       try{
         var ex=await getTodayDeliveryForCustomer(cid);
         if(ex)await updateDelivery(ex.id,{deliveredQty:dq,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
-        toast('Updated delivery ✓');btn.innerHTML='✅ Updated!';
-        setTimeout(()=>{btn.innerHTML='✓ Submit Delivery';btn.disabled=false;},2000);
+        toast('Updated delivery ✓');
+        btn.innerHTML='✅ Updated!';
+        lastScannedId='';
+        setTimeout(function(){btn.innerHTML='✓ Submit Delivery';btn.disabled=false;},2000);
       }catch(e2){toast('Error: '+e2.message,'err');btn.innerHTML='✓ Submit Delivery';btn.disabled=false;}
-    }else{toast('Error: '+e.message,'err');btn.innerHTML='✓ Submit Delivery';btn.disabled=false;}
+    }else{
+      toast('Error: '+e.message,'err');
+      btn.innerHTML='✓ Submit Delivery';btn.disabled=false;
+    }
   }
 }
 
@@ -696,11 +994,11 @@ async function loadHistory(){
     var dels=await getDeliveries(f);
     var el=document.getElementById('histList');
     if(!dels.length){el.innerHTML='<div class="empty"><div class="ei">📦</div><p>No deliveries in this range</p></div>';return;}
-    var tot=dels.reduce((s,d)=>s+(d.deliveredQty||0),0);
+    var tot=dels.reduce(function(s,d){return s+(d.deliveredQty||0);},0);
     el.innerHTML=`<div class="card" style="display:flex;gap:16px;justify-content:center;text-align:center;margin-bottom:10px">
       <div><div style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800">${dels.length}</div><div style="font-size:.68rem;color:var(--txt2)">Deliveries</div></div>
       <div><div style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--acc)">${tot}L</div><div style="font-size:.68rem;color:var(--txt2)">Total Milk</div></div>
-    </div>`+dels.map(d=>`<div class="hi"><div class="r"><span class="dt">${d.date} ${d.time||''}</span><span class="qty">${d.deliveredQty||0}L</span></div><div class="sb">${d.customerName||d.customerId}</div></div>`).join('');
+    </div>`+dels.map(function(d){return`<div class="hi"><div class="r"><span class="dt">${d.date} ${d.time||''}</span><span class="qty">${d.deliveredQty||0}L</span></div><div class="sb">${d.customerName||d.customerId}</div></div>`;}).join('');
   }catch{document.getElementById('histList').innerHTML='<div class="empty"><div class="ei">⚠️</div><p>Error loading</p></div>';}
 }
 
@@ -708,8 +1006,8 @@ async function loadHistory(){
 async function loadSettingsPage(){
   try{
     var dels=await getDeliveries({staffId:CU.uid});
-    var tot=dels.reduce((s,d)=>s+(d.deliveredQty||0),0);
-    var today=dels.filter(d=>d.date===new Date().toISOString().slice(0,10)).length;
+    var tot=dels.reduce(function(s,d){return s+(d.deliveredQty||0);},0);
+    var today=dels.filter(function(d){return d.date===new Date().toISOString().slice(0,10);}).length;
     document.getElementById('settStats').innerHTML=`
       <div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800">${dels.length}</div><div style="font-size:.65rem;color:var(--txt2)">Total Del.</div></div>
       <div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--acc)">${tot}L</div><div style="font-size:.65rem;color:var(--txt2)">Milk Served</div></div>
@@ -723,7 +1021,7 @@ async function changePwd(){
   try{await CU.updatePassword(p);toast('Password updated ✓');document.getElementById('newPwd').value='';document.getElementById('confPwd').value='';}
   catch(e){toast('Error: '+e.message,'err');}
 }
-function clearCache(){['customers','settings'].forEach(k=>CACHE.del(k));toast('Cache cleared','inf');}
+function clearCache(){['customers','settings'].forEach(function(k){CACHE.del(k);});toast('Cache cleared','inf');}
 </script>
 </body>
 </html>
