@@ -9,7 +9,8 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<!-- ZXing for robust live QR scanning -->
+<script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
 <script src="firebase.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -31,7 +32,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 .nb.scan .wrap{width:50px;height:50px;background:linear-gradient(135deg,var(--acc),#f97316);border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-top:-20px;box-shadow:0 4px 18px rgba(245,158,11,.5)}
 .page{display:none;padding:14px;animation:fi .18s ease}
 .page.active{display:block}
-#pgScan.active{display:flex;flex-direction:column;padding:0}
+#pgScan.active{display:flex;flex-direction:column;padding:0;height:calc(100vh - 54px - 76px);overflow:hidden}
 @keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 .card{background:var(--bg2);border:1px solid var(--bdr2);border-radius:var(--rnd);padding:14px;box-shadow:var(--sh);margin-bottom:12px}
 .cardHd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -70,40 +71,52 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 .sbtn{width:100%;padding:15px;font-size:1rem;border-radius:12px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.3px;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px}
 .sbtn:active{transform:scale(.98)}
 .dupwarn{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:#fbbf24;padding:9px 12px;border-radius:9px;font-size:.8rem;text-align:center;margin-bottom:8px}
-/* SCANNER */
+
+/* ── LIVE SCANNER ── */
 .scanHd{padding:12px 14px;background:var(--bg2);border-bottom:1px solid var(--bdr2);display:flex;align-items:center;gap:10px;flex-shrink:0}
 .scanHd h2{font-size:.95rem;font-weight:700;font-family:'Syne',sans-serif}
 .scanHd .st{font-size:.68rem;color:var(--txt2)}
-#scanCaptureArea{padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:14px;flex:1;overflow-y:auto}
-.capBtn{width:100%;max-width:340px;padding:18px;border-radius:16px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:.3px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .18s;box-shadow:0 4px 20px rgba(0,0,0,.4)}
-.capBtn:active{transform:scale(.97)}
-.capBtn.primary{background:linear-gradient(135deg,var(--acc),#f97316);color:#000}
-.capBtn.secondary{background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt2);font-size:.9rem;padding:14px}
-.capHint{font-size:.75rem;color:var(--txt3);text-align:center;line-height:1.6;max-width:280px}
-.capDivider{display:flex;align-items:center;gap:10px;width:100%;max-width:340px}
-.capDivider::before,.capDivider::after{content:'';flex:1;height:1px;background:var(--bdr2)}
-.capDivider span{font-size:.7rem;color:var(--txt3)}
-.manualBox{width:100%;max-width:340px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:14px;padding:14px}
-.manualBox label{display:block;font-size:.72rem;color:var(--txt2);margin-bottom:7px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
-.manualRow{display:flex;gap:8px}
-.manualInp{flex:1;background:var(--bg2);border:1px solid var(--bdr2);border-radius:9px;padding:11px 13px;color:var(--txt);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;text-transform:uppercase}
-.manualInp:focus{border-color:var(--acc)}
-.manualGoBtn{padding:11px 16px;background:var(--acc);color:#000;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;white-space:nowrap;transition:.15s}
-.manualGoBtn:active{transform:scale(.97)}
-#scanStatus{font-size:.82rem;text-align:center;padding:6px 14px;border-radius:8px;min-height:32px;display:flex;align-items:center;justify-content:center;gap:6px;width:100%;max-width:340px}
-#scanStatus.ok{color:var(--grn);background:rgba(16,185,129,.1)}
-#scanStatus.err{color:var(--red);background:rgba(239,68,68,.1)}
-#scanStatus.sc{color:var(--acc);background:rgba(245,158,11,.07)}
-#scanStatus.inf{color:#94a3b8;background:var(--bg3)}
-#photoPreview{display:none;width:100%;max-width:340px;border-radius:12px;overflow:hidden;border:1px solid var(--bdr2)}
-#photoPreview img{width:100%;display:block;border-radius:10px}
-.previewSpin{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px}
-.previewSpin .spin{width:28px;height:28px;border-width:3px}
-#scanResult{display:none;width:100%;max-width:340px}
+#scanViewport{position:relative;width:100%;background:#000;flex-shrink:0;overflow:hidden}
+#scanViewport video{width:100%;height:100%;object-fit:cover;display:block}
+#scanViewport canvas{display:none}
+.scanOverlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.scanFrame{width:220px;height:220px;position:relative}
+.scanFrame::before,.scanFrame::after{content:'';position:absolute;width:40px;height:40px;border-color:var(--acc);border-style:solid}
+.scanFrame::before{top:0;left:0;border-width:3px 0 0 3px;border-radius:4px 0 0 0}
+.scanFrame::after{top:0;right:0;border-width:3px 3px 0 0;border-radius:0 4px 0 0}
+.scanFrame .br,.scanFrame .bl{position:absolute;width:40px;height:40px;border-color:var(--acc);border-style:solid}
+.scanFrame .br{bottom:0;right:0;border-width:0 3px 3px 0;border-radius:0 0 4px 0}
+.scanFrame .bl{bottom:0;left:0;border-width:0 0 3px 3px;border-radius:0 0 0 4px}
+.scanLine{position:absolute;left:10px;right:10px;height:2px;background:linear-gradient(90deg,transparent,var(--acc),transparent);animation:scanAnim 2s ease-in-out infinite}
+@keyframes scanAnim{0%{top:10px;opacity:1}50%{top:calc(100% - 10px);opacity:1}51%{opacity:0}100%{top:10px;opacity:0}}
+#scanStatusBar{padding:8px 14px;font-size:.82rem;text-align:center;flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:7px;min-height:38px}
+#scanStatusBar.ok{color:var(--grn);background:rgba(16,185,129,.1)}
+#scanStatusBar.err{color:var(--red);background:rgba(239,68,68,.1)}
+#scanStatusBar.sc{color:var(--acc);background:rgba(245,158,11,.07)}
+#scanStatusBar.inf{color:#94a3b8;background:var(--bg3)}
+#scanBottom{flex:1;overflow-y:auto;padding:10px 14px}
+#scanResult{display:none}
 .srcHead{background:linear-gradient(135deg,var(--bg3),var(--bg4));border:1px solid var(--bdr);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .srcHead .nm{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800}
 .srcHead .cid{font-size:.68rem;color:var(--acc);background:rgba(245,158,11,.12);padding:2px 8px;border-radius:20px;display:inline-block;margin:3px 0}
 .srcHead .m{font-size:.78rem;color:var(--txt2);margin-top:2px}
+.manualBox{background:var(--bg3);border:1px solid var(--bdr2);border-radius:12px;padding:12px;margin-bottom:8px}
+.manualBox label{display:block;font-size:.68rem;color:var(--txt2);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.manualRow{display:flex;gap:8px}
+.manualInp{flex:1;background:var(--bg2);border:1px solid var(--bdr2);border-radius:9px;padding:10px 12px;color:var(--txt);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s;text-transform:uppercase}
+.manualInp:focus{border-color:var(--acc)}
+.manualGoBtn{padding:10px 14px;background:var(--acc);color:#000;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:.15s}
+.manualGoBtn:active{transform:scale(.97)}
+.camCtrl{display:flex;gap:8px;margin-bottom:8px}
+.camBtn{flex:1;padding:10px;border-radius:9px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--txt2);font-size:.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;display:flex;align-items:center;justify-content:center;gap:5px}
+.camBtn:active{transform:scale(.97)}
+.camBtn.active{border-color:var(--acc);background:rgba(245,158,11,.1);color:var(--acc)}
+
+/* History */
+.hi{background:var(--bg2);border:1px solid var(--bdr2);border-radius:10px;padding:11px 13px;margin-bottom:7px}
+.hi .r{display:flex;justify-content:space-between;align-items:center}
+.hi .dt{font-weight:600;font-size:.85rem}.hi .qty{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:var(--acc)}
+.hi .sb{font-size:.72rem;color:var(--txt2);margin-top:2px}
 .inp{width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:11px 14px;color:var(--txt);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:border .2s}
 .inp:focus{border-color:var(--acc)}
 .inpG{margin-bottom:12px}.inpG label{display:block;font-size:.75rem;color:var(--txt2);margin-bottom:5px;font-weight:500}
@@ -133,12 +146,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 .empty{text-align:center;padding:28px 14px;color:var(--txt3)}.empty .ei{font-size:2rem;margin-bottom:8px}
 .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .sh h2{font-size:1.1rem;font-weight:700;font-family:'Syne',sans-serif}
-.hi{background:var(--bg2);border:1px solid var(--bdr2);border-radius:10px;padding:11px 13px;margin-bottom:7px}
-.hi .r{display:flex;justify-content:space-between;align-items:center}
-.hi .dt{font-weight:600;font-size:.85rem}.hi .qty{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:var(--acc)}
-.hi .sb{font-size:.72rem;color:var(--txt2);margin-top:2px}
-/* Debug info box */
-.debugBox{width:100%;max-width:340px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:10px 13px;font-size:.72rem;color:#93c5fd;display:none;word-break:break-all;line-height:1.6}
 </style>
 </head>
 <body>
@@ -196,48 +203,52 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
     </div>
   </div>
 
-  <!-- SCANNER -->
+  <!-- SCANNER (Live) -->
   <div class="page" id="pgScan">
     <div class="scanHd">
       <span style="font-size:1.3rem">📷</span>
-      <div><h2>Scan QR Code</h2><div class="st" id="scanSubtitle">Take a photo of the customer QR card</div></div>
+      <div>
+        <h2>Live QR Scanner</h2>
+        <div class="st" id="scanSubtitle">Point camera at customer QR code</div>
+      </div>
     </div>
 
-    <!-- hidden file inputs -->
-    <input type="file" id="qrFileInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoCapture(this)">
-    <input type="file" id="qrGalleryInput" accept="image/*" style="display:none" onchange="handlePhotoCapture(this)">
-    <!-- hidden canvas for decoding -->
-    <canvas id="decodeCv" style="display:none"></canvas>
+    <!-- Live video viewport -->
+    <div id="scanViewport" style="height:280px">
+      <video id="scanVideo" autoplay playsinline muted></video>
+      <canvas id="scanCanvas"></canvas>
+      <div class="scanOverlay">
+        <div class="scanFrame">
+          <div class="br"></div><div class="bl"></div>
+          <div class="scanLine"></div>
+        </div>
+      </div>
+    </div>
 
-    <div id="scanCaptureArea">
-      <div id="scanStatus" class="sc">📷 Ready – tap the button below to scan</div>
+    <!-- Status bar -->
+    <div id="scanStatusBar" class="sc">📷 Starting camera…</div>
 
-      <!-- Main camera button -->
-      <button class="capBtn primary" onclick="triggerCamera()">
-        <span style="font-size:1.4rem">📸</span> Open Camera &amp; Scan QR
-      </button>
-      <div class="capHint">Tap above → your camera opens → point at QR code → tap capture.<br>Works on all Android &amp; iOS phones.</div>
+    <!-- Camera controls + manual entry + result -->
+    <div id="scanBottom">
+      <!-- Camera controls -->
+      <div class="camCtrl">
+        <button class="camBtn active" id="btnStartCam" onclick="startLiveScanner()">▶ Start Camera</button>
+        <button class="camBtn" id="btnStopCam" onclick="stopLiveScanner()">⏹ Stop</button>
+        <button class="camBtn" id="btnFlipCam" onclick="flipCamera()">🔄 Flip</button>
+      </div>
 
-      <!-- Photo preview area -->
-      <div id="photoPreview"></div>
-
-      <!-- Debug info (hidden by default, tap 5x on status to reveal) -->
-      <div class="debugBox" id="debugBox"></div>
-
-      <div class="capDivider"><span>OR ENTER ID MANUALLY</span></div>
-
-      <!-- Manual ID entry -->
+      <!-- Manual Entry -->
       <div class="manualBox">
-        <label>Customer ID / Mobile Number</label>
+        <label>Or Enter Customer ID / Mobile</label>
         <div class="manualRow">
-          <input class="manualInp" id="manualIdInp" placeholder="e.g. AMB3GUB388" autocomplete="off" autocorrect="off" spellcheck="false"
+          <input class="manualInp" id="manualIdInp" placeholder="e.g. AM87LQA528" autocomplete="off" autocorrect="off" spellcheck="false"
             oninput="this.value=this.value.toUpperCase()"
             onkeydown="if(event.key==='Enter')doManualLookup()">
           <button class="manualGoBtn" onclick="doManualLookup()">Go →</button>
         </div>
       </div>
 
-      <!-- Result area -->
+      <!-- Scan result appears here -->
       <div id="scanResult"></div>
     </div>
   </div>
@@ -252,7 +263,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
         <button class="btn bsm bacc" onclick="loadHistory()">Go</button>
       </div>
     </div>
-    <div id="histList"><div class="spin"></div></div>
+    <div id="histList"><div class="empty"><div class="ei">📋</div><p>Select dates and tap Go</p></div></div>
   </div>
 
   <!-- SETTINGS -->
@@ -275,7 +286,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
     </div>
     <div class="card">
       <div style="font-size:.85rem;font-weight:700;margin-bottom:12px">App Info</div>
-      <div class="settRow"><div>Version</div><div style="color:var(--txt2)">2.2</div></div>
+      <div class="settRow"><div>Version</div><div style="color:var(--txt2)">3.0</div></div>
       <div class="settRow"><div>Role</div><div class="badge y">MILKMAN</div></div>
       <div class="settRow"><div>Cache</div><button class="btn bsm bgh" onclick="clearCache()">Clear</button></div>
       <div style="margin-top:14px"><button class="btn bred" style="width:100%" onclick="doLogout()">🚪 Sign Out</button></div>
@@ -355,8 +366,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-
 
 <script>
 // ── STATE ──
-var CU=null,CUSTS=[],todayIds=new Set(),activeCust=null,selQtyVal=1,activePageName='Home';
-var recentSearches=[],searchTO=null,myData={};
+var CU=null, CUSTS=[], todayIds=new Set(), activeCust=null, selQtyVal=1, activePageName='Home';
+var recentSearches=[], searchTO=null, myData={};
 var acQtyVal=1;
 
 // ── CLOCK ──
@@ -365,7 +376,7 @@ function updateClock(){
   document.getElementById('liveClock').textContent=n.toLocaleTimeString('en-IN');
   document.getElementById('liveDate').textContent=n.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
 }
-setInterval(updateClock,1000);updateClock();
+setInterval(updateClock,1000); updateClock();
 
 // ── AUTH ──
 auth.onAuthStateChanged(async function(u){
@@ -385,20 +396,20 @@ auth.onAuthStateChanged(async function(u){
   await refreshHomeStats();
   try{recentSearches=await getRecentSearches(CU.uid,8);}catch(e){}
 });
-function doLogout(){signOut().then(function(){location.replace('index.html');});}
+function doLogout(){stopLiveScanner();signOut().then(function(){location.replace('index.html');});}
 
 // ── NAV ──
 function nav(name,idx){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.getElementById('pg'+name).classList.add('active');
   document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('active');});
-  if(idx===99)document.getElementById('bnScan').classList.add('active');
-  else if(idx>=0)document.getElementById('bn'+idx).classList.add('active');
-  if(activePageName==='Scan'&&name!=='Scan')resetScanPage();
+  if(idx===99) document.getElementById('bnScan').classList.add('active');
+  else if(idx>=0) document.getElementById('bn'+idx).classList.add('active');
+  if(activePageName==='Scan'&&name!=='Scan') stopLiveScanner();
   activePageName=name;
-  if(name==='Scan')setScanStatus('📷 Ready – tap the button below to scan','sc');
-  else if(name==='History')loadHistory();
-  else if(name==='Settings')loadSettingsPage();
+  if(name==='Scan') setTimeout(startLiveScanner, 300);
+  else if(name==='History') loadHistory();
+  else if(name==='Settings') loadSettingsPage();
 }
 
 function toast(msg,type){
@@ -425,7 +436,7 @@ async function refreshHomeStats(){
     document.getElementById('hs2').textContent=Math.max(0,CUSTS.length-dels.length);
     document.getElementById('hs3').textContent=dels.reduce(function(s,d){return s+(d.deliveredQty||0);},0)+'L';
     document.getElementById('hs4').textContent=CUSTS.length;
-  }catch(e){}
+  }catch(e){console.warn('stats error',e);}
 }
 setInterval(function(){if(activePageName==='Home')refreshHomeStats();},60000);
 
@@ -463,10 +474,10 @@ async function selectCust(cid){
       var d=await db.collection('customers').doc(cid).get();
       if(d.exists){c=Object.assign({id:d.id},d.data());}
       if(!c){
-        var q2=await db.collection('customers').where('customerId','==',cid).where('active','==',true).limit(1).get();
-        if(!q2.empty)c=Object.assign({id:q2.docs[0].id},q2.docs[0].data());
+        var q=await db.collection('customers').where('customerId','==',cid).where('active','==',true).limit(1).get();
+        if(!q.empty)c=Object.assign({id:q.docs[0].id},q.docs[0].data());
       }
-    }catch(e){console.error('selectCust lookup error:',e);}
+    }catch(e){console.error('selectCust:',e);}
   }
   if(!c){toast('Customer not found','err');return;}
   activeCust=c;
@@ -475,7 +486,7 @@ async function selectCust(cid){
   showCustPanel(c);
 }
 function showCustPanel(c){
-  var cid=c.customerId||c.id,done=todayIds.has(cid);
+  var cid=c.customerId||c.id, done=todayIds.has(cid);
   var dq=parseFloat(c.defaultQty)||1;
   selQtyVal=dq;
   document.getElementById('custPanel').style.display='block';
@@ -484,7 +495,8 @@ function showCustPanel(c){
   var presets=[.25,.5,1,1.5,2];
   var idx=presets.indexOf(dq);
   var btns=document.querySelectorAll('#qpresets .qbtn');
-  if(idx>=0)btns[idx].classList.add('active');else btns[5].classList.add('active');
+  if(idx>=0) btns[idx].classList.add('active');
+  else btns[5].classList.add('active');
   document.getElementById('custInp').style.display=idx>=0?'none':'block';
   document.getElementById('custInp').value=idx>=0?'':dq;
   document.getElementById('selQty').textContent=fmtQ(dq);
@@ -562,33 +574,47 @@ async function doSubmit(){
   var btn=document.getElementById('subBtn');btn.innerHTML='⏳ Submitting…';btn.disabled=true;
   var sd=await db.collection('users').doc(CU.uid).get();
   var sName=sd.exists?sd.data().name:CU.email;
-  var d={customerId:cid,customerName:activeCust.name,customerAddress:activeCust.address||'',staffId:CU.uid,staffName:sName,deliveredQty:selQtyVal,normalQty:parseFloat(activeCust.defaultQty)||1,extraQty:0,mode:'manual',status:'delivered'};
+  var today=new Date().toISOString().slice(0,10);
+  var existing=await getTodayDeliveryForCustomer(cid);
   try{
-    await submitDelivery(d);todayIds.add(cid);
-    toast(fmtQ(selQtyVal)+' delivered to '+activeCust.name+' ✓');
-    btn.innerHTML='✅ Delivered!';btn.style.background='var(--grn)';
+    if(existing){
+      await updateDelivery(existing.id,{deliveredQty:selQtyVal,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+      toast('Delivery updated ✓');
+    } else {
+      var d={customerId:cid,customerName:activeCust.name,customerAddress:activeCust.address||'',staffId:CU.uid,staffName:sName,deliveredQty:selQtyVal,normalQty:parseFloat(activeCust.defaultQty)||1,extraQty:0,mode:'manual',status:'delivered'};
+      await submitDelivery(d);
+      todayIds.add(cid);
+      toast(fmtQ(selQtyVal)+' delivered to '+activeCust.name+' ✓');
+    }
+    btn.innerHTML='✅ Delivered!';btn.style.background='var(--grn)';btn.style.color='#fff';
     refreshHomeStats();
     setTimeout(function(){btn.innerHTML='✓ Re-Submit';btn.disabled=false;},2000);
   }catch(e){
-    if(e.message==='DUPLICATE'){
-      try{var ex=await getTodayDeliveryForCustomer(cid);if(ex)await updateDelivery(ex.id,{deliveredQty:selQtyVal,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});toast('Updated ✓');}
-      catch(e2){toast('Error: '+e2.message,'err');}
-    }else toast('Error: '+e.message,'err');
+    toast('Error: '+e.message,'err');
     btn.innerHTML='✓ Submit Delivery';btn.disabled=false;
   }
 }
+
 function viewHistory(){
   if(!activeCust)return;
   var cid=activeCust.customerId||activeCust.id;
   document.getElementById('histTitle').textContent=activeCust.name+' – History';
   document.getElementById('histBody').innerHTML='<div class="spin"></div>';
   openM('histModal');
-  getDeliveries({customerId:cid}).then(function(dels){
-    var el=document.getElementById('histBody');
-    if(!dels.length){el.innerHTML='<div class="empty"><div class="ei">📦</div><p>No deliveries yet</p></div>';return;}
-    el.innerHTML=dels.slice(0,30).map(function(d){return'<div class="hi"><div class="r"><span class="dt">'+d.date+'</span><span class="qty">'+(d.deliveredQty||0)+'L</span></div><div class="sb">'+(d.time||'')+' • '+(d.staffName||'')+'</div></div>';}).join('');
-  }).catch(function(){document.getElementById('histBody').innerHTML='<div class="empty"><div class="ei">⚠️</div><p>Error</p></div>';});
+  // Query only by customerId to avoid needing a composite index
+  db.collection('deliveries').where('customerId','==',cid).orderBy('date','desc').limit(30).get()
+    .then(function(snap){
+      var el=document.getElementById('histBody');
+      if(snap.empty){el.innerHTML='<div class="empty"><div class="ei">📦</div><p>No deliveries yet</p></div>';return;}
+      el.innerHTML=snap.docs.map(function(doc){
+        var d=doc.data();
+        return'<div class="hi"><div class="r"><span class="dt">'+d.date+'</span><span class="qty">'+(d.deliveredQty||0)+'L</span></div><div class="sb">'+(d.time||'')+' • '+(d.staffName||'Staff')+'</div></div>';
+      }).join('');
+    }).catch(function(e){
+      document.getElementById('histBody').innerHTML='<div class="empty"><div class="ei">⚠️</div><p>Error: '+e.message+'</p></div>';
+    });
 }
+
 function viewQR(){
   if(!activeCust){toast('Select a customer first','err');return;}
   document.getElementById('qrTitle').textContent=activeCust.name;
@@ -621,381 +647,313 @@ document.getElementById('mainSearch').addEventListener('focus',function(){
   el.classList.add('show');
 });
 
-// ════════════════════════════════════════════════════
-//  QR SCANNER v4 – FIXED
-//  Root cause: safeValidateQR returns the customerId (p.id)
-//  which is the Firestore DOC ID. fetchAndShowScanResult
-//  must search by BOTH doc ID and customerId field.
-//  Also handles gallery upload fallback for better compat.
-// ════════════════════════════════════════════════════
-
-// Debug tap counter (tap status bar 5 times to reveal debug)
-var _dbgTaps=0;
-document.getElementById('scanStatus').addEventListener('click',function(){
-  _dbgTaps++;
-  if(_dbgTaps>=5){
-    _dbgTaps=0;
-    var db=document.getElementById('debugBox');
-    db.style.display=db.style.display==='none'||!db.style.display?'block':'none';
-  }
-});
-function dbg(msg){
-  var el=document.getElementById('debugBox');
-  if(!el)return;
-  el.textContent=msg;
-  console.log('[SCAN DEBUG]',msg);
-}
+// ══════════════════════════════════════════════════════
+//  LIVE QR SCANNER using ZXing
+// ══════════════════════════════════════════════════════
+var _scanStream=null;
+var _scanAnimId=null;
+var _scanActive=false;
+var _scanCooldown=false;
+var _facingMode='environment'; // rear camera default
+var _jsQrWorker=null;
 
 function setScanStatus(msg,type){
-  var e=document.getElementById('scanStatus');
+  var e=document.getElementById('scanStatusBar');
   if(!e)return;
   e.textContent=msg;
   e.className=type||'sc';
 }
 
-// Open native camera (capture="environment" = rear camera)
-function triggerCamera(){
-  var inp=document.getElementById('qrFileInput');
-  inp.value='';
-  inp.click();
-}
-
-// Decode QR from photo file – supports any image size
-function handlePhotoCapture(input){
-  var file=input.files&&input.files[0];
-  if(!file)return;
-  setScanStatus('⏳ Reading QR code…','sc');
-
-  var prev=document.getElementById('photoPreview');
-  prev.innerHTML='<div class="previewSpin"><div class="spin"></div><div style="font-size:.75rem;color:var(--txt2)">Decoding…</div></div>';
-  prev.style.display='block';
-
-  var reader=new FileReader();
-  reader.onload=function(e){
-    var img=new Image();
-    img.onload=function(){
-      // Try multiple canvas sizes for better QR detection
-      var sizes=[800,1200,600,400];
-      var found=false;
-
-      for(var si=0;si<sizes.length;si++){
-        var MAX=sizes[si];
-        var scale=Math.min(1,MAX/Math.max(img.width,img.height));
-        var cw=Math.round(img.width*scale);
-        var ch=Math.round(img.height*scale);
-
-        var cv=document.getElementById('decodeCv');
-        cv.width=cw;cv.height=ch;
-        var ctx=cv.getContext('2d',{willReadFrequently:true});
-        ctx.drawImage(img,0,0,cw,ch);
-        var imgData=ctx.getImageData(0,0,cw,ch);
-
-        // Try all inversion modes
-        var code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'dontInvert'});
-        if(!code)code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'invertFirst'});
-        if(!code)code=jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'attemptBoth'});
-
-        if(code&&code.data){
-          dbg('Decoded at size '+MAX+'px: '+code.data.slice(0,60));
-          found=true;
-
-          // Show thumbnail
-          var thumb=document.createElement('img');
-          thumb.src=e.target.result;
-          thumb.style.cssText='width:100%;display:block;border-radius:10px';
-          prev.innerHTML='';prev.appendChild(thumb);
-
-          var rawQR=code.data;
-          var cid=safeValidateQR(rawQR);
-          dbg('Raw: '+rawQR.slice(0,80)+' | CID: '+cid);
-
-          if(cid){
-            setScanStatus('✅ QR recognised! Loading customer…','ok');
-            if(navigator.vibrate)navigator.vibrate([80,40,80]);
-            fetchAndShowScanResult(cid,false,rawQR);
-          }else{
-            // Maybe it's a plain customer ID printed as QR (not AMINAMILK:// format)
-            var plainId=rawQR.trim().toUpperCase();
-            if(plainId.startsWith('AM')&&plainId.length>=8){
-              setScanStatus('✅ Customer ID found! Loading…','ok');
-              fetchAndShowScanResult(plainId,false,rawQR);
-            }else{
-              setScanStatus('❌ Not a valid AMINA MILK QR code','err');
-              dbg('Validation failed. Raw value: '+rawQR);
-              setTimeout(function(){setScanStatus('📷 Ready – tap the button below to scan','sc');},3500);
-            }
-          }
-          break;
-        }
-      }
-
-      if(!found){
-        // Show thumbnail anyway
-        var thumb2=document.createElement('img');
-        thumb2.src=e.target.result;
-        thumb2.style.cssText='width:100%;display:block;border-radius:10px';
-        prev.innerHTML='';prev.appendChild(thumb2);
-
-        setScanStatus('⚠️ No QR code found – try closer / better light','err');
-        dbg('jsQR failed on image '+img.width+'x'+img.height);
-        setTimeout(function(){setScanStatus('📷 Ready – tap the button below to scan','sc');},3500);
-      }
-    };
-    img.onerror=function(){
-      setScanStatus('❌ Could not read image file','err');
-      prev.innerHTML='';prev.style.display='none';
-    };
-    img.src=e.target.result;
-  };
-  reader.onerror=function(){
-    setScanStatus('❌ File read error','err');
-    prev.innerHTML='';prev.style.display='none';
-  };
-  reader.readAsDataURL(file);
-}
-
-// Manual ID / mobile lookup
-async function doManualLookup(){
-  var raw=(document.getElementById('manualIdInp').value||'').trim().toUpperCase();
-  if(!raw){toast('Enter a customer ID or mobile number','err');return;}
-  setScanStatus('🔄 Looking up…','sc');
-  document.getElementById('scanResult').style.display='none';
-  await fetchAndShowScanResult(raw,true,null);
-}
-
-// ── CORE: Fetch customer by any identifier and show result ──
-// cid       = the resolved customer ID (from QR or manual entry)
-// isManual  = true if typed in manually (enables mobile search)
-// rawQR     = original raw QR string (for extra fallback decoding)
-async function fetchAndShowScanResult(cid,isManual,rawQR){
+async function startLiveScanner(){
+  if(_scanActive) return;
+  setScanStatus('📷 Starting camera…','sc');
   try{
-    var cust=null;
-    dbg('Searching for: '+cid);
+    // Stop any existing stream
+    if(_scanStream){_scanStream.getTracks().forEach(t=>t.stop());_scanStream=null;}
 
-    // ── STRATEGY 1: Check in-memory cache first (customerId field OR doc id) ──
-    cust=CUSTS.find(function(c){
-      return (c.customerId||'')===cid || (c.id||'')===cid || (c.mobile||'')===cid;
-    });
-    if(cust){dbg('Found in CUSTS cache: '+(cust.name||cust.id));}
-
-    // ── STRATEGY 2: Direct Firestore doc lookup (doc ID = customerId) ──
-    if(!cust){
-      try{
-        var docSnap=await db.collection('customers').doc(cid).get();
-        if(docSnap.exists&&docSnap.data().active!==false){
-          cust=Object.assign({id:docSnap.id},docSnap.data());
-          dbg('Found by doc ID: '+cust.name);
-        }
-      }catch(e){dbg('Doc lookup error: '+e.message);}
-    }
-
-    // ── STRATEGY 3: Query where customerId field == cid ──
-    if(!cust){
-      try{
-        var snap=await db.collection('customers').where('customerId','==',cid).where('active','==',true).limit(1).get();
-        if(!snap.empty){
-          cust=Object.assign({id:snap.docs[0].id},snap.docs[0].data());
-          dbg('Found by customerId field: '+cust.name);
-        }
-      }catch(e){dbg('customerId query error: '+e.message);}
-    }
-
-    // ── STRATEGY 4: Manual entry – search by mobile number ──
-    if(!cust&&isManual){
-      try{
-        var mobSnap=await db.collection('customers').where('mobile','==',cid).where('active','==',true).limit(1).get();
-        if(!mobSnap.empty){
-          cust=Object.assign({id:mobSnap.docs[0].id},mobSnap.docs[0].data());
-          dbg('Found by mobile: '+cust.name);
-        }
-      }catch(e){dbg('Mobile query error: '+e.message);}
-    }
-
-    // ── STRATEGY 5: Case-insensitive name search (manual only) ──
-    if(!cust&&isManual&&cid.length>2){
-      try{
-        // Firestore doesn't support case-insensitive search natively,
-        // so search in the local cache with loose matching
-        var lowCid=cid.toLowerCase();
-        var nameMatch=CUSTS.find(function(c){
-          return (c.name||'').toLowerCase().includes(lowCid)||
-                 (c.mobile||'').includes(cid)||
-                 (c.address||'').toLowerCase().includes(lowCid);
-        });
-        if(nameMatch){
-          cust=nameMatch;
-          dbg('Found by fuzzy match: '+cust.name);
-        }
-      }catch(e){dbg('Fuzzy search error: '+e.message);}
-    }
-
-    // ── STRATEGY 6: If QR raw data available, try extracting embedded id differently ──
-    if(!cust&&rawQR){
-      try{
-        // Try to decode as plain base64 without the prefix
-        var altId=tryExtractIdFromRaw(rawQR);
-        if(altId&&altId!==cid){
-          dbg('Trying alt ID from raw: '+altId);
-          var altSnap=await db.collection('customers').doc(altId).get();
-          if(altSnap.exists&&altSnap.data().active!==false){
-            cust=Object.assign({id:altSnap.id},altSnap.data());
-            dbg('Found via alt ID: '+cust.name);
-          }
-          if(!cust){
-            var altSnap2=await db.collection('customers').where('customerId','==',altId).where('active','==',true).limit(1).get();
-            if(!altSnap2.empty){
-              cust=Object.assign({id:altSnap2.docs[0].id},altSnap2.docs[0].data());
-              dbg('Found via alt customerId: '+cust.name);
-            }
-          }
-        }
-      }catch(e){dbg('Alt extraction error: '+e.message);}
-    }
-
-    if(!cust){
-      setScanStatus('⚠️ Customer not found for: '+cid,'err');
-      dbg('All strategies failed for: '+cid);
-      setTimeout(function(){setScanStatus('📷 Ready – tap the button below to scan','sc');},3500);
-      return;
-    }
-
-    // Add to local cache if missing
-    var existsInCache=CUSTS.find(function(c){return (c.customerId||c.id)===(cust.customerId||cust.id);});
-    if(!existsInCache)CUSTS.push(cust);
-
-    showScanResult(cust);
-    setScanStatus('✅ '+cust.name+' – choose quantity below','ok');
-
+    var constraints={
+      video:{
+        facingMode:_facingMode,
+        width:{ideal:1280},
+        height:{ideal:720}
+      }
+    };
+    _scanStream=await navigator.mediaDevices.getUserMedia(constraints);
+    var vid=document.getElementById('scanVideo');
+    vid.srcObject=_scanStream;
+    await vid.play();
+    _scanActive=true;
+    setScanStatus('📷 Scanning… point at QR code','sc');
+    document.getElementById('btnStartCam').classList.add('active');
+    document.getElementById('btnStopCam').classList.remove('active');
+    // Start decode loop
+    _decodeTick();
   }catch(e){
-    console.error('fetchAndShowScanResult:',e);
-    dbg('Fatal error: '+e.message);
-    setScanStatus('⚠️ Network error – check connection','err');
-    setTimeout(function(){setScanStatus('📷 Ready – tap the button below to scan','sc');},3000);
+    console.error('Camera error:',e);
+    var msg='⚠️ Camera error: '+e.message;
+    if(e.name==='NotAllowedError') msg='❌ Camera permission denied – please allow camera access';
+    else if(e.name==='NotFoundError') msg='❌ No camera found on this device';
+    setScanStatus(msg,'err');
+    _scanActive=false;
   }
 }
 
-// ── QR validation – robust, handles multiple encoding edge cases ──
-function safeValidateQR(raw){
+function stopLiveScanner(){
+  _scanActive=false;
+  if(_scanAnimId){cancelAnimationFrame(_scanAnimId);_scanAnimId=null;}
+  if(_scanStream){_scanStream.getTracks().forEach(t=>t.stop());_scanStream=null;}
+  var vid=document.getElementById('scanVideo');
+  if(vid){vid.srcObject=null;}
+  document.getElementById('btnStartCam').classList.remove('active');
+  setScanStatus('📷 Camera stopped','inf');
+}
+
+async function flipCamera(){
+  _facingMode=(_facingMode==='environment')?'user':'environment';
+  stopLiveScanner();
+  await new Promise(r=>setTimeout(r,300));
+  startLiveScanner();
+}
+
+function _decodeTick(){
+  if(!_scanActive)return;
+  var vid=document.getElementById('scanVideo');
+  var cv=document.getElementById('scanCanvas');
+  if(!vid||!cv||vid.readyState<2){
+    _scanAnimId=requestAnimationFrame(_decodeTick);
+    return;
+  }
+  cv.width=vid.videoWidth;
+  cv.height=vid.videoHeight;
+  var ctx=cv.getContext('2d',{willReadFrequently:true});
+  ctx.drawImage(vid,0,0,cv.width,cv.height);
+
+  // Try ZXing first (more robust)
+  _tryZXing(cv, ctx, vid);
+}
+
+function _tryZXing(cv, ctx, vid){
   try{
-    if(!raw||typeof raw!=='string')return null;
-    var prefix='AMINAMILK://';
-    var token='AMINA_MILK_SECURE_v1_2025';
-    if(!raw.startsWith(prefix))return null;
+    if(window.ZXing){
+      var hints=new Map();
+      var formats=[window.ZXing.BarcodeFormat.QR_CODE];
+      hints.set(window.ZXing.DecodeHintType.POSSIBLE_FORMATS,formats);
+      hints.set(window.ZXing.DecodeHintType.TRY_HARDER,true);
+      var reader=new window.ZXing.BrowserQRCodeReader();
 
-    var b64=raw.slice(prefix.length);
-    // Normalize base64: url-safe chars, padding
-    b64=b64.replace(/-/g,'+').replace(/_/g,'/');
-    while(b64.length%4!==0)b64+='=';
-    // Remove any whitespace that might have been introduced
-    b64=b64.replace(/\s/g,'');
-
-    var binary;
-    try{binary=atob(b64);}
-    catch(e){
-      // Try stripping trailing = and retry
-      b64=b64.replace(/=+$/,'');
-      while(b64.length%4!==0)b64+='=';
-      try{binary=atob(b64);}catch(e2){return null;}
+      // Use imageData
+      var imageData=ctx.getImageData(0,0,cv.width,cv.height);
+      var luminance=new window.ZXing.HTMLCanvasElementLuminanceSource(cv);
+      var binary=new window.ZXing.HybridBinarizer(luminance);
+      var binaryBitmap=new window.ZXing.BinaryBitmap(binary);
+      try{
+        var result=new window.ZXing.QRCodeReader().decode(binaryBitmap);
+        if(result&&result.text){
+          _onQRDetected(result.text);
+          return;
+        }
+      }catch(ex){}
     }
+  }catch(ex){}
 
+  // Fallback: try jsQR if available
+  _tryJsQR(cv, ctx, vid);
+}
+
+function _tryJsQR(cv, ctx, vid){
+  try{
+    if(window.jsQR){
+      var imageData=ctx.getImageData(0,0,cv.width,cv.height);
+      var code=window.jsQR(imageData.data,imageData.width,imageData.height,{inversionAttempts:'attemptBoth'});
+      if(code&&code.data){
+        _onQRDetected(code.data);
+        return;
+      }
+    }
+  }catch(ex){}
+
+  // Schedule next frame
+  if(_scanActive){
+    _scanAnimId=requestAnimationFrame(_decodeTick);
+  }
+}
+
+// ── QR DATA VALIDATOR (robust) ──
+function validateQRData(raw){
+  if(!raw||typeof raw!=='string')return null;
+  var PREFIX='AMINAMILK://';
+  var TOKEN='AMINA_MILK_SECURE_v1_2025';
+
+  // Normalize: trim whitespace
+  raw=raw.trim();
+
+  if(!raw.startsWith(PREFIX))return null;
+
+  var b64=raw.slice(PREFIX.length);
+  // Fix URL-safe base64 and padding
+  b64=b64.replace(/-/g,'+').replace(/_/g,'/');
+  while(b64.length%4!==0)b64+='=';
+
+  try{
+    var binary=atob(b64);
     var jsonStr;
-    // Try TextDecoder first (handles UTF-8 properly)
+    // Try UTF-8 decode
     try{
       var bytes=new Uint8Array(binary.length);
       for(var i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
       jsonStr=new TextDecoder('utf-8').decode(bytes);
     }catch(e){
-      try{jsonStr=decodeURIComponent(escape(binary));}
-      catch(e2){jsonStr=binary;}
+      jsonStr=decodeURIComponent(escape(binary));
     }
-
-    var p=JSON.parse(jsonStr);
-    if(p&&p.t===token&&p.id){
-      dbg('QR token valid, id='+p.id);
-      return p.id;
+    var parsed=JSON.parse(jsonStr);
+    if(parsed&&parsed.t===TOKEN&&parsed.id){
+      return parsed.id;
     }
-    dbg('QR token mismatch or no id. t='+p.t+' id='+p.id);
     return null;
   }catch(e){
-    dbg('safeValidateQR exception: '+e.message);
+    console.warn('QR parse error:',e.message,'raw:',raw.slice(0,80));
     return null;
   }
 }
 
-// Try to extract an ID from raw QR data using alternative methods
-function tryExtractIdFromRaw(raw){
-  if(!raw)return null;
+var _lastScannedCid='';
+var _lastScanTime=0;
+
+function _onQRDetected(rawData){
+  var now=Date.now();
+  // Cooldown: ignore same QR for 3 seconds
+  if(now-_lastScanTime<3000&&rawData===_lastScannedCid){
+    if(_scanActive) _scanAnimId=requestAnimationFrame(_decodeTick);
+    return;
+  }
+
+  var cid=validateQRData(rawData);
+  if(!cid){
+    // Not our QR, keep scanning
+    if(_scanActive) _scanAnimId=requestAnimationFrame(_decodeTick);
+    return;
+  }
+
+  _lastScannedCid=rawData;
+  _lastScanTime=now;
+
+  if(navigator.vibrate)navigator.vibrate([80,40,80]);
+  setScanStatus('✅ QR scanned! Loading customer…','ok');
+
+  // Pause scanning briefly
+  _scanActive=false;
+  fetchAndShowScanResult(cid);
+}
+
+// ── MANUAL LOOKUP ──
+async function doManualLookup(){
+  var raw=(document.getElementById('manualIdInp').value||'').trim().toUpperCase();
+  if(!raw){toast('Enter a customer ID or mobile number','err');return;}
+  setScanStatus('🔄 Looking up…','sc');
+  await fetchAndShowScanResult(raw,true);
+}
+
+// ── UNIFIED FETCH + SHOW ──
+async function fetchAndShowScanResult(cid,isManual){
   try{
-    // Method A: try raw as base64 directly (no prefix)
-    if(raw.length>10&&!/^AMINAMILK:\/\//.test(raw)){
+    // 1. In-memory cache
+    var cust=CUSTS.find(function(c){return(c.customerId||c.id)===cid||c.mobile===cid;});
+
+    if(!cust){
+      // 2. Direct doc ID lookup
       try{
-        var b64=raw.replace(/-/g,'+').replace(/_/g,'/');
-        while(b64.length%4!==0)b64+='=';
-        var bin=atob(b64);
-        var bytes=new Uint8Array(bin.length);
-        for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
-        var str=new TextDecoder().decode(bytes);
-        var obj=JSON.parse(str);
-        if(obj&&obj.id)return obj.id;
+        var d=await db.collection('customers').doc(cid).get();
+        if(d.exists)cust=Object.assign({id:d.id},d.data());
       }catch(e){}
     }
-    // Method B: raw might just be the customer ID as plain text
-    if(/^AM[A-Z0-9]{5,}/.test(raw.trim()))return raw.trim();
-  }catch(e){}
-  return null;
+
+    if(!cust){
+      // 3. Query by customerId field
+      try{
+        var q=await db.collection('customers').where('customerId','==',cid).where('active','==',true).limit(1).get();
+        if(!q.empty)cust=Object.assign({id:q.docs[0].id},q.docs[0].data());
+      }catch(e){}
+    }
+
+    if(!cust&&isManual){
+      // 4. Search by mobile
+      try{
+        var qm=await db.collection('customers').where('mobile','==',cid).where('active','==',true).limit(1).get();
+        if(!qm.empty)cust=Object.assign({id:qm.docs[0].id},qm.docs[0].data());
+      }catch(e){}
+    }
+
+    if(!cust){
+      setScanStatus('⚠️ Customer not found: '+cid,'err');
+      // Resume scanning
+      setTimeout(function(){
+        setScanStatus('📷 Scanning… point at QR code','sc');
+        _scanActive=true;
+        _decodeTick();
+      },3000);
+      return;
+    }
+
+    // Add to local cache if missing
+    if(!CUSTS.find(function(c){return(c.customerId||c.id)===(cust.customerId||cust.id);})){
+      CUSTS.push(cust);
+    }
+
+    showScanResult(cust);
+    setScanStatus('✅ '+cust.name+' – choose quantity and submit','ok');
+
+  }catch(e){
+    console.error('fetchAndShowScanResult:',e);
+    setScanStatus('⚠️ Network error – check connection','err');
+    setTimeout(function(){
+      setScanStatus('📷 Scanning… point at QR code','sc');
+      _scanActive=true;
+      _decodeTick();
+    },3000);
+  }
 }
 
-// No-op stubs
-function startScanner(){}
-function stopScanner(){}
-
-function resetScanPage(){
-  setScanStatus('📷 Ready – tap the button below to scan','sc');
-  document.getElementById('scanResult').style.display='none';
-  document.getElementById('photoPreview').style.display='none';
-  document.getElementById('photoPreview').innerHTML='';
-  document.getElementById('manualIdInp').value='';
-  document.getElementById('debugBox').style.display='none';
-  document.getElementById('debugBox').textContent='';
-  _dbgTaps=0;
-}
-
-// ── SCAN RESULT DISPLAY ──
+// ── SCAN RESULT CARD ──
+var _scanQty=1;
 function showScanResult(cust){
   var cid=cust.customerId||cust.id;
   var done=todayIds.has(cid);
   var dq=parseFloat(cust.defaultQty)||1;
-  window._sc=cust;window._sq=dq;
-  var res=document.getElementById('scanResult');
-  res.style.display='block';
+  _scanQty=dq;
+  window._sc=cust;
+
   var presets=[.25,.5,1,1.5,2];
   var pi=presets.indexOf(dq);
   var presetsHtml=presets.map(function(v,i){
     return'<div class="qbtn'+(i===pi?' active':'')+'" onclick="setSQ('+v+',this)">'+fmtQ(v)+'</div>';
   }).join('');
   presetsHtml+='<div class="qbtn" onclick="setSQ(-1,this)">Custom</div>';
+
+  var res=document.getElementById('scanResult');
+  res.style.display='block';
   res.innerHTML=
-    '<div class="srcHead">'+
-      '<div>'+
-        '<div class="nm">'+esc(cust.name)+'</div>'+
-        '<div class="cid">'+cid+'</div>'+
-        '<div class="m">📱 '+(cust.mobile||'—')+'</div>'+
-        '<div class="m">📍 '+(cust.address||'—')+'</div>'+
-      '</div>'+
-      '<span class="sbadge '+(done?'done':'pend')+'">'+(done?'✓ Done':'⏳ Pending')+'</span>'+
+    '<div class="srcHead"><div>'+
+      '<div class="nm">'+esc(cust.name)+'</div>'+
+      '<div class="cid">'+cid+'</div>'+
+      '<div class="m">📱 '+(cust.mobile||'—')+'</div>'+
+      '<div class="m">📍 '+(cust.address||'—')+'</div>'+
     '</div>'+
-    '<div class="card" style="margin-bottom:0">'+
-      (done?'<div class="dupwarn">⚠️ Already delivered today – tap below to update</div>':'')+
+    '<span class="sbadge '+(done?'done':'pend')+'">'+(done?'✓ Done':'⏳ Pending')+'</span></div>'+
+
+    '<div class="card" style="margin-bottom:10px">'+
+      (done?'<div class="dupwarn">⚠️ Already delivered today – submit to update</div>':'')+
       '<div style="font-size:.75rem;color:var(--txt2);margin-bottom:8px;font-weight:600">SELECT QUANTITY</div>'+
       '<div class="qpresets" id="sqPresets">'+presetsHtml+'</div>'+
       '<input class="custinp" id="sqCustom" type="number" min="0.1" step="0.25" placeholder="Enter litres…" '+
-        'oninput="window._sq=parseFloat(this.value)||0;document.getElementById(\'sqDisp\').textContent=window._sq>0?fmtQ(window._sq):\'— L\'">'+
+        'oninput="_scanQty=parseFloat(this.value)||0;document.getElementById(\'sqDisp\').textContent=_scanQty>0?fmtQ(_scanQty):\'— L\'">'+
       '<div class="selqty" id="sqDisp">'+fmtQ(dq)+'</div>'+
       '<button class="sbtn '+(done?'bacc':'bgrn')+'" id="sqBtn" onclick="submitScanDel(\''+esc(cid)+'\',\''+esc(cust.name)+'\')">'+
-        '✓ Submit Delivery'+
-      '</button>'+
-    '</div>';
-  setTimeout(function(){res.scrollIntoView({behavior:'smooth',block:'nearest'});},100);
+        '✓ Submit Delivery</button>'+
+    '</div>'+
+
+    '<button class="btn bgh" style="width:100%;margin-bottom:10px" onclick="resumeScanning()">📷 Scan Another</button>';
+
+  res.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function setSQ(v,btn){
@@ -1003,57 +961,78 @@ function setSQ(v,btn){
   btn.classList.add('active');
   var ci=document.getElementById('sqCustom');
   if(v===-1){ci.style.display='block';ci.focus();return;}
-  ci.style.display='none';window._sq=v;
+  ci.style.display='none';
+  _scanQty=v;
   document.getElementById('sqDisp').textContent=fmtQ(v);
+}
+
+function resumeScanning(){
+  document.getElementById('scanResult').style.display='none';
+  document.getElementById('scanResult').innerHTML='';
+  document.getElementById('manualIdInp').value='';
+  _lastScannedCid='';
+  _lastScanTime=0;
+  setScanStatus('📷 Scanning… point at QR code','sc');
+  _scanActive=true;
+  _decodeTick();
 }
 
 async function submitScanDel(cid,custName){
   var btn=document.getElementById('sqBtn');
-  if(!window._sq||window._sq<=0){toast('Select a quantity first','err');return;}
+  if(!_scanQty||_scanQty<=0){toast('Select a quantity first','err');return;}
   btn.innerHTML='⏳ Submitting…';btn.disabled=true;
   var c=window._sc||{};
   var sd=await db.collection('users').doc(CU.uid).get();
   var sName=sd.exists?sd.data().name:CU.email;
-  var dq=window._sq;
-  var d={
-    customerId:cid,customerName:custName,customerAddress:c.address||'',
-    staffId:CU.uid,staffName:sName,
-    deliveredQty:dq,normalQty:parseFloat(c.defaultQty)||1,extraQty:0,
-    mode:'scan',status:'delivered'
-  };
+
   try{
-    await submitDelivery(d);todayIds.add(cid);
-    toast(fmtQ(dq)+' → '+custName+' ✓');
-    btn.innerHTML='✅ Delivered!';btn.style.background='var(--grn)';btn.style.color='#fff';
+    var existing=await getTodayDeliveryForCustomer(cid);
+    if(existing){
+      await updateDelivery(existing.id,{deliveredQty:_scanQty,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+      toast('Updated: '+fmtQ(_scanQty)+' → '+custName+' ✓');
+    } else {
+      var d={customerId:cid,customerName:custName,customerAddress:c.address||'',staffId:CU.uid,staffName:sName,deliveredQty:_scanQty,normalQty:parseFloat(c.defaultQty)||1,extraQty:0,mode:'scan',status:'delivered'};
+      await submitDelivery(d);
+      todayIds.add(cid);
+      toast(fmtQ(_scanQty)+' → '+custName+' ✓');
+    }
+    btn.innerHTML='✅ Done!';btn.style.background='var(--grn)';btn.style.color='#fff';
     refreshHomeStats();
-    setScanStatus('✅ Done! Tap camera for next customer','ok');
-    setTimeout(function(){
-      document.getElementById('scanResult').style.display='none';
-      setScanStatus('📷 Ready – tap the button below to scan','sc');
-      btn.innerHTML='✓ Submit Delivery';btn.disabled=false;
-    },2200);
+    setScanStatus('✅ Delivered! Tap "Scan Another" for next customer','ok');
+    setTimeout(function(){btn.innerHTML='✓ Submit';btn.disabled=false;},2500);
   }catch(e){
-    if(e.message==='DUPLICATE'){
-      try{
-        var ex=await getTodayDeliveryForCustomer(cid);
-        if(ex)await updateDelivery(ex.id,{deliveredQty:dq,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
-        toast('Updated delivery ✓');btn.innerHTML='✅ Updated!';
-        setTimeout(function(){btn.innerHTML='✓ Submit Delivery';btn.disabled=false;},2000);
-      }catch(e2){toast('Error: '+e2.message,'err');btn.innerHTML='✓ Submit Delivery';btn.disabled=false;}
-    }else{toast('Error: '+e.message,'err');btn.innerHTML='✓ Submit Delivery';btn.disabled=false;}
+    console.error('submitScanDel error:',e);
+    toast('Error: '+e.message,'err');
+    btn.innerHTML='✓ Submit Delivery';btn.disabled=false;
   }
 }
 
-// ── HISTORY ──
+// ── HISTORY PAGE ──
 async function loadHistory(){
-  document.getElementById('histList').innerHTML='<div class="spin"></div>';
-  var f={staffId:CU.uid};
-  var hf=document.getElementById('hFrom').value,ht=document.getElementById('hTo').value;
-  if(hf)f.dateFrom=hf;if(ht)f.dateTo=ht;
+  var el=document.getElementById('histList');
+  el.innerHTML='<div class="spin"></div>';
+
   try{
-    var dels=await getDeliveries(f);
-    var el=document.getElementById('histList');
-    if(!dels.length){el.innerHTML='<div class="empty"><div class="ei">📦</div><p>No deliveries</p></div>';return;}
+    var today=new Date().toISOString().slice(0,10);
+    var hf=document.getElementById('hFrom').value||today;
+    var ht=document.getElementById('hTo').value||today;
+
+    // Simple query: just by staffId + date range
+    // Using two separate queries to avoid needing composite index
+    var snap=await db.collection('deliveries')
+      .where('staffId','==',CU.uid)
+      .where('date','>=',hf)
+      .where('date','<=',ht)
+      .get();
+
+    if(snap.empty){
+      el.innerHTML='<div class="empty"><div class="ei">📦</div><p>No deliveries in this range</p></div>';
+      return;
+    }
+
+    var dels=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+    dels.sort(function(a,b){return b.date.localeCompare(a.date)||((b.time||'').localeCompare(a.time||''));});
+
     var tot=dels.reduce(function(s,d){return s+(d.deliveredQty||0);},0);
     el.innerHTML=
       '<div class="card" style="display:flex;gap:16px;justify-content:center;text-align:center;margin-bottom:10px">'+
@@ -1061,23 +1040,51 @@ async function loadHistory(){
         '<div><div style="font-family:\'Syne\',sans-serif;font-size:1.5rem;font-weight:800;color:var(--acc)">'+tot+'L</div><div style="font-size:.68rem;color:var(--txt2)">Total Milk</div></div>'+
       '</div>'+
       dels.map(function(d){
-        return'<div class="hi"><div class="r"><span class="dt">'+d.date+' '+(d.time||'')+'</span><span class="qty">'+(d.deliveredQty||0)+'L</span></div><div class="sb">'+(d.customerName||d.customerId)+'</div></div>';
+        return'<div class="hi">'+
+          '<div class="r"><span class="dt">'+d.date+(d.time?' '+d.time:'')+'</span><span class="qty">'+(d.deliveredQty||0)+'L</span></div>'+
+          '<div class="sb">'+(d.customerName||d.customerId)+'</div>'+
+        '</div>';
       }).join('');
-  }catch(e){document.getElementById('histList').innerHTML='<div class="empty"><div class="ei">⚠️</div><p>Error loading</p></div>';}
+  }catch(e){
+    console.error('History error:',e);
+    // If composite index error, try simpler query
+    if(e.code==='failed-precondition'||e.message.includes('index')){
+      el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>Index not ready. Showing all your deliveries.</p></div>';
+      // Fallback: just get all deliveries by staffId
+      try{
+        var snap2=await db.collection('deliveries').where('staffId','==',CU.uid).get();
+        var dels2=snap2.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+        dels2.sort(function(a,b){return b.date.localeCompare(a.date);});
+        if(!dels2.length){el.innerHTML='<div class="empty"><div class="ei">📦</div><p>No deliveries yet</p></div>';return;}
+        el.innerHTML=dels2.map(function(d){
+          return'<div class="hi">'+
+            '<div class="r"><span class="dt">'+d.date+'</span><span class="qty">'+(d.deliveredQty||0)+'L</span></div>'+
+            '<div class="sb">'+(d.customerName||d.customerId)+'</div>'+
+          '</div>';
+        }).join('');
+      }catch(e2){el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>'+e2.message+'</p></div>';}
+    } else {
+      el.innerHTML='<div class="empty"><div class="ei">⚠️</div><p>Error: '+e.message+'</p></div>';
+    }
+  }
 }
 
 // ── SETTINGS ──
 async function loadSettingsPage(){
   try{
-    var dels=await getDeliveries({staffId:CU.uid});
+    // Simple query without composite index
+    var snap=await db.collection('deliveries').where('staffId','==',CU.uid).get();
+    var dels=snap.docs.map(function(d){return d.data();});
     var tot=dels.reduce(function(s,d){return s+(d.deliveredQty||0);},0);
-    var today=dels.filter(function(d){return d.date===new Date().toISOString().slice(0,10);}).length;
+    var today=new Date().toISOString().slice(0,10);
+    var todayCount=dels.filter(function(d){return d.date===today;}).length;
     document.getElementById('settStats').innerHTML=
       '<div style="text-align:center"><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:800">'+dels.length+'</div><div style="font-size:.65rem;color:var(--txt2)">Total Del.</div></div>'+
       '<div style="text-align:center"><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:800;color:var(--acc)">'+tot+'L</div><div style="font-size:.65rem;color:var(--txt2)">Milk Served</div></div>'+
-      '<div style="text-align:center"><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:800;color:var(--grn)">'+today+'</div><div style="font-size:.65rem;color:var(--txt2)">Today</div></div>';
-  }catch(e){}
+      '<div style="text-align:center"><div style="font-family:\'Syne\',sans-serif;font-size:1.3rem;font-weight:800;color:var(--grn)">'+todayCount+'</div><div style="font-size:.65rem;color:var(--txt2)">Today</div></div>';
+  }catch(e){console.warn('Settings stats:',e);}
 }
+
 async function changePwd(){
   var p=document.getElementById('newPwd').value,c=document.getElementById('confPwd').value;
   if(!p||p.length<6){toast('Min 6 characters','err');return;}
