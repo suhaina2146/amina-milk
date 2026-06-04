@@ -11,22 +11,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="firebase.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#0a0e1a;--bg2:#111827;--bg3:#1a2234;--bg4:#1e2a40;
-  --acc:#f59e0b;--acc2:#fbbf24;--grn:#10b981;--red:#ef4444;--blu:#3b82f6;
-  --txt:#f1f5f9;--txt2:#94a3b8;--txt3:#64748b;
-  --bdr:rgba(245,158,11,0.15);--bdr2:rgba(255,255,255,0.07);
-  --sh:0 4px 24px rgba(0,0,0,0.4);--rnd:14px;
-}
+:root{--bg:#0a0e1a;--bg2:#111827;--bg3:#1a2234;--bg4:#1e2a40;--acc:#f59e0b;--grn:#10b981;--red:#ef4444;--blu:#3b82f6;--txt:#f1f5f9;--txt2:#94a3b8;--txt3:#64748b;--bdr:rgba(245,158,11,.15);--bdr2:rgba(255,255,255,.07);--sh:0 4px 24px rgba(0,0,0,.4);--rnd:14px}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
 h1,h2,h3,.brand{font-family:'Syne',sans-serif}
-/* ---- CHECKING SCREEN ---- */
-#checkScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:14px}
-#checkScreen .spin{width:40px;height:40px;border:3px solid var(--bdr2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite}
-#checkScreen p{color:var(--txt2);font-size:.88rem}
-/* ---- LAYOUT ---- */
+#guard{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:14px}
+#guard .spin{width:40px;height:40px;border:3px solid var(--bdr2);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite}
+#guard p{color:var(--txt2);font-size:.88rem}
 #app{display:none}
 .topbar{background:var(--bg2);border-bottom:1px solid var(--bdr2);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .topbar .brand{font-size:1.2rem;color:var(--acc);font-weight:800;display:flex;align-items:center;gap:10px}
@@ -34,10 +27,10 @@ h1,h2,h3,.brand{font-family:'Syne',sans-serif}
 .topNav{display:flex;gap:4px;align-items:center;overflow-x:auto;flex:1;margin:0 16px;padding:4px 0}
 .topNav::-webkit-scrollbar{height:0}
 .navBtn{background:none;border:none;color:var(--txt2);padding:8px 14px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;white-space:nowrap;transition:.2s;display:flex;align-items:center;gap:6px}
-.navBtn:hover{background:var(--bg3);color:var(--txt)}
-.navBtn.active{background:rgba(245,158,11,.15);color:var(--acc)}
+.navBtn:hover{background:var(--bg3);color:var(--txt)}.navBtn.active{background:rgba(245,158,11,.15);color:var(--acc)}
 .topRight{display:flex;align-items:center;gap:8px}
-.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--acc),#f97316);display:flex;align-items:center;justify-content:center;font-weight:700;color:#000;font-size:.85rem;cursor:pointer}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--acc),#f97316);display:flex;align-items:center;justify-content:center;font-weight:700;color:#000;font-size:.85rem}
+.mobileMenu{display:none;background:none;border:none;color:var(--txt);font-size:1.4rem;cursor:pointer}
 .page{display:none;padding:20px;max-width:1400px;margin:0 auto}
 .page.active{display:block}
 .statsGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
@@ -54,8 +47,7 @@ h1,h2,h3,.brand{font-family:'Syne',sans-serif}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 th{background:var(--bg3);color:var(--txt2);padding:10px 12px;text-align:left;font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
 td{padding:10px 12px;border-bottom:1px solid var(--bdr2);vertical-align:middle}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(255,255,255,.02)}
+tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.02)}
 .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600}
 .badge.grn{background:rgba(16,185,129,.15);color:#34d399}.badge.red{background:rgba(239,68,68,.15);color:#fca5a5}
 .badge.yel{background:rgba(245,158,11,.15);color:var(--acc)}.badge.blu{background:rgba(59,130,246,.15);color:#93c5fd}
@@ -85,12 +77,12 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .qrBox{display:flex;flex-direction:column;align-items:center;gap:12px}
 .qrBox canvas,.qrBox img{border:4px solid var(--bg4);border-radius:12px}
 #toast{position:fixed;bottom:24px;right:24px;z-index:500;display:flex;flex-direction:column;gap:8px}
-.toastItem{background:var(--bg2);border:1px solid var(--bdr2);border-radius:10px;padding:12px 18px;font-size:.85rem;box-shadow:var(--sh);animation:slideIn .3s ease;display:flex;align-items:center;gap:10px;max-width:320px}
+.toastItem{background:var(--bg2);border:1px solid var(--bdr2);border-radius:10px;padding:12px 18px;font-size:.85rem;box-shadow:var(--sh);animation:sIn .3s ease;display:flex;align-items:center;gap:10px;max-width:320px}
 .toastItem.ok{border-left:3px solid var(--grn)}.toastItem.err{border-left:3px solid var(--red)}.toastItem.inf{border-left:3px solid var(--blu)}
-@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes sIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
 #confirmBox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;align-items:center;justify-content:center}
 #confirmBox.open{display:flex}
-.confirmCard{background:var(--bg2);border:1px solid var(--bdr2);border-radius:16px;padding:28px;max-width:360px;width:100%;text-align:center}
+.confirmCard{background:var(--bg2);border:1px solid var(--bdr2);border-radius:16px;padding:28px;max-width:360px;width:100%;text-align:center;margin:20px}
 .confirmCard h3{font-size:1.05rem;margin-bottom:8px}.confirmCard p{color:var(--txt2);font-size:.88rem;margin-bottom:20px}
 .confirmBtns{display:flex;gap:10px;justify-content:center}
 .exportPanel{background:var(--bg3);border-radius:10px;padding:14px;margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -107,7 +99,6 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .empty{text-align:center;padding:40px 20px;color:var(--txt3)}.empty .ico{font-size:2.5rem;margin-bottom:12px}
 .delRow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bdr2);font-size:.85rem}
 .delRow:last-child{border-bottom:none}
-.mobileMenu{display:none;background:none;border:none;color:var(--txt);font-size:1.4rem;cursor:pointer}
 #mobileNav{display:none;position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.6)}
 #mobileNav.open{display:block}
 .mobileNavPanel{position:absolute;right:0;top:0;bottom:0;width:240px;background:var(--bg2);border-left:1px solid var(--bdr2);padding:20px;display:flex;flex-direction:column;gap:4px}
@@ -116,14 +107,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 </style>
 </head>
 <body>
-
-<!-- Checking auth state -->
-<div id="checkScreen">
-  <div class="spin"></div>
-  <p>Checking access…</p>
-</div>
-
-<!-- APP (shown only after auth verified) -->
+<div id="guard"><div class="spin"></div><p>Checking access…</p></div>
 <div id="app">
   <div class="topbar">
     <div class="brand">🥛 <span>ADMIN</span> AMINA MILK</div>
@@ -138,20 +122,21 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="topRight">
       <div class="avatar" id="adminAvatar">A</div>
       <button class="btn btnSm btnGhost" onclick="doLogout()">Logout</button>
-      <button class="mobileMenu" onclick="toggleMobileNav()">☰</button>
+      <button class="mobileMenu" onclick="document.getElementById('mobileNav').classList.add('open')">☰</button>
     </div>
   </div>
-
-  <div id="mobileNav"><div class="mobileNavPanel">
-    <div style="font-family:'Syne',sans-serif;font-size:1rem;color:var(--acc);margin-bottom:16px;font-weight:700">🥛 AMINA MILK</div>
-    <button class="navBtn active" onclick="showPage('dashboard',this);closeMobileNav()">📊 Dashboard</button>
-    <button class="navBtn" onclick="showPage('customers',this);closeMobileNav()">👥 Customers</button>
-    <button class="navBtn" onclick="showPage('deliveries',this);closeMobileNav()">🚚 Deliveries</button>
-    <button class="navBtn" onclick="showPage('reports',this);closeMobileNav()">📋 Reports</button>
-    <button class="navBtn" onclick="showPage('staff',this);closeMobileNav()">👤 Staff</button>
-    <button class="navBtn" onclick="showPage('settings',this);closeMobileNav()">⚙️ Settings</button>
-    <button class="btn btnSm btnGhost" style="margin-top:auto" onclick="doLogout()">Logout</button>
-  </div></div>
+  <div id="mobileNav" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="mobileNavPanel">
+      <div style="font-family:'Syne',sans-serif;font-size:1rem;color:var(--acc);margin-bottom:16px;font-weight:700">🥛 AMINA MILK</div>
+      <button class="navBtn" onclick="showPage('dashboard',this);document.getElementById('mobileNav').classList.remove('open')">📊 Dashboard</button>
+      <button class="navBtn" onclick="showPage('customers',this);document.getElementById('mobileNav').classList.remove('open')">👥 Customers</button>
+      <button class="navBtn" onclick="showPage('deliveries',this);document.getElementById('mobileNav').classList.remove('open')">🚚 Deliveries</button>
+      <button class="navBtn" onclick="showPage('reports',this);document.getElementById('mobileNav').classList.remove('open')">📋 Reports</button>
+      <button class="navBtn" onclick="showPage('staff',this);document.getElementById('mobileNav').classList.remove('open')">👤 Staff</button>
+      <button class="navBtn" onclick="showPage('settings',this);document.getElementById('mobileNav').classList.remove('open')">⚙️ Settings</button>
+      <button class="btn btnSm btnGhost" style="margin-top:auto" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
 
   <div class="page active" id="pgDashboard">
     <div class="secHd"><h2>Dashboard Overview</h2><span id="dashDate" style="color:var(--txt2);font-size:.85rem"></span></div>
@@ -195,7 +180,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <input class="inp" id="rStaff" placeholder="Staff" style="flex:1;min-width:120px">
         <input class="inp" type="date" id="rFrom" style="flex:1;min-width:120px">
         <input class="inp" type="date" id="rTo" style="flex:1;min-width:120px">
-        <select class="select" id="rStatus"><option value="">All Status</option><option>delivered</option><option>pending</option></select>
+        <select class="select" id="rStatus"><option value="">All Status</option><option>delivered</option></select>
       </div>
       <div class="exportPanel">
         <span style="font-size:.82rem;color:var(--txt2);margin-right:6px">Export:</span>
@@ -227,8 +212,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <div class="card">
         <h3 style="margin-bottom:14px">Delivery Defaults</h3>
         <div class="inpG"><label>Default Milk Qty (L)</label><input class="inp" type="number" id="defQty" value="1" min="0.5" step="0.5"></div>
-        <div class="inpG"><label>Delivery Start Time</label><input class="inp" type="time" id="delStart" value="06:00"></div>
-        <div class="inpG"><label>Delivery End Time</label><input class="inp" type="time" id="delEnd" value="10:00"></div>
+        <div class="inpG"><label>Delivery Start</label><input class="inp" type="time" id="delStart" value="06:00"></div>
+        <div class="inpG"><label>Delivery End</label><input class="inp" type="time" id="delEnd" value="10:00"></div>
         <button class="btn btnAcc" onclick="saveDelSettings()">Save Defaults</button>
       </div>
       <div class="card">
@@ -304,8 +289,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 </div>
 <div id="confirmBox">
   <div class="confirmCard">
-    <h3 id="confirmQ">Are you sure?</h3>
-    <p id="confirmD">This action cannot be undone.</p>
+    <h3 id="confirmQ">Are you sure?</h3><p id="confirmD">This cannot be undone.</p>
     <div class="confirmBtns">
       <button class="btn btnGhost" onclick="closeConfirm()">Cancel</button>
       <button class="btn btnRed" onclick="runConfirm()">Confirm</button>
@@ -314,50 +298,36 @@ tr:hover td{background:rgba(255,255,255,.02)}
 </div>
 <div id="toast"></div>
 
-<script src="firebase.js"></script>
 <script>
-// ── ALL FUNCTIONS ARE GLOBAL (no DOMContentLoaded wrapper) ──
-var CU=null, CUR=null, CUSTS=[], DELS=[], STAFF=[];
-var pendingConfirm=null;
-var reportData=[];
-var todayStr=new Date().toISOString().slice(0,10);
+var CU=null,CUR=null,CUSTS=[],DELS=[],STAFF=[],pendingConfirm=null,reportData=[];
 
-// ── AUTH GUARD ── runs immediately on page load
+// ── AUTH GUARD ──
 auth.onAuthStateChanged(async function(u){
-  if(!u){
-    // Not logged in → back to login
-    window.location.href='index.html';
-    return;
-  }
+  if(!u){window.location.replace('index.html');return;}
   var role=await getUserRole(u.uid);
   if(role==='admin'){
-    CU=u; CUR=role;
-    await bootstrapSystem(u.uid, role);
-    document.getElementById('checkScreen').style.display='none';
+    CU=u;CUR=role;
+    await bootstrapSystem(u.uid,role);
+    document.getElementById('guard').style.display='none';
     document.getElementById('app').style.display='block';
     document.getElementById('adminAvatar').textContent=(u.email||'A')[0].toUpperCase();
     document.getElementById('adminEmail').value=u.email||'';
     document.getElementById('dashDate').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-    fixGrid();
-    loadDashboard();
-    loadCustomers();
-  } else if(role==='staff'){
-    // Staff tried to open admin → redirect to milkman
-    window.location.href='milkman.html';
-  } else {
-    await signOut();
-    window.location.href='index.html';
+    fixGrid();loadDashboard();loadCustomers();
+  }else if(role==='staff'){
+    window.location.replace('milkman.html');
+  }else{
+    await signOut();window.location.replace('index.html');
   }
 });
 
-function doLogout(){signOut().then(function(){window.location.href='index.html';});}
+function doLogout(){signOut().then(()=>window.location.replace('index.html'));}
 
-// ── NAVIGATION ──
-function showPage(p, btn){
-  document.querySelectorAll('.page').forEach(function(el){el.classList.remove('active');});
-  var pageId='pg'+p.charAt(0).toUpperCase()+p.slice(1);
-  if(document.getElementById(pageId))document.getElementById(pageId).classList.add('active');
-  document.querySelectorAll('.navBtn').forEach(function(b){b.classList.remove('active');});
+function showPage(p,btn){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  var id='pg'+p.charAt(0).toUpperCase()+p.slice(1);
+  if(document.getElementById(id))document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.topNav .navBtn,.mobileNavPanel .navBtn').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
   if(p==='dashboard')loadDashboard();
   else if(p==='customers')loadCustomers();
@@ -365,34 +335,17 @@ function showPage(p, btn){
   else if(p==='staff')loadStaff();
   else if(p==='settings')loadSettings();
 }
-function toggleMobileNav(){document.getElementById('mobileNav').classList.add('open');}
-function closeMobileNav(){document.getElementById('mobileNav').classList.remove('open');}
-document.addEventListener('click',function(e){if(e.target===document.getElementById('mobileNav'))closeMobileNav();});
 
-// ── TOAST ──
-function toast(msg, type){
+function toast(msg,type){
   type=type||'ok';
-  var d=document.createElement('div');
-  d.className='toastItem '+type;
+  var d=document.createElement('div');d.className='toastItem '+type;
   d.innerHTML=(type==='ok'?'✅':type==='err'?'❌':'ℹ️')+' '+msg;
   document.getElementById('toast').appendChild(d);
-  setTimeout(function(){d.remove();},3500);
+  setTimeout(()=>d.remove(),3500);
 }
-
-// ── CONFIRM ──
-function confirmAction(q, fn, data){
-  pendingConfirm={fn:fn,data:data};
-  document.getElementById('confirmQ').textContent=q||'Confirm?';
-  document.getElementById('confirmBox').classList.add('open');
-}
+function confirmAction(q,fn,data){pendingConfirm={fn,data};document.getElementById('confirmQ').textContent=q||'Confirm?';document.getElementById('confirmBox').classList.add('open');}
 function closeConfirm(){document.getElementById('confirmBox').classList.remove('open');pendingConfirm=null;}
-function runConfirm(){
-  if(pendingConfirm){
-    var fn=pendingConfirm.fn; var data=pendingConfirm.data;
-    closeConfirm();
-    if(typeof window[fn]==='function')window[fn](data);
-  }
-}
+function runConfirm(){if(pendingConfirm){var{fn,data}=pendingConfirm;closeConfirm();if(typeof window[fn]==='function')window[fn](data);}}
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 
@@ -400,109 +353,86 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 async function loadDashboard(){
   try{
     var st=await getStats();
-    document.getElementById('s1').textContent=st.totalCustomers;
-    document.getElementById('s2').textContent=st.todayServed;
-    document.getElementById('s3').textContent=st.totalPending;
-    document.getElementById('s4').textContent=st.totalMilk+'L';
-    document.getElementById('s5').textContent=st.extraMilk+'L';
+    ['s1','s2','s3','s4','s5'].forEach((id,i)=>{document.getElementById(id).textContent=[st.totalCustomers,st.todayServed,st.totalPending,st.totalMilk+'L',st.extraMilk+'L'][i];});
     var dels=await getTodayDeliveries();
     var rl=document.getElementById('recentDelList');
     if(!dels.length){rl.innerHTML='<div class="empty"><div class="ico">🚚</div><p>No deliveries today yet</p></div>';return;}
-    rl.innerHTML=dels.slice(0,6).map(function(d){return '<div class="delRow"><div><div style="font-weight:600;font-size:.88rem">'+( d.customerName||d.customerId)+'</div><div style="font-size:.75rem;color:var(--txt2)">'+(d.time||'')+' • '+(d.staffName||'Staff')+'</div></div><div><span class="badge grn">'+(d.deliveredQty||0)+'L</span></div></div>';}).join('');
-    var tl=document.getElementById('topCustList');
-    var weekAgo=new Date(); weekAgo.setDate(weekAgo.getDate()-7);
+    rl.innerHTML=dels.slice(0,6).map(d=>`<div class="delRow"><div><div style="font-weight:600;font-size:.88rem">${d.customerName||d.customerId}</div><div style="font-size:.75rem;color:var(--txt2)">${d.time||''} • ${d.staffName||'Staff'}</div></div><span class="badge grn">${d.deliveredQty||0}L</span></div>`).join('');
+    var weekAgo=new Date();weekAgo.setDate(weekAgo.getDate()-7);
     var wDels=await getDeliveries({dateFrom:weekAgo.toISOString().slice(0,10)});
-    var freq={};
-    wDels.forEach(function(d){if(d.customerId){if(!freq[d.customerId])freq[d.customerId]={nm:d.customerName||d.customerId,cnt:0,ml:0};freq[d.customerId].cnt++;freq[d.customerId].ml+=(d.deliveredQty||0);}});
-    var top=Object.values(freq).sort(function(a,b){return b.cnt-a.cnt;}).slice(0,5);
-    var mx=top.length?top[0].cnt:1;
-    tl.innerHTML=top.length?top.map(function(t){return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:.83rem"><span>'+t.nm+'</span><span style="color:var(--acc)">'+t.cnt+' del • '+t.ml+'L</span></div><div class="chartBar"><div class="fill" style="width:'+((t.cnt/mx)*100)+'%"></div></div></div>';}).join(''):'<div class="empty"><div class="ico">📊</div><p>No data this week</p></div>';
-  }catch(e){console.error('Dashboard error:',e);}
+    var freq={};wDels.forEach(d=>{if(d.customerId){freq[d.customerId]=freq[d.customerId]||{nm:d.customerName||d.customerId,cnt:0,ml:0};freq[d.customerId].cnt++;freq[d.customerId].ml+=(d.deliveredQty||0);}});
+    var top=Object.values(freq).sort((a,b)=>b.cnt-a.cnt).slice(0,5),mx=top[0]?.cnt||1;
+    document.getElementById('topCustList').innerHTML=top.length?top.map(t=>`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:.83rem"><span>${t.nm}</span><span style="color:var(--acc)">${t.cnt} del • ${t.ml}L</span></div><div class="chartBar"><div class="fill" style="width:${(t.cnt/mx)*100}%"></div></div></div>`).join(''):'<div class="empty"><div class="ico">📊</div><p>No data this week</p></div>';
+  }catch(e){console.error('Dashboard:',e);}
 }
 
 // ── CUSTOMERS ──
 async function loadCustomers(){
   document.getElementById('custList').innerHTML='<div class="spin"></div>';
-  try{
-    CUSTS=await getCustomers();
-    renderCustomers(CUSTS);
-  }catch(e){
-    var cached=CACHE.get('customers',600000);
-    if(cached){CUSTS=cached;renderCustomers(CUSTS);toast('Offline – cached data','inf');}
-    else document.getElementById('custList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Failed to load customers</p></div>';
-  }
+  try{CUSTS=await getCustomers();renderCustomers(CUSTS);}
+  catch(e){var cached=CACHE.get('customers',600000);if(cached){CUSTS=cached;renderCustomers(CUSTS);toast('Offline – cached data','inf');}else document.getElementById('custList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Failed to load</p></div>';}
 }
 function renderCustomers(list){
   var el=document.getElementById('custList');
   if(!list.length){el.innerHTML='<div class="empty"><div class="ico">👥</div><p>No customers yet. Add one!</p></div>';return;}
-  el.innerHTML=list.map(function(c){
-    var addedDate=c.createdAt&&c.createdAt.toDate?c.createdAt.toDate().toLocaleDateString('en-IN'):'';
-    return '<div class="custCard"><div><div class="nm">'+c.name+' <span class="badge grn" style="font-size:.65rem">'+c.customerId+'</span></div><div class="meta">📱 '+(c.mobile||'—')+' • 📍 '+(c.address||'—')+' • 🥛 '+(c.defaultQty||1)+'L '+(c.milkType||'')+'</div>'+(addedDate?'<div class="meta" style="margin-top:4px">Added: '+addedDate+'</div>':'')+'</div><div class="acts"><button class="btn btnSm btnAcc" onclick="showQR(\''+c.customerId+'\',\''+( c.qrData||'')+'\',\''+c.name.replace(/'/g,'\\\'')+ '\')">QR</button><button class="btn btnSm btnGhost" onclick="showCustHistory(\''+c.customerId+'\',\''+c.name.replace(/'/g,'\\\'')+ '\')">History</button><button class="btn btnSm btnBlu" onclick="openEditCustomer(\''+c.customerId+'\')">Edit</button><button class="btn btnSm btnRed" onclick="confirmAction(\'Delete '+c.name.replace(/'/g,'\\\'')+'?\',\'doDeleteCustomer\',\''+c.customerId+'\')">Del</button></div></div>';
+  el.innerHTML=list.map(c=>{
+    var dt=c.createdAt&&c.createdAt.toDate?c.createdAt.toDate().toLocaleDateString('en-IN'):'';
+    var n=c.name.replace(/'/g,"\\'"),cid=c.customerId||c.id,qr=c.qrData||'';
+    return`<div class="custCard"><div><div class="nm">${c.name} <span class="badge grn" style="font-size:.65rem">${cid}</span></div><div class="meta">📱 ${c.mobile||'—'} • 📍 ${c.address||'—'} • 🥛 ${c.defaultQty||1}L ${c.milkType||''}</div>${dt?`<div class="meta" style="margin-top:4px">Added: ${dt}</div>`:''}</div><div class="acts"><button class="btn btnSm btnAcc" onclick="showQR('${cid}','${qr}','${n}')">QR</button><button class="btn btnSm btnGhost" onclick="showCustHistory('${cid}','${n}')">History</button><button class="btn btnSm btnBlu" onclick="openEditCustomer('${cid}')">Edit</button><button class="btn btnSm btnRed" onclick="confirmAction('Delete ${n}?','doDeleteCustomer','${cid}')">Del</button></div></div>`;
   }).join('');
 }
 function filterCustomers(){
   var q=document.getElementById('custSearch').value.toLowerCase();
-  renderCustomers(CUSTS.filter(function(c){return (c.name||'').toLowerCase().includes(q)||(c.mobile||'').includes(q)||(c.customerId||'').toLowerCase().includes(q)||(c.address||'').toLowerCase().includes(q);}));
+  renderCustomers(CUSTS.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.mobile||'').includes(q)||(c.customerId||'').toLowerCase().includes(q)||(c.address||'').toLowerCase().includes(q)));
 }
 function openAddCustomer(){
   document.getElementById('custModalTitle').textContent='Add Customer';
   document.getElementById('saveCustBtn').textContent='Save Customer';
-  ['editCustId','cName','cMobile','cMobile2','cAddress','cNotes'].forEach(function(id){document.getElementById(id).value='';});
-  document.getElementById('cQty').value=1;
-  openModal('custModal');
+  ['editCustId','cName','cMobile','cMobile2','cAddress','cNotes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('cQty').value=1;openModal('custModal');
 }
 function openEditCustomer(cid){
-  var c=CUSTS.find(function(x){return x.customerId===cid||x.id===cid;});
-  if(!c)return;
+  var c=CUSTS.find(x=>(x.customerId||x.id)===cid);if(!c)return;
   document.getElementById('custModalTitle').textContent='Edit Customer';
   document.getElementById('saveCustBtn').textContent='Update Customer';
   document.getElementById('editCustId').value=c.customerId||c.id;
-  document.getElementById('cName').value=c.name||'';
-  document.getElementById('cMobile').value=c.mobile||'';
-  document.getElementById('cMobile2').value=c.mobile2||'';
-  document.getElementById('cAddress').value=c.address||'';
+  ['cName','cMobile','cMobile2','cAddress','cNotes'].forEach(id=>document.getElementById(id).value=c[{cName:'name',cMobile:'mobile',cMobile2:'mobile2',cAddress:'address',cNotes:'notes'}[id]]||'');
   document.getElementById('cQty').value=c.defaultQty||1;
-  document.getElementById('cNotes').value=c.notes||'';
   openModal('custModal');
 }
 async function saveCustomer(){
   var eid=document.getElementById('editCustId').value;
-  var name=document.getElementById('cName').value.trim();
-  var mobile=document.getElementById('cMobile').value.trim();
-  var address=document.getElementById('cAddress').value.trim();
+  var name=document.getElementById('cName').value.trim(),mobile=document.getElementById('cMobile').value.trim(),address=document.getElementById('cAddress').value.trim();
   if(!name||!mobile||!address){toast('Fill required fields','err');return;}
-  var data={name:name,mobile:mobile,mobile2:document.getElementById('cMobile2').value.trim(),address:address,defaultQty:parseFloat(document.getElementById('cQty').value)||1,milkType:document.getElementById('cMilkType').value,notes:document.getElementById('cNotes').value.trim()};
+  var data={name,mobile,mobile2:document.getElementById('cMobile2').value.trim(),address,defaultQty:parseFloat(document.getElementById('cQty').value)||1,milkType:document.getElementById('cMilkType').value,notes:document.getElementById('cNotes').value.trim()};
   try{
-    if(eid){await updateCustomer(eid,data);toast('Customer updated ✓');}
-    else{var res=await addCustomer(data,CU.uid);closeModal('custModal');showNewQR(res);toast('Customer added ✓');loadCustomers();return;}
-    closeModal('custModal');loadCustomers();
+    if(eid){await updateCustomer(eid,data);toast('Customer updated ✓');closeModal('custModal');loadCustomers();}
+    else{var res=await addCustomer(data,CU.uid);closeModal('custModal');showNewQR(res);toast('Customer added ✓');}
   }catch(e){toast('Error: '+e.message,'err');}
 }
 function showNewQR(res){
   document.getElementById('qrModalTitle').textContent='New Customer QR';
   var el=document.getElementById('qrDisplay');el.innerHTML='';
   renderQR(res.qrData,el,200);
-  document.getElementById('qrCustInfo').innerHTML='<strong>'+res.doc.name+'</strong><br>ID: '+res.cid+'<br><small style="color:var(--txt3)">Save this QR code</small>';
-  document.getElementById('qrModalFt').innerHTML='<button class="btn btnGhost" onclick="closeModal(\'qrModal\')">Close</button><button class="btn btnAcc" onclick="downloadQR(\''+res.qrData+'\',\''+res.cid+'_QR\')">Download QR</button>';
+  document.getElementById('qrCustInfo').innerHTML=`<strong>${res.doc.name}</strong><br>ID: ${res.cid}<br><small style="color:var(--txt3)">Save this QR</small>`;
+  document.getElementById('qrModalFt').innerHTML=`<button class="btn btnGhost" onclick="closeModal('qrModal')">Close</button><button class="btn btnAcc" onclick="downloadQR('${res.qrData}','${res.cid}_QR')">Download QR</button>`;
   openModal('qrModal');loadCustomers();
 }
 async function doDeleteCustomer(cid){try{await deleteCustomer(cid);toast('Customer deleted');loadCustomers();}catch(e){toast('Error: '+e.message,'err');}}
 async function showQR(cid,qrData,name){
-  if(!qrData){var c=CUSTS.find(function(x){return x.customerId===cid;});qrData=c?c.qrData:'';}
+  if(!qrData){var c=CUSTS.find(x=>x.customerId===cid);qrData=c?c.qrData:'';}
   if(!qrData){toast('No QR data','err');return;}
   document.getElementById('qrModalTitle').textContent='QR – '+name;
   var el=document.getElementById('qrDisplay');el.innerHTML='';
   renderQR(qrData,el,200);
-  document.getElementById('qrCustInfo').innerHTML='<strong>'+name+'</strong><br>ID: '+cid;
-  document.getElementById('qrModalFt').innerHTML='<button class="btn btnGhost" onclick="closeModal(\'qrModal\')">Close</button><button class="btn btnAcc" onclick="downloadQR(\''+qrData+'\',\''+cid+'_QR\')">⬇ Download</button><button class="btn btnGhost" onclick="regenQR(\''+cid+'\')">🔄 Regen</button>';
+  document.getElementById('qrCustInfo').innerHTML=`<strong>${name}</strong><br>ID: ${cid}`;
+  document.getElementById('qrModalFt').innerHTML=`<button class="btn btnGhost" onclick="closeModal('qrModal')">Close</button><button class="btn btnAcc" onclick="downloadQR('${qrData}','${cid}_QR')">⬇ Download</button><button class="btn btnGhost" onclick="regenQR('${cid}')">🔄 Regen</button>`;
   openModal('qrModal');
 }
 async function regenQR(cid){
   try{
-    var newQ=generateQRData(cid);
-    await updateCustomer(cid,{qrData:newQ});
-    toast('QR regenerated ✓');
-    var idx=CUSTS.findIndex(function(c){return c.customerId===cid||c.id===cid;});
+    var newQ=genQR(cid);await updateCustomer(cid,{qrData:newQ});toast('QR regenerated ✓');
+    var idx=CUSTS.findIndex(c=>(c.customerId||c.id)===cid);
     if(idx>-1)CUSTS[idx].qrData=newQ;
     showQR(cid,newQ,CUSTS[idx]?CUSTS[idx].name:cid);
   }catch(e){toast('Error: '+e.message,'err');}
@@ -515,71 +445,64 @@ async function showCustHistory(cid,name){
     var dels=await getDeliveries({customerId:cid});
     var el=document.getElementById('histBody');
     if(!dels.length){el.innerHTML='<div class="empty"><div class="ico">📦</div><p>No deliveries yet</p></div>';return;}
-    el.innerHTML=dels.slice(0,30).map(function(d){return '<div class="delRow"><div><div style="font-weight:600;font-size:.88rem">'+d.date+'</div><div style="font-size:.75rem;color:var(--txt2)">'+(d.time||'')+' • '+(d.staffName||'Staff')+'</div></div><div style="text-align:right"><div style="font-size:.9rem;font-weight:600">'+(d.deliveredQty||0)+'L</div>'+(d.extraQty?'<div style="font-size:.72rem;color:var(--acc)">+'+d.extraQty+'L extra</div>':'')+'</div></div>';}).join('');
-  }catch(e){document.getElementById('histBody').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Error</p></div>';}
+    el.innerHTML=dels.slice(0,30).map(d=>`<div class="delRow"><div><div style="font-weight:600;font-size:.88rem">${d.date}</div><div style="font-size:.75rem;color:var(--txt2)">${d.time||''} • ${d.staffName||'Staff'}</div></div><div style="text-align:right"><div style="font-size:.9rem;font-weight:600">${d.deliveredQty||0}L</div>${d.extraQty?`<div style="font-size:.72rem;color:var(--acc)">+${d.extraQty}L extra</div>`:''}</div></div>`).join('');
+  }catch{document.getElementById('histBody').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Error</p></div>';}
 }
 
 // ── DELIVERIES ──
 async function loadDeliveries(){
   document.getElementById('delList').innerHTML='<div class="spin"></div>';
-  var filters={};
-  var fc=document.getElementById('fCust').value.trim();
-  var ff=document.getElementById('fFrom').value; var ft=document.getElementById('fTo').value;
-  if(ff)filters.dateFrom=ff; if(ft)filters.dateTo=ft;
+  var f={};var fc=document.getElementById('fCust').value.trim(),ff=document.getElementById('fFrom').value,ft=document.getElementById('fTo').value;
+  if(ff)f.dateFrom=ff;if(ft)f.dateTo=ft;
   try{
-    var dels=await getDeliveries(filters);
-    if(fc)dels=dels.filter(function(d){return (d.customerName||'').toLowerCase().includes(fc.toLowerCase())||(d.customerId||'').toLowerCase().includes(fc.toLowerCase());});
-    DELS=dels; renderDeliveries(dels);
-  }catch(e){document.getElementById('delList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Failed to load</p></div>';}
+    var dels=await getDeliveries(f);
+    if(fc)dels=dels.filter(d=>(d.customerName||'').toLowerCase().includes(fc.toLowerCase())||(d.customerId||'').toLowerCase().includes(fc.toLowerCase()));
+    DELS=dels;
+    if(!dels.length){document.getElementById('delList').innerHTML='<div class="empty"><div class="ico">🚚</div><p>No deliveries found</p></div>';return;}
+    document.getElementById('delList').innerHTML='<div class="tblWrap"><table><thead><tr><th>Customer</th><th>Date</th><th>Time</th><th>Qty</th><th>Extra</th><th>Staff</th></tr></thead><tbody>'+dels.map(d=>`<tr><td><div style="font-weight:600">${d.customerName||d.customerId}</div><div style="font-size:.73rem;color:var(--txt3)">${d.customerId}</div></td><td>${d.date}</td><td>${d.time||'—'}</td><td>${d.deliveredQty||0}L</td><td>${d.extraQty?`<span style="color:var(--acc)">+${d.extraQty}L</span>`:'—'}</td><td>${d.staffName||'—'}</td></tr>`).join('')+'</tbody></table></div>';
+  }catch{document.getElementById('delList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Failed to load</p></div>';}
 }
-function renderDeliveries(list){
-  var el=document.getElementById('delList');
-  if(!list.length){el.innerHTML='<div class="empty"><div class="ico">🚚</div><p>No deliveries found</p></div>';return;}
-  el.innerHTML='<div class="tblWrap"><table><thead><tr><th>Customer</th><th>Date</th><th>Time</th><th>Qty</th><th>Extra</th><th>Staff</th></tr></thead><tbody>'+list.map(function(d){return '<tr><td><div style="font-weight:600">'+(d.customerName||d.customerId)+'</div><div style="font-size:.73rem;color:var(--txt3)">'+d.customerId+'</div></td><td>'+d.date+'</td><td>'+(d.time||'—')+'</td><td>'+(d.deliveredQty||0)+'L</td><td>'+(d.extraQty?'<span style="color:var(--acc)">+'+d.extraQty+'L</span>':'—')+'</td><td>'+(d.staffName||'—')+'</td></tr>';}).join('')+'</tbody></table></div>';
-}
-function clearDelFilters(){['fCust','fFrom','fTo'].forEach(function(id){document.getElementById(id).value='';});loadDeliveries();}
+function clearDelFilters(){['fCust','fFrom','fTo'].forEach(id=>document.getElementById(id).value='');loadDeliveries();}
 
 // ── REPORTS ──
 async function loadReport(){
   document.getElementById('reportList').innerHTML='<div class="spin"></div>';
-  var filters={};
-  var rf=document.getElementById('rFrom').value; var rt=document.getElementById('rTo').value;
-  if(rf)filters.dateFrom=rf; if(rt)filters.dateTo=rt;
+  var f={};var rf=document.getElementById('rFrom').value,rt=document.getElementById('rTo').value;
+  if(rf)f.dateFrom=rf;if(rt)f.dateTo=rt;
   try{
-    var data=await getDeliveries(filters);
-    var rc=document.getElementById('rCust').value.trim().toLowerCase();
-    var rs=document.getElementById('rStaff').value.trim().toLowerCase();
-    if(rc)data=data.filter(function(d){return (d.customerName||'').toLowerCase().includes(rc)||(d.customerId||'').toLowerCase().includes(rc);});
-    if(rs)data=data.filter(function(d){return (d.staffName||'').toLowerCase().includes(rs);});
+    var data=await getDeliveries(f);
+    var rc=document.getElementById('rCust').value.trim().toLowerCase(),rs=document.getElementById('rStaff').value.trim().toLowerCase();
+    if(rc)data=data.filter(d=>(d.customerName||'').toLowerCase().includes(rc)||(d.customerId||'').toLowerCase().includes(rc));
+    if(rs)data=data.filter(d=>(d.staffName||'').toLowerCase().includes(rs));
     reportData=data;
-    if(!data.length){document.getElementById('reportList').innerHTML='<div class="empty"><div class="ico">📊</div><p>No records match filters</p></div>';return;}
-    document.getElementById('reportList').innerHTML='<div style="margin-bottom:10px;font-size:.85rem;color:var(--txt2)">'+data.length+' records found</div><div class="tblWrap"><table><thead><tr><th>Customer</th><th>Date</th><th>Time</th><th>Qty</th><th>Extra</th><th>Staff</th></tr></thead><tbody>'+data.map(function(d){return '<tr><td>'+(d.customerName||d.customerId)+'</td><td>'+d.date+'</td><td>'+(d.time||'—')+'</td><td>'+(d.deliveredQty||0)+'L</td><td>'+(d.extraQty||0)+'L</td><td>'+(d.staffName||'—')+'</td></tr>';}).join('')+'</tbody></table></div>';
-  }catch(e){document.getElementById('reportList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Error loading report</p></div>';}
+    if(!data.length){document.getElementById('reportList').innerHTML='<div class="empty"><div class="ico">📊</div><p>No records match</p></div>';return;}
+    document.getElementById('reportList').innerHTML=`<div style="margin-bottom:10px;font-size:.85rem;color:var(--txt2)">${data.length} records</div><div class="tblWrap"><table><thead><tr><th>Customer</th><th>Date</th><th>Time</th><th>Qty</th><th>Extra</th><th>Staff</th></tr></thead><tbody>${data.map(d=>`<tr><td>${d.customerName||d.customerId}</td><td>${d.date}</td><td>${d.time||'—'}</td><td>${d.deliveredQty||0}L</td><td>${d.extraQty||0}L</td><td>${d.staffName||'—'}</td></tr>`).join('')}</tbody></table></div>`;
+  }catch{document.getElementById('reportList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Error</p></div>';}
 }
 async function exportReport(fmt){
-  if(!reportData.length){toast('Preview report first','inf');await loadReport();}
+  if(!reportData.length){await loadReport();}
   if(!reportData.length){toast('No data to export','err');return;}
   var data=reportData;
   if(fmt==='pdf'){
-    var jsPDF=window.jspdf.jsPDF; var doc=new jsPDF();
+    var{jsPDF}=window.jspdf;var doc=new jsPDF();
     doc.setFontSize(22);doc.setTextColor(245,158,11);doc.text('AMINA MILK',105,18,{align:'center'});
     doc.setFontSize(10);doc.setTextColor(148,163,184);doc.text('Delivery Report – '+new Date().toLocaleString('en-IN'),105,26,{align:'center'});
     doc.setDrawColor(245,158,11,0.3);doc.line(14,30,196,30);
-    var y=40;var heads=['Customer','Date','Time','Qty','Extra','Staff'];var cols=[52,22,20,16,16,30];
+    var y=40,cols=[52,22,20,16,16,30];
     doc.setFontSize(8);doc.setTextColor(245,158,11);
-    var x=14;heads.forEach(function(h,i){doc.text(h,x,y);x+=cols[i];});
+    ['Customer','Date','Time','Qty','Extra','Staff'].forEach((h,i)=>{var x=14;for(var j=0;j<i;j++)x+=cols[j];doc.text(h,x,y);});
     y+=6;doc.setTextColor(241,245,249);
-    data.forEach(function(d,idx){
+    data.forEach((d,idx)=>{
       if(y>270){doc.addPage();y=20;}
       if(idx%2===0){doc.setFillColor(26,34,52);doc.rect(14,y-4,182,8,'F');}
-      x=14;[d.customerName||d.customerId,d.date,d.time||'—',(d.deliveredQty||0)+'L',(d.extraQty||0)+'L',d.staffName||'—'].forEach(function(v,i){doc.text(String(v).slice(0,16),x,y);x+=cols[i];});y+=8;
+      [d.customerName||d.customerId,d.date,d.time||'—',(d.deliveredQty||0)+'L',(d.extraQty||0)+'L',d.staffName||'—'].forEach((v,i)=>{var x=14;for(var j=0;j<i;j++)x+=cols[j];doc.text(String(v).slice(0,16),x,y);});y+=8;
     });
     doc.save('aminamilk_report.pdf');toast('PDF exported ✓');
   }else if(fmt==='csv'){
-    var rows=data.map(function(d){return (d.customerName||'')+','+(d.customerId||'')+','+d.date+','+(d.time||'')+','+(d.deliveredQty||0)+','+(d.extraQty||0)+','+(d.staffName||'');});
+    var rows=data.map(d=>`${d.customerName||''},${d.customerId||''},${d.date},${d.time||''},${d.deliveredQty||0},${d.extraQty||0},${d.staffName||''}`);
     var b=new Blob(['Customer,ID,Date,Time,Qty,Extra,Staff\n'+rows.join('\n')],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='aminamilk.csv';a.click();toast('CSV exported ✓');
   }else if(fmt==='excel'){
-    var ws=XLSX.utils.json_to_sheet(data.map(function(d){return{'Customer':d.customerName,'ID':d.customerId,'Date':d.date,'Time':d.time||'','Qty(L)':d.deliveredQty||0,'Extra(L)':d.extraQty||0,'Staff':d.staffName||''};}));
+    var ws=XLSX.utils.json_to_sheet(data.map(d=>({'Customer':d.customerName,'ID':d.customerId,'Date':d.date,'Time':d.time||'','Qty(L)':d.deliveredQty||0,'Extra(L)':d.extraQty||0,'Staff':d.staffName||''})));
     var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Report');XLSX.writeFile(wb,'aminamilk.xlsx');toast('Excel exported ✓');
   }else{
     var b2=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});var a2=document.createElement('a');a2.href=URL.createObjectURL(b2);a2.download='aminamilk.json';a2.click();toast('JSON exported ✓');
@@ -592,39 +515,27 @@ async function loadStaff(){
   try{
     STAFF=await getStaff();
     if(!STAFF.length){document.getElementById('staffList').innerHTML='<div class="empty"><div class="ico">👤</div><p>No staff added yet</p></div>';return;}
-    document.getElementById('staffList').innerHTML='<div class="tblWrap"><table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Actions</th></tr></thead><tbody>'+STAFF.map(function(s){return '<tr><td><div style="font-weight:600">'+s.name+'</div></td><td>'+s.email+'</td><td>'+(s.phone||'—')+'</td><td><span class="badge blu">Staff</span></td><td><button class="btn btnSm btnRed" onclick="confirmAction(\'Remove '+s.name.replace(/'/g,'\\\'')+'?\',\'doRemoveStaff\',\''+s.id+'\')">Remove</button></td></tr>';}).join('')+'</tbody></table></div>';
-  }catch(e){document.getElementById('staffList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Error loading staff</p></div>';}
+    document.getElementById('staffList').innerHTML='<div class="tblWrap"><table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Actions</th></tr></thead><tbody>'+STAFF.map(s=>`<tr><td><div style="font-weight:600">${s.name}</div></td><td>${s.email}</td><td>${s.phone||'—'}</td><td><span class="badge blu">Staff</span></td><td><button class="btn btnSm btnRed" onclick="confirmAction('Remove ${s.name.replace(/'/g,"\\'")}?','doRemoveStaff','${s.id}')">Remove</button></td></tr>`).join('')+'</tbody></table></div>';
+  }catch{document.getElementById('staffList').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Error loading staff</p></div>';}
 }
-function openAddStaff(){['sName','sEmail','sPwd','sPhone'].forEach(function(id){document.getElementById(id).value='';});openModal('staffModal');}
+function openAddStaff(){['sName','sEmail','sPwd','sPhone'].forEach(id=>document.getElementById(id).value='');openModal('staffModal');}
 async function saveStaff(){
-  var name=document.getElementById('sName').value.trim();
-  var email=document.getElementById('sEmail').value.trim();
-  var pwd=document.getElementById('sPwd').value;
-  var phone=document.getElementById('sPhone').value.trim();
+  var name=document.getElementById('sName').value.trim(),email=document.getElementById('sEmail').value.trim(),pwd=document.getElementById('sPwd').value,phone=document.getElementById('sPhone').value.trim();
   if(!name||!email||!pwd){toast('Fill all required fields','err');return;}
   if(pwd.length<6){toast('Password min 6 characters','err');return;}
   try{await createStaffUser(email,pwd,name,phone);toast('Staff account created ✓');closeModal('staffModal');loadStaff();}
   catch(e){toast('Error: '+e.message,'err');}
 }
-async function doRemoveStaff(uid){
-  try{await deactivateStaff(uid);toast('Staff removed');loadStaff();}
-  catch(e){toast('Error: '+e.message,'err');}
-}
+async function doRemoveStaff(uid){try{await deactivateStaff(uid);toast('Staff removed');loadStaff();}catch(e){toast('Error: '+e.message,'err');}}
 
 // ── SETTINGS ──
 async function loadSettings(){
   var s=await getSettings();
-  var map={'bizName':'bizName','bizPhone':'bizPhone','bizAddr':'bizAddress','defQty':'defaultQty','delStart':'deliveryStart','delEnd':'deliveryEnd'};
-  Object.entries(map).forEach(function(entry){var elId=entry[0];var key=entry[1];if(s[key]!==undefined&&document.getElementById(elId))document.getElementById(elId).value=s[key];});
+  var map={bizName:'bizName',bizPhone:'bizPhone',bizAddr:'bizAddress',defQty:'defaultQty',delStart:'deliveryStart',delEnd:'deliveryEnd'};
+  Object.entries(map).forEach(([elId,key])=>{if(s[key]!==undefined&&document.getElementById(elId))document.getElementById(elId).value=s[key];});
 }
-async function saveBizSettings(){
-  await saveSettings({bizName:document.getElementById('bizName').value,bizPhone:document.getElementById('bizPhone').value,bizAddress:document.getElementById('bizAddr').value});
-  toast('Business info saved ✓');
-}
-async function saveDelSettings(){
-  await saveSettings({defaultQty:parseFloat(document.getElementById('defQty').value)||1,deliveryStart:document.getElementById('delStart').value,deliveryEnd:document.getElementById('delEnd').value});
-  toast('Delivery settings saved ✓');
-}
+async function saveBizSettings(){await saveSettings({bizName:document.getElementById('bizName').value,bizPhone:document.getElementById('bizPhone').value,bizAddress:document.getElementById('bizAddr').value});toast('Business info saved ✓');}
+async function saveDelSettings(){await saveSettings({defaultQty:parseFloat(document.getElementById('defQty').value)||1,deliveryStart:document.getElementById('delStart').value,deliveryEnd:document.getElementById('delEnd').value});toast('Delivery settings saved ✓');}
 async function updateAdminPwd(){
   var p=document.getElementById('newPwd').value;
   if(!p||p.length<6){toast('Enter 6+ character password','err');return;}
@@ -634,22 +545,21 @@ async function updateAdminPwd(){
 async function deleteAllDeliveries(){
   toast('Deleting…','inf');
   var snap=await db.collection('deliveries').get();
-  var batch=db.batch();snap.docs.forEach(function(d){batch.delete(d.ref);});
+  var batch=db.batch();snap.docs.forEach(d=>batch.delete(d.ref));
   await batch.commit();toast('All deliveries deleted ✓');
 }
 async function deleteAllCustomers(){
   toast('Removing…','inf');
   var snap=await db.collection('customers').get();
-  var batch=db.batch();snap.docs.forEach(function(d){batch.update(d.ref,{active:false});});
+  var batch=db.batch();snap.docs.forEach(d=>batch.update(d.ref,{active:false}));
   await batch.commit();CUSTS=[];loadCustomers();toast('All customers removed ✓');
 }
 async function resetSearchHistory(){
   var snap=await db.collection('searchHistory').get();
-  var batch=db.batch();snap.docs.forEach(function(d){batch.delete(d.ref);});
+  var batch=db.batch();snap.docs.forEach(d=>batch.delete(d.ref));
   await batch.commit();toast('Search history cleared ✓');
 }
 
-// ── RESPONSIVE ──
 function fixGrid(){
   var w=window.innerWidth;
   var g=document.getElementById('dashGrid');if(g)g.style.gridTemplateColumns=w<700?'1fr':'1fr 1fr';
