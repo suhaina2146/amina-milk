@@ -408,6 +408,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <!-- SCRIPTS -->
 <script src="firebase.js"></script>
 <script>
+document.addEventListener("DOMContentLoaded", function() {
 // ---- STATE ----
 let CU=null,CUR=null,CUSTS=[],DELS=[],STAFF=[],SETTINGS={};
 let pendingConfirm=null;
@@ -824,6 +825,8 @@ function fixGrid(){
   if(sg)sg.style.gridTemplateColumns=w<700?'1fr':'1fr 1fr';
 }
 window.addEventListener('resize',fixGrid);fixGrid();
+
+});
 </script>
 </body>
 </html>
