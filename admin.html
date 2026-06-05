@@ -46,7 +46,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
   display:flex;align-items:center;justify-content:space-between;
   position:sticky;top:0;z-index:100;gap:10px;
   box-shadow:0 1px 0 var(--bdr2),0 2px 12px rgba(26,127,60,.04);
-  /* notch support */
   padding-left:calc(16px + env(safe-area-inset-left,0px));
   padding-right:calc(16px + env(safe-area-inset-right,0px));
 }
@@ -84,7 +83,6 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .mmBtn:hover{background:var(--grn-lt);}
 .clockBadge{font-size:.66rem;color:var(--txt3);text-align:right;line-height:1.5;display:none;}
 .clockBadge strong{color:var(--txt);font-size:.74rem;display:block;font-weight:700;}
-/* hide sign-out text on small screens, show avatar only */
 .signoutBtn{white-space:nowrap;}
 
 /* ── PAGES ── */
@@ -155,7 +153,7 @@ tr:hover td{background:var(--grn-ltr);}
 /* ── INPUTS ── */
 .inp{
   width:100%;background:var(--bg);border:1.5px solid var(--bdr);border-radius:9px;
-  padding:11px 14px;color:var(--txt);font-size:16px;/* 16px prevents iOS zoom */
+  padding:11px 14px;color:var(--txt);font-size:16px;
   font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:all .2s;font-weight:500;
   -webkit-appearance:none;
 }
@@ -173,17 +171,73 @@ tr:hover td{background:var(--grn-ltr);}
 }
 .sel:focus{border-color:var(--grn);box-shadow:0 0 0 3px rgba(26,127,60,.08);}
 
-/* ── SEARCH ── */
+/* ══════════════════════════════════════
+   FIXED SEARCH BOX — icon never overlaps text
+   left padding = icon width (16px) + left offset (14px) + gap (10px) = 40px
+   The icon is positioned via 'left:14px' and is 16px wide,
+   so text needs at least 14+16+10=40px left padding.
+   Also add right padding for clear button.
+══════════════════════════════════════ */
 .sw{position:relative;margin-bottom:14px;}
-.sw .si{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--txt3);font-size:1rem;}
+.sw .si{
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  color:var(--txt3);font-size:1rem;
+  /* pointer-events:none so clicks pass through to input */
+  pointer-events:none;
+  z-index:2;
+  line-height:1;
+  width:16px;text-align:center;
+}
+/* ── CLEAR BUTTON ── */
+.sw .sclr{
+  position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:var(--bg3);border:none;color:var(--txt3);cursor:pointer;
+  border-radius:50%;width:20px;height:20px;display:none;
+  align-items:center;justify-content:center;font-size:.65rem;font-weight:700;
+  z-index:2;transition:.15s;
+}
+.sw .sclr:hover{background:var(--bdr);color:var(--txt);}
+.sw.has-val .sclr{display:flex;}
+
 .sinp{
   width:100%;background:var(--bg2);border:1.5px solid var(--bdr);border-radius:10px;
-  padding:12px 14px 12px 42px;color:var(--txt);font-size:16px;
+  /* FIX: padding-left must be large enough so text doesn't hide under icon */
+  padding:12px 36px 12px 42px;
+  color:var(--txt);font-size:16px;
   font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:all .2s;font-weight:500;
   -webkit-appearance:none;
 }
 .sinp:focus{border-color:var(--grn);background:var(--bg2);box-shadow:0 0 0 3px rgba(26,127,60,.08);}
 .sinp::placeholder{color:var(--txt4);}
+
+/* ══════════════════════════════════════
+   AUTOCOMPLETE SUGGESTIONS DROPDOWN
+══════════════════════════════════════ */
+.sug-wrap{position:relative;}
+.sug-drop{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;
+  background:var(--bg2);border:1.5px solid var(--bdr);border-radius:12px;
+  box-shadow:var(--sh2);z-index:50;overflow:hidden;
+  display:none;max-height:260px;overflow-y:auto;
+  animation:sugIn .12s ease;
+}
+@keyframes sugIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.sug-drop.open{display:block;}
+.sug-item{
+  padding:11px 14px;cursor:pointer;font-size:.82rem;color:var(--txt);
+  font-weight:500;border-bottom:1px solid var(--bdr2);
+  display:flex;align-items:center;gap:10px;
+  transition:background .1s;
+}
+.sug-item:last-child{border-bottom:none;}
+.sug-item:hover,.sug-item.active{background:var(--grn-ltr);}
+.sug-item .sug-icon{font-size:.9rem;width:18px;text-align:center;flex-shrink:0;}
+.sug-item .sug-main{flex:1;min-width:0;}
+.sug-item .sug-nm{font-weight:700;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sug-item .sug-nm mark{background:var(--grn-lt);color:var(--grn);border-radius:3px;padding:0 1px;font-weight:700;}
+.sug-item .sug-sub{font-size:.68rem;color:var(--txt3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sug-item .sug-badge{background:var(--grn-lt);color:var(--grn-dk);border:1px solid var(--bdr);padding:1px 6px;border-radius:10px;font-size:.6rem;font-weight:700;flex-shrink:0;}
+.sug-hdr{padding:7px 14px 5px;font-size:.62rem;font-weight:800;color:var(--txt4);text-transform:uppercase;letter-spacing:.6px;background:var(--bg3);}
 
 /* ── FILTER ROW ── */
 .frow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;align-items:flex-end;}
@@ -201,7 +255,7 @@ tr:hover td{background:var(--grn-ltr);}
 .ccard .cmeta{font-size:.72rem;color:var(--txt2);margin-top:3px;line-height:1.7;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
 .ccard .acts{display:flex;gap:5px;flex-wrap:wrap;flex-shrink:0;align-items:flex-start;padding-top:2px;}
 
-/* ── MODAL — sheet style on mobile ── */
+/* ── MODAL ── */
 .ov{
   display:none;position:fixed;inset:0;background:rgba(15,35,24,.6);
   z-index:200;align-items:flex-end;justify-content:center;
@@ -222,7 +276,6 @@ tr:hover td{background:var(--grn-ltr);}
   display:flex;align-items:center;justify-content:space-between;
   background:var(--grn-ltr);position:relative;
 }
-/* drag handle pill */
 .mhd::before{
   content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);
   width:36px;height:4px;background:var(--bdr);border-radius:4px;
@@ -332,17 +385,43 @@ tr:hover td{background:var(--grn-ltr);}
 .summCard .sv{font-size:1.4rem;font-weight:800;color:var(--txt);letter-spacing:-1px;}
 .summCard .sl{font-size:.66rem;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-top:1px;}
 
+/* ── DATA CLEANUP ── */
+.cleanupSection{border:1.5px solid rgba(220,38,38,.25);border-radius:var(--rnd2);overflow:hidden;margin-bottom:14px;}
+.cleanupHdr{background:linear-gradient(135deg,#fef2f2,#fff5f5);padding:14px 18px;border-bottom:1.5px solid rgba(220,38,38,.15);display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.cleanupBody{padding:18px;}
+.quickBtn{
+  padding:9px 14px;border-radius:8px;border:1.5px solid rgba(220,38,38,.25);
+  background:var(--bg2);color:var(--red);font-size:.76rem;font-weight:700;cursor:pointer;
+  font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;display:flex;align-items:center;gap:6px;
+  min-height:36px;-webkit-tap-highlight-color:transparent;
+}
+.quickBtn:hover{background:var(--red-lt);border-color:var(--red);}
+.warnBox{
+  background:#fffbeb;border:1.5px solid rgba(217,119,6,.3);border-radius:10px;
+  padding:12px 14px;margin-bottom:14px;font-size:.78rem;color:#92400e;line-height:1.65;
+}
+.warnBox strong{display:block;font-size:.82rem;margin-bottom:4px;}
+
+/* confirm-text input (type the phrase to confirm delete) */
+.confirmPhrase{
+  background:var(--red-lt);border:2px dashed rgba(220,38,38,.4);border-radius:9px;
+  padding:10px 14px;color:var(--txt);font-size:16px;font-family:'Plus Jakarta Sans',sans-serif;
+  outline:none;width:100%;transition:all .2s;font-weight:600;
+}
+.confirmPhrase:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(220,38,38,.1);}
+.confirmPhrase::placeholder{color:rgba(220,38,38,.4);font-weight:500;}
+
+/* progress bar */
+.progressWrap{background:var(--bg3);border-radius:8px;overflow:hidden;height:10px;margin:10px 0;}
+.progressBar{height:100%;background:linear-gradient(90deg,var(--grn),var(--grn2));border-radius:8px;transition:width .3s;width:0}
+
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-track{background:var(--bg3);}
 ::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:10px;}
 ::-webkit-scrollbar-thumb:hover{background:var(--txt4);}
 
-/* ════════════════════════════════════════
-   RESPONSIVE BREAKPOINTS
-════════════════════════════════════════ */
-
-/* ── DESKTOP (1024px+) ── */
+/* ═══════════════ BREAKPOINTS ═══════════════ */
 @media(min-width:1024px){
   .tb{padding:0 28px;height:62px;}
   .brand{font-size:1.05rem;}
@@ -354,18 +433,13 @@ tr:hover td{background:var(--grn-ltr);}
   .sc .sv{font-size:1.8rem;letter-spacing:-1px;}
   .sc .sl{font-size:.68rem;}
   .nb{font-size:.8rem;padding:7px 14px;}
-  .card{padding:20px;}
-  /* On desktop, modals are centred dialog boxes */
   .ov{align-items:center;padding:16px;}
   .modal{border-radius:20px;max-width:520px;max-height:90vh;}
   .mhd{border-radius:20px 20px 0 0;}
-  .mhd::before{display:none;}/* no drag handle on desktop */
-  /* reset mobile bottom padding on pages */
+  .mhd::before{display:none;}
   .page{padding-bottom:24px;}
   .sh h2{font-size:1.25rem;}
 }
-
-/* ── TABLET (640–1023px) ── */
 @media(min-width:640px) and (max-width:1023px){
   .tnav{display:flex;}
   .mmBtn{display:none;}
@@ -377,20 +451,17 @@ tr:hover td{background:var(--grn-ltr);}
   #dashGrid{grid-template-columns:1fr 1fr!important;}
   #settGrid{grid-template-columns:1fr 1fr!important;}
 }
-
-/* ── MOBILE (<640px) ── */
 @media(max-width:639px){
   .tnav{display:none;}
   .mmBtn{display:flex;}
   .brand-tag{display:none;}
-  .signoutBtn{display:none;}/* hide sign out text, avatar serves as indicator */
+  .signoutBtn{display:none;}
   .sgrid{grid-template-columns:repeat(3,1fr);gap:8px;}
   .sc{padding:12px 10px 10px;}
   .sc .sei{font-size:1.05rem;margin-bottom:4px;}
   .sc .sv{font-size:1.25rem;letter-spacing:-.4px;}
   .sc .sl{font-size:.56rem;letter-spacing:.3px;}
   .sc .ssub{font-size:.54rem;}
-  /* filter rows go full width */
   .frow{flex-direction:column;}
   .frow .inp,.frow .sel{width:100%;min-width:0;flex:none;}
   .frow .btn{width:100%;}
@@ -402,29 +473,20 @@ tr:hover td{background:var(--grn-ltr);}
   .tb{height:52px;}
   .sh{margin-bottom:14px;}
   .sh h2{font-size:1.05rem;}
-  /* customer cards stack on mobile */
   .ccard{flex-direction:column;gap:8px;}
   .ccard .acts{flex-direction:row;flex-wrap:wrap;width:100%;}
   .ccard .acts .btn{flex:1;min-width:0;}
   .summCard{gap:12px;padding:12px 14px;}
   .summCard .sv{font-size:1.2rem;}
-  /* modal gets extra bottom padding for home indicator */
   .mft{padding-bottom:max(16px,env(safe-area-inset-bottom,0px));}
-  /* export buttons wrap */
   #expRow{flex-wrap:wrap;}
   #expRow .btn{flex:1;min-width:calc(50% - 4px);}
-  /* danger buttons full-width stack */
   .dangerZone .btn.bsm{width:100%;}
-  /* page content breathing room from bottom */
   .page{padding:12px 14px 24px;}
-  /* hide less-used table columns */
   .col-hide-mob{display:none!important;}
 }
-
-/* ── TINY (<380px) ── */
 @media(max-width:379px){
   .sgrid{grid-template-columns:repeat(2,1fr);}
-  .sc:nth-child(5),.sc:nth-child(6){/* let last 2 flow in 2-col */}
   .sc .sv{font-size:1.1rem;}
   .brand{gap:6px;}
   .brand-icon{width:28px;height:28px;font-size:.8rem;border-radius:8px;}
@@ -433,8 +495,6 @@ tr:hover td{background:var(--grn-ltr);}
   .bxs{font-size:.62rem;padding:4px 8px;min-height:28px;}
   .inp,.sel,.sinp{font-size:16px;padding:10px 12px;}
 }
-
-/* ── FOCUS RINGS ── */
 .btn:focus-visible,.nb:focus-visible,.inp:focus-visible,.sinp:focus-visible{outline:2px solid var(--grn);outline-offset:2px;}
 </style>
 </head>
@@ -534,9 +594,17 @@ tr:hover td{background:var(--grn-ltr);}
       </div>
       <button class="btn bacc" onclick="openAddCust()">+ Add Customer</button>
     </div>
-    <div class="sw">
-      <span class="si">🔍</span>
-      <input class="sinp" id="cSearch" placeholder="Search name, mobile, ID, address…" oninput="filterCusts()">
+    <!-- FIXED SEARCH with autocomplete -->
+    <div class="sug-wrap">
+      <div class="sw" id="custSW">
+        <span class="si">🔍</span>
+        <input class="sinp" id="cSearch" placeholder="Search name, mobile, ID, address…"
+          oninput="filterCusts();updateSugWrap('custSW')"
+          onfocus="showCustSug()"
+          autocomplete="off" autocorrect="off" spellcheck="false">
+        <button class="sclr" onclick="clearSearch('cSearch','custSW');filterCusts()" title="Clear">✕</button>
+      </div>
+      <div class="sug-drop" id="custSugDrop"></div>
     </div>
     <div id="custList"><div style="display:flex;align-items:center;justify-content:center;padding:40px"><div class="spin"></div></div></div>
   </div>
@@ -546,8 +614,22 @@ tr:hover td{background:var(--grn-ltr);}
     <div class="sh"><h2>Delivery Records</h2></div>
     <div class="card" style="margin-bottom:14px">
       <div class="frow">
-        <input class="inp" id="fC" placeholder="Customer name or ID">
-        <input class="inp" id="fS" placeholder="Staff name">
+        <!-- customer filter with suggestions -->
+        <div class="sug-wrap" style="flex:1;min-width:140px;position:relative">
+          <input class="inp" id="fC" placeholder="Customer name or ID"
+            oninput="updateDelSug()"
+            onfocus="updateDelSug()"
+            autocomplete="off">
+          <div class="sug-drop" id="fCSugDrop" style="position:absolute;z-index:60;top:calc(100% + 2px);left:0;right:0"></div>
+        </div>
+        <!-- staff filter with suggestions -->
+        <div class="sug-wrap" style="flex:1;min-width:140px;position:relative">
+          <input class="inp" id="fS" placeholder="Staff name"
+            oninput="updateStaffSug('fS','fSSugDrop')"
+            onfocus="updateStaffSug('fS','fSSugDrop')"
+            autocomplete="off">
+          <div class="sug-drop" id="fSSugDrop" style="position:absolute;z-index:60;top:calc(100% + 2px);left:0;right:0"></div>
+        </div>
         <select class="sel" id="fShift">
           <option value="">All Shifts</option>
           <option value="morning">☀️ Morning</option>
@@ -569,8 +651,22 @@ tr:hover td{background:var(--grn-ltr);}
     <div class="card" style="margin-bottom:14px">
       <div style="font-size:.7rem;color:var(--txt2);font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:12px">Filter Data</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px">
-        <div class="inpG" style="margin:0"><label>Customer</label><input class="inp" id="rC" placeholder="Filter by customer"></div>
-        <div class="inpG" style="margin:0"><label>Staff</label><input class="inp" id="rS" placeholder="Filter by staff"></div>
+        <div class="inpG" style="margin:0;position:relative">
+          <label>Customer</label>
+          <input class="inp" id="rC" placeholder="Filter by customer"
+            oninput="updateRepCustSug()"
+            onfocus="updateRepCustSug()"
+            autocomplete="off">
+          <div class="sug-drop" id="rCSugDrop" style="position:absolute;z-index:60;top:calc(100% + 2px);left:0;right:0"></div>
+        </div>
+        <div class="inpG" style="margin:0;position:relative">
+          <label>Staff</label>
+          <input class="inp" id="rS" placeholder="Filter by staff"
+            oninput="updateStaffSug('rS','rSSugDrop')"
+            onfocus="updateStaffSug('rS','rSSugDrop')"
+            autocomplete="off">
+          <div class="sug-drop" id="rSSugDrop" style="position:absolute;z-index:60;top:calc(100% + 2px);left:0;right:0"></div>
+        </div>
         <div class="inpG" style="margin:0"><label>Shift</label>
           <select class="sel" id="rShift"><option value="">All Shifts</option><option value="morning">☀️ Morning</option><option value="evening">🌙 Evening</option></select>
         </div>
@@ -626,6 +722,45 @@ tr:hover td{background:var(--grn-ltr);}
         <div class="inpG"><label>Confirm Password</label><input class="inp" id="aPwd2" type="password" placeholder="Confirm new password"></div>
         <button class="btn bacc" style="width:100%" onclick="updatePwd()">Update Password</button>
       </div>
+
+      <!-- ════ DATA CLEANUP CARD ════ -->
+      <div class="card" style="grid-column:1/-1">
+        <div class="settSection" style="color:var(--red);border-color:rgba(220,38,38,.2)">🗑️ Delivery Data Cleanup</div>
+
+        <!-- Firebase usage tip -->
+        <div style="background:var(--blu-lt);border:1.5px solid rgba(37,99,235,.2);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:.78rem;color:#1e3a8a;line-height:1.7">
+          <strong style="display:block;margin-bottom:3px">💡 Keep Firebase free tier healthy</strong>
+          Firestore free tier allows 50,000 reads/day and 1 GB storage. Deleting old <em>delivery records</em> (not customer profiles) keeps your database lean. Customer data is <strong>never</strong> touched by this tool.
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px">
+          <!-- Quick presets -->
+          <div>
+            <div style="font-size:.7rem;color:var(--txt2);font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px">Quick Delete Presets</div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <button class="quickBtn" onclick="openCleanup('3m')">📅 Older than 3 months <span style="margin-left:auto;font-size:.62rem;opacity:.7">(recommended)</span></button>
+              <button class="quickBtn" onclick="openCleanup('6m')">📅 Older than 6 months</button>
+              <button class="quickBtn" onclick="openCleanup('1y')">📅 Older than 1 year</button>
+              <button class="quickBtn" onclick="openCleanup('custom')">🗓️ Custom date range…</button>
+            </div>
+          </div>
+          <!-- Usage estimate -->
+          <div style="background:var(--bg3);border-radius:10px;padding:14px">
+            <div style="font-size:.7rem;color:var(--txt2);font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin-bottom:10px">Delivery Record Count</div>
+            <div id="cleanupCountWrap">
+              <button class="btn bsm bgh" style="width:100%" onclick="countDeliveries()">🔢 Count Records</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="warnBox">
+          <strong>⚠️ What gets deleted</strong>
+          Only <strong>delivery transaction records</strong> (date, quantity, staff, shift) are deleted.<br>
+          Customer profiles, QR codes, contact info, and default quantities are <strong>never affected</strong>.
+        </div>
+      </div>
+
+      <!-- Danger zone (existing) -->
       <div class="card dangerZone">
         <div class="settSection" style="color:var(--red);border-color:rgba(220,38,38,.2)">⚠️ Danger Zone</div>
         <p style="font-size:.8rem;color:var(--txt2);margin-bottom:14px;line-height:1.65">These actions are permanent and cannot be undone.</p>
@@ -722,6 +857,20 @@ tr:hover td{background:var(--grn-ltr);}
   </div>
 </div>
 
+<!-- ════ DATA CLEANUP MODAL ════ -->
+<div class="ov" id="cleanupModal">
+  <div class="modal" style="max-width:560px">
+    <div class="mhd" style="background:linear-gradient(135deg,#fef2f2,#fff5f5)">
+      <h3 id="cleanupT" style="color:var(--red)">🗑️ Delete Old Delivery Records</h3>
+      <button class="mc" onclick="closeM('cleanupModal')">✕</button>
+    </div>
+    <div class="mbd" id="cleanupBody">
+      <!-- Steps injected by JS -->
+    </div>
+    <div class="mft" id="cleanupFt"></div>
+  </div>
+</div>
+
 <!-- Confirm Box -->
 <div id="confBox">
   <div class="confCard">
@@ -738,19 +887,23 @@ tr:hover td{background:var(--grn-ltr);}
 <div id="toast"></div>
 
 <script>
-var CU=null,CUSTS=[],DELS=[],reportData=[],pendingConf=null,formQtyVal=1;
+/* ══════════════════════════════════════
+   GLOBALS
+══════════════════════════════════════ */
+var CU=null,CUSTS=[],DELS=[],STAFF_LIST=[],reportData=[],pendingConf=null,formQtyVal=1;
 
+/* ── CLOCK ── */
 function tickClock(){
   var n=new Date();
   var t=n.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
   var d=n.toLocaleDateString('en-IN',{day:'numeric',month:'short'});
   var ac=document.getElementById('aClock');if(ac)ac.textContent=t;
   var ad=document.getElementById('aDate');if(ad)ad.textContent=d;
-  var ac2=document.getElementById('adminClock2');
-  if(ac2)ac2.textContent=t+' • '+d;
+  var ac2=document.getElementById('adminClock2');if(ac2)ac2.textContent=t+' • '+d;
 }
 setInterval(tickClock,1000);tickClock();
 
+/* ── AUTH ── */
 auth.onAuthStateChanged(async function(u){
   if(!u){location.replace('index.html');return;}
   var role=await getUserRole(u.uid);
@@ -762,7 +915,7 @@ auth.onAuthStateChanged(async function(u){
     document.getElementById('av').textContent=(u.email||'A')[0].toUpperCase();
     document.getElementById('aEmail').value=u.email||'';
     document.getElementById('dashDate').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-    fixGrid();loadDash();loadCusts();
+    fixGrid();loadDash();loadCusts();loadStaffList();
   }else if(role==='staff'){
     location.replace('milkman.html');
   }else{
@@ -772,12 +925,14 @@ auth.onAuthStateChanged(async function(u){
 
 function doLogout(){signOut().then(function(){location.replace('index.html');});}
 
+/* ── PAGE ROUTING ── */
 function pg(name,btn){
   document.querySelectorAll('.page').forEach(function(e){e.classList.remove('active');});
   var nm=name.charAt(0).toUpperCase()+name.slice(1);
   var el=document.getElementById('pg'+nm);if(el)el.classList.add('active');
   document.querySelectorAll('.tnav .nb,.mPanel .nb').forEach(function(b){b.classList.remove('active');});
   if(btn)btn.classList.add('active');
+  closeSugAll();
   if(name==='dashboard')loadDash();
   else if(name==='customers')loadCusts();
   else if(name==='deliveries')loadDels();
@@ -785,6 +940,7 @@ function pg(name,btn){
   else if(name==='settings')loadSett();
 }
 
+/* ── TOAST ── */
 function toast(msg,type,dur){
   type=type||'ok';dur=dur||3500;
   var d=document.createElement('div');d.className='ti '+type;
@@ -794,6 +950,7 @@ function toast(msg,type,dur){
   setTimeout(function(){d.style.opacity='0';d.style.transform='translateX(20px)';d.style.transition='.2s';setTimeout(function(){d.remove();},200);},dur);
 }
 
+/* ── CONFIRM ── */
 function conf(q,detail,fn){
   pendingConf=fn;
   document.getElementById('confQ').textContent=q||'Confirm?';
@@ -805,13 +962,162 @@ function runConf(){if(pendingConf){var fn=pendingConf;closeConf();if(typeof wind
 function openM(id){document.getElementById(id).classList.add('open');}
 function closeM(id){document.getElementById(id).classList.remove('open');}
 
+/* ── FORMAT QTY ── */
 function fmtQ(v){
   v=parseFloat(v)||0;
   if(v<=0)return'—';
   return v<1?(v*1000).toFixed(0)+'ml':v+'L';
 }
 
-// ── DASHBOARD ──
+/* ══════════════════════════════════════
+   AUTOCOMPLETE / SUGGESTIONS ENGINE
+══════════════════════════════════════ */
+function hl(text,query){
+  if(!query)return esc(text);
+  var re=new RegExp('('+query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+  return esc(text).replace(re,'<mark>$1</mark>');
+}
+
+/* close all suggestion dropdowns */
+function closeSugAll(){
+  document.querySelectorAll('.sug-drop').forEach(function(d){d.classList.remove('open');});
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.sug-wrap'))closeSugAll();
+});
+
+/* update clear-button visibility */
+function updateSugWrap(swId){
+  var sw=document.getElementById(swId);
+  var inp=sw?sw.querySelector('.sinp'):null;
+  if(inp&&inp.value)sw.classList.add('has-val');
+  else if(sw)sw.classList.remove('has-val');
+}
+function clearSearch(inpId,swId){
+  var inp=document.getElementById(inpId);
+  if(inp)inp.value='';
+  var sw=document.getElementById(swId);
+  if(sw)sw.classList.remove('has-val');
+  closeSugAll();
+}
+
+/* ── Customer search suggestions ── */
+function showCustSug(){
+  var q=document.getElementById('cSearch').value.toLowerCase().trim();
+  renderCustSug(q);
+}
+function renderCustSug(q){
+  var drop=document.getElementById('custSugDrop');
+  if(!CUSTS.length){drop.classList.remove('open');return;}
+  var list=q
+    ?CUSTS.filter(function(c){
+        return(c.name||'').toLowerCase().includes(q)||(c.mobile||'').includes(q)||
+          (c.customerId||'').toLowerCase().includes(q)||(c.address||'').toLowerCase().includes(q)||
+          (c.milkType||'').toLowerCase().includes(q);
+      }).slice(0,8)
+    :CUSTS.slice(0,6);
+  if(!list.length){drop.classList.remove('open');return;}
+  drop.innerHTML=(q?'<div class="sug-hdr">Results for "'+esc(q)+'"</div>':'<div class="sug-hdr">All Customers</div>')+
+    list.map(function(c){
+      var cid=c.customerId||c.id;
+      return'<div class="sug-item" onmousedown="pickCustSug(\''+esc(cid)+'\',\''+esc(c.name)+'\')">'+
+        '<span class="sug-icon">👤</span>'+
+        '<div class="sug-main">'+
+          '<div class="sug-nm">'+hl(c.name||'',q)+'</div>'+
+          '<div class="sug-sub">'+esc(c.mobile||'')+(c.address?' · '+esc(c.address):'')+'</div>'+
+        '</div>'+
+        '<span class="sug-badge">'+esc(cid)+'</span>'+
+      '</div>';
+    }).join('');
+  drop.classList.add('open');
+}
+function pickCustSug(cid,name){
+  document.getElementById('cSearch').value=name;
+  document.getElementById('custSW').classList.add('has-val');
+  closeSugAll();filterCusts();
+}
+
+/* ── Delivery page customer suggestions ── */
+function updateDelSug(){
+  var q=document.getElementById('fC').value.toLowerCase().trim();
+  var drop=document.getElementById('fCSugDrop');
+  if(!q){drop.classList.remove('open');return;}
+  var list=CUSTS.filter(function(c){
+    return(c.name||'').toLowerCase().includes(q)||(c.customerId||'').toLowerCase().includes(q);
+  }).slice(0,6);
+  if(!list.length){drop.classList.remove('open');return;}
+  drop.innerHTML=list.map(function(c){
+    return'<div class="sug-item" onmousedown="pickDelCustSug(\''+esc(c.name||'')+'\')">'+
+      '<span class="sug-icon">👤</span>'+
+      '<div class="sug-main">'+
+        '<div class="sug-nm">'+hl(c.name||'',q)+'</div>'+
+        '<div class="sug-sub">'+esc(c.customerId||'')+(c.mobile?' · '+esc(c.mobile):'')+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  drop.classList.add('open');
+}
+function pickDelCustSug(name){
+  document.getElementById('fC').value=name;
+  document.getElementById('fCSugDrop').classList.remove('open');
+}
+
+/* ── Report page customer suggestions ── */
+function updateRepCustSug(){
+  var q=document.getElementById('rC').value.toLowerCase().trim();
+  var drop=document.getElementById('rCSugDrop');
+  if(!q){drop.classList.remove('open');return;}
+  var list=CUSTS.filter(function(c){
+    return(c.name||'').toLowerCase().includes(q)||(c.customerId||'').toLowerCase().includes(q);
+  }).slice(0,6);
+  if(!list.length){drop.classList.remove('open');return;}
+  drop.innerHTML=list.map(function(c){
+    return'<div class="sug-item" onmousedown="pickRepCustSug(\''+esc(c.name||'')+'\')">'+
+      '<span class="sug-icon">👤</span>'+
+      '<div class="sug-main">'+
+        '<div class="sug-nm">'+hl(c.name||'',q)+'</div>'+
+        '<div class="sug-sub">'+esc(c.customerId||'')+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  drop.classList.add('open');
+}
+function pickRepCustSug(name){
+  document.getElementById('rC').value=name;
+  document.getElementById('rCSugDrop').classList.remove('open');
+}
+
+/* ── Staff suggestions (shared) ── */
+function loadStaffList(){
+  getStaff().then(function(s){STAFF_LIST=s||[];}).catch(function(){});
+}
+function updateStaffSug(inpId,dropId){
+  var q=document.getElementById(inpId).value.toLowerCase().trim();
+  var drop=document.getElementById(dropId);
+  if(!q){drop.classList.remove('open');return;}
+  var list=STAFF_LIST.filter(function(s){
+    return(s.name||'').toLowerCase().includes(q)||(s.email||'').toLowerCase().includes(q);
+  }).slice(0,5);
+  if(!list.length){drop.classList.remove('open');return;}
+  drop.innerHTML=list.map(function(s){
+    return'<div class="sug-item" onmousedown="pickStaffSug(\''+inpId+'\',\''+dropId+'\',\''+esc(s.name||'')+'\')">'+
+      '<span class="sug-icon">👤</span>'+
+      '<div class="sug-main">'+
+        '<div class="sug-nm">'+hl(s.name||'',q)+'</div>'+
+        '<div class="sug-sub">'+esc(s.email||'')+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  drop.classList.add('open');
+}
+function pickStaffSug(inpId,dropId,name){
+  document.getElementById(inpId).value=name;
+  document.getElementById(dropId).classList.remove('open');
+}
+
+/* ══════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════ */
 async function loadDash(){
   try{
     var st=await getStats();
@@ -878,7 +1184,9 @@ async function loadDash(){
   }
 }
 
-// ── CUSTOMERS ──
+/* ══════════════════════════════════════
+   CUSTOMERS
+══════════════════════════════════════ */
 async function loadCusts(){
   document.getElementById('custList').innerHTML='<div style="display:flex;align-items:center;justify-content:center;padding:40px"><div class="spin"></div></div>';
   try{
@@ -924,15 +1232,19 @@ function renderCusts(list){
 
 function filterCusts(){
   var q=document.getElementById('cSearch').value.toLowerCase();
-  if(!q){renderCusts(CUSTS);return;}
-  renderCusts(CUSTS.filter(function(c){
+  var sw=document.getElementById('custSW');
+  if(q)sw.classList.add('has-val');else sw.classList.remove('has-val');
+  if(!q){renderCusts(CUSTS);renderCustSug('');return;}
+  var filtered=CUSTS.filter(function(c){
     return(c.name||'').toLowerCase().includes(q)||(c.mobile||'').includes(q)||
       (c.customerId||'').toLowerCase().includes(q)||(c.address||'').toLowerCase().includes(q)||
       (c.milkType||'').toLowerCase().includes(q)||(c.notes||'').toLowerCase().includes(q);
-  }));
+  });
+  renderCusts(filtered);
+  renderCustSug(q);
 }
 
-var formQtyVal=1;
+/* ── Customer form ── */
 function setQP(v,btn){
   document.querySelectorAll('.qpreset .qp').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
@@ -1087,7 +1399,9 @@ async function showHist(cid,name){
   }
 }
 
-// ── DELIVERIES ──
+/* ══════════════════════════════════════
+   DELIVERIES
+══════════════════════════════════════ */
 async function loadDels(){
   document.getElementById('delList').innerHTML='<div style="display:flex;align-items:center;justify-content:center;padding:40px"><div class="spin"></div></div>';
   document.getElementById('delSummary').innerHTML='';
@@ -1147,11 +1461,14 @@ async function loadDels(){
 function clearDelFilter(){
   ['fC','fS','fF','fT'].forEach(function(id){document.getElementById(id).value='';});
   document.getElementById('fShift').value='';
+  ['fCSugDrop','fSSugDrop'].forEach(function(id){var d=document.getElementById(id);if(d)d.classList.remove('open');});
   document.getElementById('delSummary').innerHTML='';
   document.getElementById('delList').innerHTML='<div class="empty"><div class="ei">🚚</div><p>Set filters and click Apply Filter</p></div>';
 }
 
-// ── REPORTS ──
+/* ══════════════════════════════════════
+   REPORTS
+══════════════════════════════════════ */
 async function loadReport(){
   document.getElementById('repList').innerHTML='<div style="display:flex;align-items:center;justify-content:center;padding:40px"><div class="spin"></div></div>';
   var rf=document.getElementById('rF').value;var rt=document.getElementById('rT').value;
@@ -1245,11 +1562,14 @@ async function exportRep(fmt){
 }
 function esc2(s){return String(s||'').replace(/"/g,'""');}
 
-// ── STAFF ──
+/* ══════════════════════════════════════
+   STAFF
+══════════════════════════════════════ */
 async function loadStaff(){
   document.getElementById('staffList').innerHTML='<div style="display:flex;align-items:center;justify-content:center;padding:40px"><div class="spin"></div></div>';
   try{
     var staff=await getStaff();
+    STAFF_LIST=staff||[];
     if(!staff.length){document.getElementById('staffList').innerHTML='<div class="empty"><div class="ei">👤</div><p>No staff members yet.<br>Add your first staff member!</p></div>';return;}
     document.getElementById('staffList').innerHTML=
       '<div class="tw"><table>'+
@@ -1296,7 +1616,9 @@ async function removeStaff(uid){
   catch(e){toast('Error: '+e.message,'err');}
 }
 
-// ── SETTINGS ──
+/* ══════════════════════════════════════
+   SETTINGS
+══════════════════════════════════════ */
 async function loadSett(){
   try{
     var s=await getSettings();
@@ -1347,6 +1669,309 @@ async function clearHistory(){
   catch(e){toast('Error: '+e.message,'err');}
 }
 
+/* ══════════════════════════════════════
+   DATA CLEANUP — count records
+══════════════════════════════════════ */
+async function countDeliveries(){
+  var wrap=document.getElementById('cleanupCountWrap');
+  wrap.innerHTML='<div class="spin" style="margin:0 auto"></div>';
+  try{
+    var snap=await db.collection('deliveries').get();
+    var total=snap.size;
+    /* count by age */
+    var now=new Date();
+    var c3=0,c6=0,c12=0;
+    var cutoff3=new Date(now);cutoff3.setMonth(cutoff3.getMonth()-3);
+    var cutoff6=new Date(now);cutoff6.setMonth(cutoff6.getMonth()-6);
+    var cutoff12=new Date(now);cutoff12.setFullYear(cutoff12.getFullYear()-1);
+    snap.docs.forEach(function(doc){
+      var d=doc.data();
+      var dt=d.date;/* "YYYY-MM-DD" */
+      if(dt&&dt<cutoff3.toISOString().slice(0,10))c3++;
+      if(dt&&dt<cutoff6.toISOString().slice(0,10))c6++;
+      if(dt&&dt<cutoff12.toISOString().slice(0,10))c12++;
+    });
+    wrap.innerHTML=
+      '<div style="font-size:1.6rem;font-weight:800;color:var(--txt);letter-spacing:-1px;margin-bottom:6px">'+total+'</div>'+
+      '<div style="font-size:.7rem;color:var(--txt3);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px">Total delivery records</div>'+
+      '<div style="display:flex;flex-direction:column;gap:4px">'+
+        '<div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--txt2);font-weight:600">'+
+          '<span>Older than 3 months:</span><span style="color:var(--red);font-weight:800">'+c3+'</span></div>'+
+        '<div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--txt2);font-weight:600">'+
+          '<span>Older than 6 months:</span><span style="color:var(--red);font-weight:800">'+c6+'</span></div>'+
+        '<div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--txt2);font-weight:600">'+
+          '<span>Older than 1 year:</span><span style="color:var(--red);font-weight:800">'+c12+'</span></div>'+
+      '</div>';
+  }catch(e){wrap.innerHTML='<div style="font-size:.78rem;color:var(--red)">Error: '+esc(e.message)+'</div>';}
+}
+
+/* ══════════════════════════════════════
+   DATA CLEANUP MODAL — multi-step
+══════════════════════════════════════ */
+var CLEANUP_STATE={mode:null,dateFrom:null,dateTo:null,count:0,step:1};
+
+function calcCutoff(preset){
+  var d=new Date();
+  if(preset==='3m')d.setMonth(d.getMonth()-3);
+  else if(preset==='6m')d.setMonth(d.getMonth()-6);
+  else if(preset==='1y')d.setFullYear(d.getFullYear()-1);
+  return d.toISOString().slice(0,10);
+}
+
+function openCleanup(preset){
+  CLEANUP_STATE={mode:preset,dateFrom:null,dateTo:null,count:0,step:1};
+  if(preset==='custom'){
+    renderCleanupStep1Custom();
+  }else{
+    var cutoff=calcCutoff(preset);
+    CLEANUP_STATE.dateTo=cutoff;
+    renderCleanupStep1Preset(preset,cutoff);
+  }
+  openM('cleanupModal');
+}
+
+function renderCleanupStep1Preset(preset,cutoff){
+  var label=preset==='3m'?'3 months':preset==='6m'?'6 months':'1 year';
+  document.getElementById('cleanupT').textContent='🗑️ Delete Delivery Records';
+  document.getElementById('cleanupBody').innerHTML=
+    '<div class="warnBox" style="background:#fef2f2;border-color:rgba(220,38,38,.3)">'+
+      '<strong>⚠️ Warning — Read carefully</strong>'+
+      'You are about to delete all delivery records <strong>before '+cutoff+'</strong> (older than '+label+').<br>'+
+      'This will permanently remove those delivery entries from Firestore.<br>'+
+      '<strong style="color:var(--red)">Customer profiles are NOT affected.</strong>'+
+    '</div>'+
+    '<div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:16px">'+
+      '<div style="font-size:.7rem;color:var(--txt2);font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px">What will be deleted</div>'+
+      '<div id="cleanupPreviewCount" style="font-size:.82rem;color:var(--txt2)">Counting records…</div>'+
+    '</div>'+
+    '<div class="warnBox">'+
+      '<strong>💡 Why delete old data?</strong>'+
+      'Firestore free tier = 1 GB storage + 50K reads/day. Old delivery records accumulate fast. '+
+      'Deleting records older than 3 months keeps your app running smoothly without cost.'+
+    '</div>';
+
+  document.getElementById('cleanupFt').innerHTML='';
+  var cb=document.createElement('button');cb.className='btn bgh';cb.textContent='Cancel';cb.onclick=function(){closeM('cleanupModal');};
+  var nb=document.createElement('button');nb.className='btn bred';nb.id='cleanupNext1';nb.textContent='Next: Confirm →';nb.disabled=true;
+  nb.onclick=function(){renderCleanupStep2(cutoff);};
+  document.getElementById('cleanupFt').appendChild(cb);
+  document.getElementById('cleanupFt').appendChild(nb);
+
+  /* count async */
+  db.collection('deliveries').get().then(function(snap){
+    var count=0;
+    snap.docs.forEach(function(doc){
+      var d=doc.data();
+      if(d.date&&d.date<cutoff)count++;
+    });
+    CLEANUP_STATE.count=count;
+    var el=document.getElementById('cleanupPreviewCount');
+    if(el){
+      if(count===0){
+        el.innerHTML='<span style="color:var(--grn);font-weight:700">✅ No records found before '+cutoff+'. Nothing to delete.</span>';
+      }else{
+        el.innerHTML='<span style="color:var(--red);font-weight:800;font-size:1.1rem">'+count+'</span> delivery records will be deleted.';
+        document.getElementById('cleanupNext1').disabled=false;
+      }
+    }
+  }).catch(function(e){
+    var el=document.getElementById('cleanupPreviewCount');
+    if(el)el.innerHTML='<span style="color:var(--red)">Error counting: '+esc(e.message)+'</span>';
+  });
+}
+
+function renderCleanupStep1Custom(){
+  document.getElementById('cleanupT').textContent='🗑️ Custom Date Range Delete';
+  var today=new Date().toISOString().slice(0,10);
+  document.getElementById('cleanupBody').innerHTML=
+    '<div class="warnBox" style="background:#fef2f2;border-color:rgba(220,38,38,.3)">'+
+      '<strong>⚠️ Warning — Custom range delete</strong>'+
+      'Only delivery records (not customer profiles) within the selected date range will be deleted.'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'+
+      '<div class="inpG" style="margin:0"><label>From Date (start)</label><input class="inp" type="date" id="cleanFrom" max="'+today+'"></div>'+
+      '<div class="inpG" style="margin:0"><label>To Date (end)</label><input class="inp" type="date" id="cleanTo" max="'+today+'"></div>'+
+    '</div>'+
+    '<div id="cleanupRangeInfo" style="font-size:.8rem;color:var(--txt3);font-style:italic">Select a date range then click Count Records.</div>'+
+    '<div id="cleanupPreviewCount" style="font-size:.82rem;color:var(--txt2);margin-top:10px"></div>';
+
+  document.getElementById('cleanupFt').innerHTML='';
+  var cb=document.createElement('button');cb.className='btn bgh';cb.textContent='Cancel';cb.onclick=function(){closeM('cleanupModal');};
+  var countBtn=document.createElement('button');countBtn.className='btn bgh bsm';countBtn.textContent='🔢 Count Records';
+  countBtn.onclick=function(){countCustomRange();};
+  var nb=document.createElement('button');nb.className='btn bred';nb.id='cleanupNext1';nb.textContent='Next: Confirm →';nb.disabled=true;
+  nb.onclick=function(){
+    var f=document.getElementById('cleanFrom').value;
+    var t=document.getElementById('cleanTo').value;
+    if(!f||!t){toast('Select both dates','err');return;}
+    if(f>t){toast('From date cannot be after To date','err');return;}
+    CLEANUP_STATE.dateFrom=f;CLEANUP_STATE.dateTo=t;
+    renderCleanupStep2Custom(f,t);
+  };
+  document.getElementById('cleanupFt').appendChild(cb);
+  document.getElementById('cleanupFt').appendChild(countBtn);
+  document.getElementById('cleanupFt').appendChild(nb);
+}
+
+async function countCustomRange(){
+  var f=document.getElementById('cleanFrom').value;
+  var t=document.getElementById('cleanTo').value;
+  if(!f||!t){toast('Select both dates','err');return;}
+  if(f>t){toast('From date cannot be after To date','err');return;}
+  var el=document.getElementById('cleanupPreviewCount');
+  el.innerHTML='<div class="spin" style="margin:8px auto;display:block"></div>';
+  try{
+    var snap=await db.collection('deliveries').get();
+    var count=0;
+    snap.docs.forEach(function(doc){
+      var d=doc.data();
+      if(d.date&&d.date>=f&&d.date<=t)count++;
+    });
+    CLEANUP_STATE.count=count;
+    if(count===0){
+      el.innerHTML='<span style="color:var(--grn);font-weight:700">✅ No records found in this range.</span>';
+      document.getElementById('cleanupNext1').disabled=true;
+    }else{
+      el.innerHTML='<span style="color:var(--red);font-weight:800;font-size:1.1rem">'+count+'</span> delivery records found in range '+f+' → '+t+'.';
+      document.getElementById('cleanupNext1').disabled=false;
+    }
+  }catch(e){el.innerHTML='<span style="color:var(--red)">Error: '+esc(e.message)+'</span>';}
+}
+
+function renderCleanupStep2(cutoff){
+  /* second warning screen */
+  document.getElementById('cleanupBody').innerHTML=
+    '<div style="background:#fef2f2;border:2px solid rgba(220,38,38,.4);border-radius:12px;padding:16px;margin-bottom:16px;text-align:center">'+
+      '<div style="font-size:2rem;margin-bottom:8px">🚨</div>'+
+      '<div style="font-weight:800;font-size:.95rem;color:var(--red);margin-bottom:6px">FINAL WARNING</div>'+
+      '<div style="font-size:.82rem;color:#7f1d1d;line-height:1.7">'+
+        'You are about to <strong>permanently delete '+CLEANUP_STATE.count+' delivery records</strong> from Firebase.<br>'+
+        'Records before <strong>'+cutoff+'</strong> will be gone forever.<br>'+
+        'This <strong>cannot be undone</strong>. Make sure you have exported the data if needed.'+
+      '</div>'+
+    '</div>'+
+    '<div style="margin-bottom:14px">'+
+      '<div style="font-size:.78rem;color:var(--txt2);font-weight:600;margin-bottom:6px">'+
+        'To confirm, type exactly: <code style="background:var(--bg3);padding:2px 8px;border-radius:6px;font-size:.82rem;color:var(--red);font-weight:700">DELETE DELIVERIES</code>'+
+      '</div>'+
+      '<input class="confirmPhrase" id="cleanupPhrase" type="text" placeholder="Type DELETE DELIVERIES to confirm…" oninput="checkDeletePhrase()">'+
+    '</div>'+
+    '<div class="warnBox">'+
+      '<strong>💾 Export first?</strong>'+
+      'Go to Reports page → select the date range → export as CSV or Excel before deleting.'+
+    '</div>';
+
+  document.getElementById('cleanupFt').innerHTML='';
+  var cb=document.createElement('button');cb.className='btn bgh';cb.textContent='← Go Back';cb.onclick=function(){openCleanup(CLEANUP_STATE.mode);};
+  var db2=document.createElement('button');db2.className='btn bred';db2.id='cleanupConfirmBtn';db2.textContent='🗑️ Delete '+CLEANUP_STATE.count+' Records';db2.disabled=true;
+  db2.onclick=function(){executeCleanup(cutoff,null,null);};
+  document.getElementById('cleanupFt').appendChild(cb);
+  document.getElementById('cleanupFt').appendChild(db2);
+}
+
+function renderCleanupStep2Custom(f,t){
+  document.getElementById('cleanupBody').innerHTML=
+    '<div style="background:#fef2f2;border:2px solid rgba(220,38,38,.4);border-radius:12px;padding:16px;margin-bottom:16px;text-align:center">'+
+      '<div style="font-size:2rem;margin-bottom:8px">🚨</div>'+
+      '<div style="font-weight:800;font-size:.95rem;color:var(--red);margin-bottom:6px">FINAL WARNING</div>'+
+      '<div style="font-size:.82rem;color:#7f1d1d;line-height:1.7">'+
+        'You are about to <strong>permanently delete '+CLEANUP_STATE.count+' delivery records</strong><br>'+
+        'from <strong>'+f+'</strong> to <strong>'+t+'</strong>.<br>'+
+        'This <strong>cannot be undone</strong>.'+
+      '</div>'+
+    '</div>'+
+    '<div style="margin-bottom:14px">'+
+      '<div style="font-size:.78rem;color:var(--txt2);font-weight:600;margin-bottom:6px">'+
+        'To confirm, type exactly: <code style="background:var(--bg3);padding:2px 8px;border-radius:6px;font-size:.82rem;color:var(--red);font-weight:700">DELETE DELIVERIES</code>'+
+      '</div>'+
+      '<input class="confirmPhrase" id="cleanupPhrase" type="text" placeholder="Type DELETE DELIVERIES to confirm…" oninput="checkDeletePhrase()">'+
+    '</div>'+
+    '<div class="warnBox">'+
+      '<strong>💾 Export first?</strong>'+
+      'Go to Reports → select this date range → export as CSV or Excel before deleting.'+
+    '</div>';
+
+  document.getElementById('cleanupFt').innerHTML='';
+  var cb=document.createElement('button');cb.className='btn bgh';cb.textContent='← Go Back';cb.onclick=function(){openCleanup('custom');};
+  var db2=document.createElement('button');db2.className='btn bred';db2.id='cleanupConfirmBtn';db2.textContent='🗑️ Delete '+CLEANUP_STATE.count+' Records';db2.disabled=true;
+  db2.onclick=function(){executeCleanup(null,f,t);};
+  document.getElementById('cleanupFt').appendChild(cb);
+  document.getElementById('cleanupFt').appendChild(db2);
+}
+
+function checkDeletePhrase(){
+  var v=document.getElementById('cleanupPhrase').value;
+  var btn=document.getElementById('cleanupConfirmBtn');
+  if(btn)btn.disabled=(v!=='DELETE DELIVERIES');
+}
+
+async function executeCleanup(cutoff,fromDate,toDate){
+  var btn=document.getElementById('cleanupConfirmBtn');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Deleting…';}
+
+  document.getElementById('cleanupBody').innerHTML=
+    '<div style="text-align:center;padding:20px">'+
+      '<div style="font-size:1.5rem;margin-bottom:10px">⏳</div>'+
+      '<div style="font-weight:700;margin-bottom:14px;font-size:.9rem">Deleting records…</div>'+
+      '<div class="progressWrap"><div class="progressBar" id="cleanProg"></div></div>'+
+      '<div id="cleanProgText" style="font-size:.76rem;color:var(--txt3);margin-top:8px">Starting…</div>'+
+    '</div>';
+  document.getElementById('cleanupFt').innerHTML='';
+
+  try{
+    var snap=await db.collection('deliveries').get();
+    var toDelete=snap.docs.filter(function(doc){
+      var d=doc.data();
+      if(!d.date)return false;
+      if(cutoff)return d.date<cutoff;
+      if(fromDate&&toDate)return d.date>=fromDate&&d.date<=toDate;
+      return false;
+    });
+
+    var total=toDelete.length;
+    var deleted=0;
+
+    /* delete in batches of 400 (Firestore limit 500) */
+    while(deleted<total){
+      var batch=db.batch();
+      var chunk=toDelete.slice(deleted,deleted+400);
+      chunk.forEach(function(doc){batch.delete(doc.ref);});
+      await batch.commit();
+      deleted+=chunk.length;
+      var pct=Math.round((deleted/total)*100);
+      var pb=document.getElementById('cleanProg');
+      var pt=document.getElementById('cleanProgText');
+      if(pb)pb.style.width=pct+'%';
+      if(pt)pt.textContent='Deleted '+deleted+' of '+total+' records ('+pct+'%)';
+    }
+
+    document.getElementById('cleanupBody').innerHTML=
+      '<div style="text-align:center;padding:28px">'+
+        '<div style="font-size:2.5rem;margin-bottom:12px">✅</div>'+
+        '<div style="font-weight:800;font-size:1rem;color:var(--grn);margin-bottom:6px">Successfully deleted '+total+' records!</div>'+
+        '<div style="font-size:.8rem;color:var(--txt2);line-height:1.7">Customer profiles are intact.<br>Firestore usage has been reduced.</div>'+
+      '</div>';
+    document.getElementById('cleanupFt').innerHTML='';
+    var cb=document.createElement('button');cb.className='btn bacc';cb.textContent='Close';cb.onclick=function(){closeM('cleanupModal');};
+    document.getElementById('cleanupFt').appendChild(cb);
+    toast('Deleted '+total+' delivery records ✓','ok');
+  }catch(e){
+    document.getElementById('cleanupBody').innerHTML=
+      '<div style="text-align:center;padding:28px">'+
+        '<div style="font-size:2rem;margin-bottom:10px">❌</div>'+
+        '<div style="font-weight:700;font-size:.9rem;color:var(--red);margin-bottom:6px">Delete failed</div>'+
+        '<div style="font-size:.8rem;color:var(--txt2)">'+esc(e.message)+'</div>'+
+      '</div>';
+    document.getElementById('cleanupFt').innerHTML='';
+    var cb2=document.createElement('button');cb2.className='btn bgh';cb2.textContent='Close';cb2.onclick=function(){closeM('cleanupModal');};
+    document.getElementById('cleanupFt').appendChild(cb2);
+    toast('Delete failed: '+e.message,'err');
+  }
+}
+
+/* ══════════════════════════════════════
+   GRID / MISC
+══════════════════════════════════════ */
 function fixGrid(){
   var w=window.innerWidth;
   var g=document.getElementById('dashGrid');if(g)g.style.gridTemplateColumns=w<640?'1fr':'1fr 1fr';
