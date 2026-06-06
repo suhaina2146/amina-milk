@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
 <title>AMINA MILK – Login</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -13,139 +13,165 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#06090f;--bg2:#0d1526;--bg3:#141f33;
-  --acc:#f59e0b;--acc2:#fbbf24;--grn:#10b981;--red:#ef4444;
-  --txt:#f0f4ff;--txt2:#8899bb;--txt3:#4a5a7a;
-  --bdr:rgba(245,158,11,.2);--bdr2:rgba(100,130,200,.1);
-  --sh:0 0 80px rgba(245,158,11,.08)
+  --bg:#f0faf4;--bg2:#ffffff;--bg3:#e6f5ec;
+  --grn:#16a34a;--grn2:#22c55e;--grn-dk:#14532d;
+  --red:#dc2626;
+  --txt:#0a1f12;--txt2:#3a6b4f;--txt3:#7aad8a;--txt4:#b8d9c2;
+  --bdr:rgba(22,163,74,.18);--bdr2:rgba(22,163,74,.10);
 }
+html,body{height:100%;}
 body{
-  font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--bg);color:var(--txt);
   min-height:100vh;display:flex;align-items:center;justify-content:center;
-  padding:20px;overflow:hidden;
+  padding:20px;
   background-image:
-    radial-gradient(ellipse 70% 50% at 15% 5%,rgba(245,158,11,.07),transparent),
-    radial-gradient(ellipse 60% 60% at 90% 95%,rgba(16,185,129,.05),transparent),
-    radial-gradient(ellipse 40% 40% at 50% 50%,rgba(245,158,11,.03),transparent);
+    radial-gradient(ellipse 70% 50% at 10% 5%,rgba(22,163,74,.07),transparent),
+    radial-gradient(ellipse 60% 60% at 90% 95%,rgba(22,163,74,.05),transparent),
+    radial-gradient(ellipse 40% 40% at 50% 50%,rgba(34,197,94,.03),transparent);
 }
 
-/* Animated grain overlay */
-body::before{
-  content:'';position:fixed;inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events:none;z-index:0;opacity:0.4;
-}
-
-/* Grid lines background */
+/* Grid lines */
 body::after{
   content:'';position:fixed;inset:0;
-  background-image:linear-gradient(rgba(245,158,11,.03) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(245,158,11,.03) 1px,transparent 1px);
+  background-image:
+    linear-gradient(rgba(22,163,74,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(22,163,74,.04) 1px,transparent 1px);
   background-size:48px 48px;pointer-events:none;z-index:0;
 }
 
 .wrap{position:relative;z-index:1;width:100%;max-width:420px;}
 
 /* Logo area */
-.logo-area{text-align:center;margin-bottom:32px;animation:fadeUp .6s ease both;}
+.logo-area{text-align:center;margin-bottom:28px;animation:fadeUp .5s ease both;}
 .drop-icon{
   width:72px;height:72px;
-  background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(245,158,11,.05));
-  border:1px solid rgba(245,158,11,.25);
-  border-radius:20px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--grn),var(--grn2));
+  border-radius:22px;display:flex;align-items:center;justify-content:center;
   font-size:32px;margin:0 auto 14px;
-  box-shadow:0 0 40px rgba(245,158,11,.15),inset 0 1px 0 rgba(255,255,255,.08);
+  box-shadow:0 8px 32px rgba(22,163,74,.30);
   animation:float 4s ease-in-out infinite;
+  border:2px solid rgba(255,255,255,.3);
 }
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-.logo-title{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;letter-spacing:-.5px;
-  background:linear-gradient(135deg,var(--acc),var(--acc2) 60%,#fff);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.logo-sub{font-size:.78rem;color:var(--txt2);margin-top:4px;letter-spacing:.8px;text-transform:uppercase;}
+.logo-title{
+  font-family:'Instrument Serif',Georgia,serif;
+  font-size:2rem;font-weight:400;letter-spacing:-.3px;
+  color:var(--grn-dk);
+}
+.logo-sub{
+  font-size:.72rem;color:var(--txt3);margin-top:5px;
+  letter-spacing:.9px;text-transform:uppercase;font-weight:700;
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
 
 /* Card */
 .box{
-  background:linear-gradient(160deg,rgba(20,31,51,.95),rgba(13,21,38,.98));
-  border:1px solid var(--bdr2);border-radius:24px;padding:32px 28px;
-  box-shadow:0 24px 80px rgba(0,0,0,.6),0 0 0 1px rgba(245,158,11,.05),var(--sh);
-  animation:fadeUp .6s .1s ease both;backdrop-filter:blur(20px);
+  background:rgba(255,255,255,.95);
+  border:1.5px solid rgba(22,163,74,.14);border-radius:22px;
+  padding:30px 26px;
+  box-shadow:0 8px 40px rgba(22,163,74,.10),0 2px 8px rgba(0,0,0,.04);
+  animation:fadeUp .5s .08s ease both;backdrop-filter:blur(20px);
   position:relative;overflow:hidden;
 }
 .box::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,rgba(245,158,11,.3),transparent);
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--grn),var(--grn2),transparent);
 }
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 
 /* Form elements */
-.inpG{margin-bottom:16px;position:relative;}
-.inpG label{display:block;font-size:.72rem;color:var(--txt2);margin-bottom:6px;font-weight:500;letter-spacing:.4px;text-transform:uppercase;}
+.inpG{margin-bottom:15px;position:relative;}
+.inpG label{
+  display:block;font-size:.68rem;color:var(--txt2);margin-bottom:5px;
+  font-weight:700;letter-spacing:.4px;text-transform:uppercase;
+}
 .inp-wrap{position:relative;}
-.inp-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:.9rem;pointer-events:none;color:var(--txt3);}
+.inp-icon{
+  position:absolute;left:13px;top:50%;transform:translateY(-50%);
+  font-size:.9rem;pointer-events:none;color:var(--txt3);
+}
 .inp{
-  width:100%;background:rgba(255,255,255,.03);
-  border:1px solid var(--bdr2);border-radius:12px;
-  padding:13px 14px 13px 42px;color:var(--txt);
-  font-size:.92rem;font-family:'DM Sans',sans-serif;outline:none;
+  width:100%;background:var(--bg3);
+  border:1.5px solid rgba(22,163,74,.14);border-radius:11px;
+  padding:13px 13px 13px 40px;color:var(--txt);
+  font-size:.92rem;font-family:'Plus Jakarta Sans',sans-serif;outline:none;
   transition:border .2s,background .2s,box-shadow .2s;
+  -webkit-appearance:none;
 }
 .inp:focus{
-  border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.03);
-  box-shadow:0 0 0 3px rgba(245,158,11,.08);
+  border-color:rgba(22,163,74,.45);background:#fff;
+  box-shadow:0 0 0 3px rgba(22,163,74,.10);
 }
-.inp::placeholder{color:var(--txt3);}
+.inp::placeholder{color:var(--txt4);}
 
 /* Password toggle */
-.pwd-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--txt3);cursor:pointer;font-size:.85rem;padding:4px;transition:color .15s;}
+.pwd-toggle{
+  position:absolute;right:13px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--txt3);cursor:pointer;
+  font-size:.85rem;padding:4px;transition:color .15s;
+}
 .pwd-toggle:hover{color:var(--txt2);}
 
 /* Submit button */
 .btn-submit{
   width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;
-  font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:.3px;
-  background:linear-gradient(135deg,#f59e0b,#f97316);color:#000;
+  font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:.92rem;
+  letter-spacing:.1px;
+  background:linear-gradient(135deg,var(--grn-dk),var(--grn),var(--grn2));
+  color:#fff;
   transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;
-  position:relative;overflow:hidden;margin-top:8px;
-  box-shadow:0 4px 20px rgba(245,158,11,.25);
+  position:relative;overflow:hidden;margin-top:6px;
+  box-shadow:0 4px 20px rgba(22,163,74,.30);
 }
-.btn-submit::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,transparent,rgba(255,255,255,.15),transparent);
-  transform:translateX(-100%);transition:transform .4s;
-}
-.btn-submit:hover::before{transform:translateX(100%);}
-.btn-submit:hover{box-shadow:0 6px 28px rgba(245,158,11,.4);transform:translateY(-1px);}
+.btn-submit:hover{box-shadow:0 6px 28px rgba(22,163,74,.40);transform:translateY(-1px);}
 .btn-submit:active{transform:scale(.98);}
 .btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none;}
 
 /* Error */
 .err{
-  background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);
-  color:#fca5a5;padding:10px 14px;border-radius:10px;
-  font-size:.82rem;margin-bottom:14px;display:none;
+  background:rgba(220,38,38,.08);border:1.5px solid rgba(220,38,38,.22);
+  color:#b91c1c;padding:10px 13px;border-radius:10px;
+  font-size:.8rem;margin-bottom:13px;display:none;
   align-items:center;gap:8px;
 }
 .err.show{display:flex;}
 
 /* Spinner */
-.spin{width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:sp .5s linear infinite;flex-shrink:0;}
+.spin{
+  width:16px;height:16px;
+  border:2px solid rgba(255,255,255,.35);border-top-color:#fff;
+  border-radius:50%;animation:sp .55s linear infinite;flex-shrink:0;
+}
 @keyframes sp{to{transform:rotate(360deg)}}
 
 /* Note */
-.note{text-align:center;margin-top:18px;font-size:.72rem;color:var(--txt3);line-height:1.6;}
-.note span{color:var(--txt2);}
+.note{
+  text-align:center;margin-top:16px;
+  font-size:.7rem;color:var(--txt3);line-height:1.7;
+}
+.note span{color:var(--txt2);font-weight:600;}
 
 /* Divider */
-.divider{height:1px;background:var(--bdr2);margin:20px 0;}
+.divider{height:1px;background:rgba(22,163,74,.10);margin:18px 0;}
+
+/* Role pills */
+.role-pills{display:flex;gap:6px;justify-content:center;margin-top:10px;}
+.role-pill{
+  padding:4px 12px;border-radius:20px;font-size:.64rem;font-weight:700;
+  font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:.3px;
+}
+.role-pill.admin{background:rgba(22,163,74,.12);color:var(--grn-dk);border:1px solid rgba(22,163,74,.22);}
+.role-pill.staff{background:rgba(34,197,94,.10);color:#166534;border:1px solid rgba(34,197,94,.22);}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="logo-area">
     <div class="drop-icon">🥛</div>
-    <div class="logo-title">AMINA MILK</div>
-    <div class="logo-sub">Staff & Admin Portal</div>
+    <div class="logo-title">Amina Milk</div>
+    <div class="logo-sub">Staff &amp; Admin Portal</div>
   </div>
   <div class="box">
     <div class="err" id="err"><span>⚠️</span><span id="errMsg"></span></div>
@@ -153,21 +179,26 @@ body::after{
       <label>Email Address</label>
       <div class="inp-wrap">
         <span class="inp-icon">✉️</span>
-        <input class="inp" id="em" type="email" inputmode="email" placeholder="you@aminamilk.com" autocomplete="username">
+        <input class="inp" id="em" type="email" inputmode="email"
+          placeholder="you@aminamilk.com" autocomplete="username">
       </div>
     </div>
     <div class="inpG">
       <label>Password</label>
       <div class="inp-wrap">
         <span class="inp-icon">🔒</span>
-        <input class="inp" id="pw" type="password" placeholder="Enter your password" autocomplete="current-password">
+        <input class="inp" id="pw" type="password"
+          placeholder="Enter your password" autocomplete="current-password">
         <button class="pwd-toggle" type="button" onclick="togglePwd()" id="pwdToggle">👁</button>
       </div>
     </div>
     <button class="btn-submit" id="btn" onclick="doLogin()">Sign In →</button>
+    <div class="divider"></div>
     <div class="note">
-      Access is role-based. You'll be redirected automatically.<br>
-      <span>Admin → Dashboard &nbsp;|&nbsp; Staff → Milkman App</span>
+      <div class="role-pills" style="margin-top:7px">
+        <span class="role-pill admin"></span>
+        <span class="role-pill staff"></span>
+      </div>
     </div>
   </div>
 </div>
@@ -215,7 +246,7 @@ async function doLogin(){
   hideErr();
   if(!e||!p){showErr('Please enter your email and password.');return;}
   if(!/\S+@\S+\.\S+/.test(e)){showErr('Enter a valid email address.');return;}
-  btn.innerHTML='<div class="spin"></div> Signing in…';btn.disabled=true;
+  btn.innerHTML='<div class="spin"></div>&nbsp;Signing in…';btn.disabled=true;
   try{
     var c=await signIn(e,p);
     var role=await ensureUserDoc(c.user);
